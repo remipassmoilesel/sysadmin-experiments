@@ -18,6 +18,9 @@ Vagrant.configure("2") do |config|
 
     echo "Current user for provisionning: $USER"
 
+    # add backports
+    echo -e "deb http://ftp.debian.org/debian jessie-backports main \ndeb-src http://ftp.debian.org/debian jessie-backports main" > /etc/apt/sources.list.d/backports
+
     # update system
     apt-get update && sudo apt-get upgrade -y
 
