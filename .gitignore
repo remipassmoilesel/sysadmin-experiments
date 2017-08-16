@@ -1,3 +1,4 @@
 .idea
 terraform/variables.tf
 .tfvars
+.vagrant
