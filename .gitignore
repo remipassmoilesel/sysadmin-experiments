@@ -2,3 +2,4 @@
 terraform/variables.tf
 .tfvars
 .vagrant
+*console.log
