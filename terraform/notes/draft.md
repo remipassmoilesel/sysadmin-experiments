@@ -36,3 +36,9 @@ Exécuter une commande distante:
         "sudo service nginx start"
         ]
     }
+    
+## Notes
+
+    $ terraform init    
+    $ terraform plan    
+    $ terraform apply    

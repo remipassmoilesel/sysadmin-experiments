@@ -1,5 +1,8 @@
 .idea
 terraform/variables.tf
 .tfvars
+.terraform
 .vagrant
 *console.log
+*.tfstate
+*.lock.info
