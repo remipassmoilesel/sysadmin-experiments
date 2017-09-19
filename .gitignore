@@ -1,6 +1,7 @@
 .idea
 terraform/variables.tf
 .tfvars
+credentials.tf
 .terraform
 .vagrant
 *console.log
