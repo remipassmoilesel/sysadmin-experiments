@@ -18,9 +18,4 @@ resource "vsphere_virtual_machine" "vm_creation_registry" {
     datastore         = "SSD1toCrucialM2"
   }
 
-  provisioner "remote-exec" {
-    inline = [
-      "ls ~"
-    ]
-  }
 }
