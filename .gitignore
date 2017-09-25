@@ -3,6 +3,7 @@ terraform/variables.tf
 .tfvars
 credentials.tf
 .terraform
+*.tfstate.backup
 .vagrant
 *console.log
 *.tfstate
