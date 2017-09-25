@@ -1,6 +1,7 @@
 version: '3'
 services:
-  amqp:
+  amqp-test:
+    container_name: amqp-test
     image: rabbitmq:3.4-management
     ports:
      - "15671:15671"
@@ -9,8 +10,9 @@ services:
     deploy:
       restart_policy:
         condition: always
-  nats:
-    image: nats
+  nats-test:
+    container_name: nats-test
+    image: nats:1.0.2
     ports:
      - "6222:6222"
      - "4222:4222"
