@@ -19,6 +19,6 @@ Vérifier que la base de données keycloak est crée:
 ## Lancer deux instances de KeyCloak
 
     $ 2-keycloak1.sh
-    $ 2-keycloak2.sh
+    $ 3-keycloak2.sh
 
     
