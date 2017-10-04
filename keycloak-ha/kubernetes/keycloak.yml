@@ -1,0 +1,32 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: keycloak
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: keycloak
+    spec:
+      containers:
+        - name: keycloak
+          image: jboss/keycloak-ha-postgres
+          ports:
+            - containerPort: 8080
+          env:
+            - name: KEYCLOAK_USER
+              value: "keycloak"
+            - name: KEYCLOAK_PASSWORD
+              value: "keycloak"
+            - name: POSTGRES_DATABASE
+              value: "keycloak"
+            - name: POSTGRES_USER
+              value: "keycloak"
+            - name: POSTGRES_PASSWORD
+              value: "keycloak"
+            - name: POSTGRES_PORT_5432_TCP_ADDR
+              value: "10.0.4.230"
+            - name: POSTGRES_PORT_5432_TCP_PORT
+              value: "5432"
+
