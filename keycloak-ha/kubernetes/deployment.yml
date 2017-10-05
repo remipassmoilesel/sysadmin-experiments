@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: keycloak
 spec:
-  replicas: 3
+  replicas: 2
   template:
     metadata:
       labels:
@@ -11,12 +11,42 @@ spec:
     spec:
       containers:
         - name: keycloak
-          image: jboss/keycloak-ha-postgres
+          image: repo/keycloak-ha-postgres-whelpers:1.0
+          imagePullPolicy: Always
           ports:
-            - containerPort: 8080
+            - name: http
+              containerPort: 8080
+            - name: https
+              containerPort: 8443
+            - name: management
+              containerPort: 9090
+            - name: jgroups-tcp
+              containerPort: 7600
+            - name: jgroups-tcp-fd
+              containerPort: 57600
+            - name: jgroups-udp
+              containerPort: 55200
+              protocol: UDP
+            - name: jgroups-udp-mc
+              containerPort: 45688
+              protocol: UDP
+            - name: jgroups-udp-fd
+              containerPort: 54200
+              protocol: UDP
+            - name: modcluster
+              containerPort: 23364
+            - name: modcluster-udp
+              containerPort: 23364
+              protocol: UDP
+            - name: txn-recovery-ev
+              containerPort: 4712
+            - name: txn-status-mgr
+              containerPort: 4713
           env:
+            - name: KEYSTORE_PASSWORD
+              value: azerty
             - name: KEYCLOAK_USER
-              value: "keycloak"
+              value: "keycloak-admin"
             - name: KEYCLOAK_PASSWORD
               value: "keycloak"
             - name: POSTGRES_DATABASE
@@ -29,13 +59,23 @@ spec:
               value: "10.0.4.230"
             - name: POSTGRES_PORT_5432_TCP_PORT
               value: "5432"
+            - name: MY_POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          args:
+            - -Djboss.node.name=node-${env.MY_POD_IP}          # Cluster node name
+            - -Djboss.bind.address=${env.MY_POD_IP}            # Bind address
+            - -Djboss.bind.address.private=${env.MY_POD_IP}    # Multicast address, used for synchronization.
+            - -Djboss.default.multicast.address=230.0.0.4      # One address needed per cluster group
+            - --server-config=standalone-ha.xml                # Server configuration name
 
           readinessProbe:
             httpGet:
               path: /auth
               port: 8080
             initialDelaySeconds: 40
-            periodSeconds: 5
+            periodSeconds: 20
             timeoutSeconds: 2
             failureThreshold: 4
             successThreshold: 1
@@ -49,4 +89,7 @@ spec:
             timeoutSeconds: 2
             failureThreshold: 2
             successThreshold: 1
+
+      imagePullSecrets:
+        - name: registry-secret
 
