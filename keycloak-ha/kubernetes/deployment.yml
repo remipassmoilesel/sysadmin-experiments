@@ -1,3 +1,11 @@
+
+##
+##    As of 10/2017, this deployment works only with Weave network plugin,
+##    others do not support IP multicast
+##
+##
+
+
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
