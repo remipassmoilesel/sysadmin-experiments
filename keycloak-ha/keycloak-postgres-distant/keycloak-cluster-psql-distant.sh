@@ -11,7 +11,7 @@ docker run --name keycloak \
     -e POSTGRES_PASSWORD=keycloak \
     -e POSTGRES_PORT_5432_TCP_ADDR=10.0.4.230 \
     -e POSTGRES_PORT_5432_TCP_PORT=5432 \
-    -d keycloak-ha-postgres-whelpers \
+    -d keycloak-ha-postgres-whelpers:1.0 \
     -Djboss.node.name=node1 \
     -Djboss.bind.address=172.17.0.2 \
     -Djboss.bind.address.private=172.17.0.2 \
@@ -26,7 +26,7 @@ docker run --name keycloak2 \
     -e POSTGRES_PASSWORD=keycloak \
     -e POSTGRES_PORT_5432_TCP_ADDR=10.0.4.230 \
     -e POSTGRES_PORT_5432_TCP_PORT=5432 \
-    -d keycloak-ha-postgres-whelpers \
+    -d keycloak-ha-postgres-whelpers:1.0 \
     -Djboss.node.name=node2 \
     -Djboss.bind.address=172.17.0.3 \
     -Djboss.bind.address.private=172.17.0.3 \

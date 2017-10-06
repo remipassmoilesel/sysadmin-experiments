@@ -59,16 +59,16 @@ spec:
               value: "10.0.4.230"
             - name: POSTGRES_PORT_5432_TCP_PORT
               value: "5432"
-            - name: MY_POD_IP
+            - name: POD_IP
               valueFrom:
                 fieldRef:
                   fieldPath: status.podIP
           args:
-            - -Djboss.node.name=node-${env.MY_POD_IP}          # Cluster node name
-            - -Djboss.bind.address=${env.MY_POD_IP}            # Bind address
-            - -Djboss.bind.address.private=${env.MY_POD_IP}    # Multicast address, used for synchronization.
-            - -Djboss.default.multicast.address=230.0.0.4      # One address needed per cluster group
-            - --server-config=standalone-ha.xml                # Server configuration name
+            - -Djboss.node.name="node-${env.POD_IP}"            # Cluster node name
+            - -Djboss.bind.address=${env.POD_IP}                # Bind address
+            - -Djboss.bind.address.private=${env.POD_IP}        # Multicast address, used for synchronization.
+            - -Djboss.default.multicast.address=230.0.0.4       # One address needed per cluster group
+            - --server-config=standalone-ha.xml                 # Server configuration name
 
           readinessProbe:
             httpGet:

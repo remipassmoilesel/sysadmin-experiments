@@ -39,3 +39,15 @@ Vérifier que la base de données keycloak est crée:
     14:01:14,253 INFO  [org.infinispan.remoting.transport.jgroups.JGroupsTransport] (MSC service thread 1-6) ISPN000079: Channel server local address is node2, physical addresses are [172.17.0.3:55200]
     14:01:14,252 INFO  [org.infinispan.remoting.transport.jgroups.JGroupsTransport] (MSC service thread 1-2) ISPN000079: Channel keycloak local address is node2, physical addresses are [172.17.0.3:55200]
     
+## Utiliser OmPing pour vérifier que le multicast est disponible
+
+Sur 172.17.0.3:
+    
+    $ omping -m 230.0.0.4 -p 45688 172.17.0.3 172.17.0.4
+    
+Sur 172.17.0.4:
+    
+    $ omping -m 230.0.0.4 -p 45688 172.17.0.4 172.17.0.3
+    
+      
+        
