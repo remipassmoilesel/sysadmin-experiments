@@ -8,7 +8,7 @@ Créer un fichier htpasswd:
     
     $ 🙂 cd /etc/nginx && htpasswd -cb .htpasswd user password
     
-Configurer Nginx
+Configurer Nginx:
 
     $ 🙂 sudo vim /etc/nginx/sites-enabled
     
@@ -16,6 +16,9 @@ Configurer Nginx
             auth_basic           "Attention, site hautement sécurisé";
             auth_basic_user_file /etc/nginx/.htpasswd;
         }
+    
+       # Il est possible de placer cette configuration dans 'server' également, pour
+       # qu'elle soit utilisée pour toutes les locations      
     
 Recharger Nginx:
 
