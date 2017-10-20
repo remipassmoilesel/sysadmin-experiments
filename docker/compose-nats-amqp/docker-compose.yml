@@ -7,9 +7,7 @@ services:
      - "15671:15671"
      - "15672:15672"
      - "5672:5672"
-    deploy:
-      restart_policy:
-        condition: always
+    restart: always
   nats-test:
     container_name: nats-test
     image: nats:1.0.2
@@ -17,6 +15,4 @@ services:
      - "6222:6222"
      - "4222:4222"
      - "8222:8222"
-    deploy:
-      restart_policy:
-        condition: always
+    restart: always
