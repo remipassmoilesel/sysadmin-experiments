@@ -1,0 +1,48 @@
+- name: Install bind
+  apt:
+    name: bind
+    state: latest
+
+- name: Install dns utils
+  apt:
+    name: dnsutils
+    state: latest
+
+- name: Template options
+  template:
+    src: named.conf.options
+    dest: /etc/bind/named.conf.options
+    owner: bind
+
+- name: Template local conf
+  template:
+    src: named.conf.local
+    dest: /etc/bind/named.conf.local
+    owner: bind
+
+- name: Create directory for name db
+  file:
+    path: /etc/bind/infra.net
+    state: directory
+    owner: bind
+
+- name: Template name db
+  file:
+    path: /etc/bind/infra.net
+    state: directory
+    owner: bind
+
+- name: Allow writing in infra directory
+  lineinfile:
+    line: "/etc/bind/infra.net/** rw,"
+    insertafter: ".*/etc/bind/** r,"
+
+- name: Restart app armor
+  systemd:
+    name: apparmor
+    state: restarted
+
+- name: Restart bind
+  systemd:
+    name: bind
+    state: restarted

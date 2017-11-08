@@ -59,4 +59,21 @@ Redémarrer Bind:
     send
     
     $ nsupdate -v -k /etc/bind/ddns.keys batch.txt 
+
+En cas de problème d'écriture:
+
+    $ vim /etc/apparmor.d/usr.sbin.named
     
+    /etc/bind/** r,
+    /etc/bind/infra.net/** rw,
+    
+    $ systemctl restart apparmor
+    $ sudo chown -R bind:bind /etc/bind
+    
+    
+    
+    
+    
+    
+    
+        

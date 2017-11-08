@@ -1,0 +1,25 @@
+options {
+        directory "/var/cache/bind";
+
+       # Activer DNSSEC
+       dnssec-enable yes;
+       dnssec-validation auto;
+       auth-nxdomain no; # RFC1035
+
+       listen-on { any; };
+       listen-on-v6 { any; };
+
+       # Autoriser les requêtes récursives locales uniquement
+       allow-recursion { 127.0.0.1; ::1; };
+
+       # Ne pas transférer les informations des zones aux DNS secondaires
+       allow-transfer { none; };
+
+       # Ne pas autoriser la mise à jour des zones maîtres
+       allow-update { none; };
+
+       version none;
+       hostname none;
+       server-id none;
+
+};

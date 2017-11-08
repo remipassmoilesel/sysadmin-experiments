@@ -1,0 +1,24 @@
+$ORIGIN .
+$TTL 7200       ; 2 hours
+infra.net               IN SOA  ns1.infra.net. hostmaster.infra.net. (
+                                2014102002 ; serial
+                                14400      ; refresh (4 hours)
+                                3600       ; retry (1 hour)
+                                1209600    ; expire (2 weeks)
+                                86400      ; minimum (1 day)
+                                )
+                        NS      ns1.infra.net.
+                        NS      ns6.gandi.net.
+                        A       10.0.2.15
+                        AAAA    fe80::a4:a0ff:fef1:db6e
+$ORIGIN infra.net.
+blog                    CNAME   hostname
+forum                   CNAME   hostname
+hostname                A       10.0.2.15
+                        AAAA    fe80::a4:a0ff:fef1:db6e
+machine1                A       10.0.1.138
+                        AAAA    fe80::82ee:73ff:feb6:97cc
+$TTL 7200       ; 2 hours
+ns1                     A       10.0.2.15
+                        AAAA    fe80::a4:a0ff:fef1:db6e
+www                     CNAME   hostname

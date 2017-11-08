@@ -16,6 +16,6 @@
       key_secret: "5n6gUejOh0EN39gcETleHA=="
       server: "{{ ansible_default_ipv4 }}"
       zone: "infra.net"
-      record: "machine1"
+      record: "machine2"
       type: "A"
       value: "10.0.1.138"

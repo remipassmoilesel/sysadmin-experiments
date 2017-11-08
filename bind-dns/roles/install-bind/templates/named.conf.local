@@ -1,0 +1,22 @@
+
+include "/etc/bind/ddns.keys";
+
+zone "infra.net" IN {
+
+    # Zone de type maîtr
+    type master;
+
+    # Fichier de zone
+    file "/etc/bind/infra.net/db.infra.net";
+
+    # On autorise le transfert de la zone aux serveurs DNS secondaires
+    allow-transfer { 217.70.177.40; 213.186.33.199; 127.0.0.1; ::1; };
+
+    allow-update { key DDNS_UPDATE; };
+
+    # On autorise tout le monde à envoyer des requêtes vers cette zonene
+    allow-query { any; };
+
+    # Prévenir les serveurs DNS secondaires qu'un changement a été effectué dans la zone m
+    notify yes;
+};
