@@ -8,3 +8,4 @@ credentials.tf
 *console.log
 *.tfstate
 *.lock.info
+*.retry
