@@ -1,0 +1,42 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+
+  config.vm.box = "ubuntu/xenial64"
+
+  config.vm.network "public_network"
+
+  config.vbguest.auto_update = false
+
+  config.vm.provider "virtualbox" do |vb|
+     vb.memory = "2096"
+     vb.cpus = 2
+  end
+
+  config.vm.provision "shell", inline: <<-SHELL
+
+    echo "Current user for provisionning: $USER"
+
+    # update system
+    apt-get update && sudo apt-get upgrade -y
+
+    # install helpers
+    apt-get install -y python vim net-tools sed curl wget byobu
+
+  	echo 'root:azerty' | chpasswd
+  	echo 'ubuntu:azerty' | chpasswd
+
+    cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+
+    # allow root login
+    sed -i -E 's/PermitRootLogin.+/PermitRootLogin yes/g' /etc/ssh/sshd_config
+
+    service ssh restart
+
+    # show adresses
+    ip a
+
+  SHELL
+
+end
