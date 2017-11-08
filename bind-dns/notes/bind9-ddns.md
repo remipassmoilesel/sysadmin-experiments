@@ -60,6 +60,9 @@ Redémarrer Bind:
     
     $ nsupdate -v -k /etc/bind/ddns.keys batch.txt 
 
+/!\ Les enregistrements ne sont pas écrits tout de suite, un journal est créé et ils 
+apparaitront au prochain redémarrage
+
 En cas de problème d'écriture:
 
     $ vim /etc/apparmor.d/usr.sbin.named
