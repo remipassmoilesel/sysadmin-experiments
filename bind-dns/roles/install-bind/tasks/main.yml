@@ -1,6 +1,6 @@
 - name: Install bind
   apt:
-    name: bind
+    name: bind9
     state: latest
 
 - name: Install dns utils
@@ -27,15 +27,22 @@
     owner: bind
 
 - name: Template name db
-  file:
-    path: /etc/bind/infra.net
-    state: directory
+  template:
+    src: db.infra.net
+    dest: /etc/bind/infra.net/db.infra.net
     owner: bind
 
 - name: Allow writing in infra directory
   lineinfile:
-    line: "/etc/bind/infra.net/** rw,"
-    insertafter: ".*/etc/bind/** r,"
+    path: /etc/apparmor.d/usr.sbin.named
+    insertafter: ".*/etc/bind/.+ r,"
+    line: "  /etc/bind/infra.net/** rw,"
+
+- name: Template DDNS keys
+  template:
+    src: ddns.key
+    dest: /etc/bind/ddns.key
+    owner: bind
 
 - name: Restart app armor
   systemd:
@@ -44,5 +51,11 @@
 
 - name: Restart bind
   systemd:
-    name: bind
+    name: bind9
     state: restarted
+
+# TODO: find a better way
+- name: Add local DNS in resolv.conf
+  template:
+    src: resolv.conf
+    dest: /etc/resolv.conf

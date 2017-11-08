@@ -1,5 +1,5 @@
 
-include "/etc/bind/ddns.keys";
+include "/etc/bind/ddns.key";
 
 zone "infra.net" IN {
 
