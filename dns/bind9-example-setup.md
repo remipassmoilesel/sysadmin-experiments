@@ -123,14 +123,7 @@ Puis ajouter les enregistrements:
 Redémarrer Bind:
 
     $ systemctl reload bind9 && systemctl status bind9
-        
-    
-    
-    
-    
-    
-    
-    
+
     
     
     
