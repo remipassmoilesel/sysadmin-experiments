@@ -9,3 +9,4 @@ credentials.tf
 *.tfstate
 *.lock.info
 *.retry
+*.box
