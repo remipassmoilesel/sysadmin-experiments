@@ -73,7 +73,15 @@ Attribuer des rôles:
 
     Users > Roles mapping            
     
+Créer des policy:
+
+    admin can administrate
+    users can access
+    group a can access library a    
+    group b can access library b
     
+    admin a can administrate lib a    
+    admin b can administrate lib b    
         
 
     
