@@ -22,7 +22,6 @@ Créer des scopes:
     Create new
     Name: "Edit" 
     Name: "View" 
-
     
 Créer des ressources à protéger:
 
@@ -56,6 +55,14 @@ Créer des policy:
     Client: "library_api"
     Client role: "library_admin" + Required       -> L'utilisateur devra avoir ce rôle
     
+    admin can administrate
+    users can access
+    group a can access library a    
+    group b can access library b
+    
+    admin a can administrate lib a    
+    admin b can administrate lib b    
+    
 Créer des groupes:
 
     group_library_a
@@ -69,19 +76,15 @@ Créer des utilisateurs:
     "admin_a"    
     "admin_b"
     
-Attribuer des rôles:
+Attribuer des rôles aux utilisateurs:
 
-    Users > Roles mapping            
+    Users > Roles mapping           
     
-Créer des policy:
+Créer des permissions pour lier des polices aux ressources.
+     
 
-    admin can administrate
-    users can access
-    group a can access library a    
-    group b can access library b
-    
-    admin a can administrate lib a    
-    admin b can administrate lib b    
+
+
         
 
     

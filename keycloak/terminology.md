@@ -16,7 +16,7 @@ Ce que l'on peut faire avec une ressource. Exemple: edit, delete, view, ...
 
 Associe une ressource protégée avec une policy pour vérifier un accès.
 
-    X (user, role, group) can do Y (scope ?) on Z (resource)
+    X (user, role, group = policy ?) can do Y (scope ?) on Z (resource)
 
 ## Policy
 
