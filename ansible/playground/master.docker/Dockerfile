@@ -3,7 +3,7 @@ FROM alpine:latest
 MAINTAINER remipassmoilesel
 LABEL name="ansible-master"
 
-COPY ./helpers /root/
+COPY helpers /root/
 RUN chmod +x /root/*.sh
 
 RUN echo "@testing http://nl.alpinelinux.org/alpine/edge/testing" | tee -a /etc/apk/repositories \

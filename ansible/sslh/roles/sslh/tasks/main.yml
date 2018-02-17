@@ -21,4 +21,6 @@
 - name: Restart sslh
   systemd:
     name: ssh
-    state: restarted
+    enabled: yes
+    daemon_reload: yes
+    state: started
