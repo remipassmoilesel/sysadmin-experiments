@@ -15,9 +15,9 @@
     state: latest
 
 
-- name: "Ensure docker-py is installed"
+- name: "Ensure docker is installed"
   pip:
-    name: docker-py
+    name: docker
 
 
 - name: "Copy certificate in /usr/local/share/ca-certificates/"
