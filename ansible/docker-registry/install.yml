@@ -5,7 +5,7 @@
   roles:
   - role: install-prerequisites
   - role: mount-nfs-volume
-  - role: install-docker
+  - role: remipassmoilesel.install-docker
   - role: install-docker-registry
   - role: install-image-cleaner
   - role: install-docker-registry-web
