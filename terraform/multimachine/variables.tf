@@ -13,7 +13,7 @@ variable "vsphere_password" {
 provider "vsphere" {
   user = "${var.vsphere_user}"
   password = "${var.vsphere_password}"
-  vsphere_server = "vccloudlab01.bee-labs.net"
+  vsphere_server = "domain.net"
   allow_unverified_ssl = "true"
 }
 
@@ -35,7 +35,7 @@ variable "vsphere_ressource_pool" {
 
 variable "domain" {
   description = "Internal domain name"
-  default = "predev.bee-labs.net"
+  default = "domain.net"
 }
 
 variable "vm_template" {

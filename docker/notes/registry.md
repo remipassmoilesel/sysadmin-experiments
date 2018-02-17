@@ -27,11 +27,11 @@ Exemple de configuration:
         rootdirectory: /var/lib/registry
     http:
       addr: :5001
-      host: https://beelab-repositories.bbuzcloud.com:5001
-      secret: poipoi
+      host: https://domain.com:5001
+      secret: secret
       tls:
-        certificate: /etc/docker/registry/certs/beelab-repositories.bbuzcloud.com.crt
-        key: /etc/docker/registry/certs/beelab-repositories.bbuzcloud.com.key
+        certificate: /etc/docker/registry/certs/domain.crt
+        key: /etc/docker/registry/certs/domain.key
       headers:
         X-Content-Type-Options: [nosniff]
       debug:

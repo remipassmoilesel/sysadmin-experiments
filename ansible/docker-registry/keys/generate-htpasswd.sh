@@ -2,7 +2,7 @@
 
 echo "Need htpasswd utility: sudo apt update apache2-utils"
 
-USER="bee"
+USER="username"
 PASSWORD="xxxxxxx"
 
 # remove previous file
