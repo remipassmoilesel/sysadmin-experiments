@@ -1,0 +1,31 @@
+---
+- hosts: cluster
+  tasks:
+
+  - include_role:
+      name: install-helpers
+
+  - name: "Configure interfaces"
+    include_role:
+      name: configure-interfaces-deb
+    vars:
+      interfaceName: "ens192"
+      interfacesPath: "/etc/network/interfaces"
+      ipAddress: "{{ newAddress }}"
+      netmask: "255.255.248.0"
+      gateway: "10.0.0.254"
+
+  - name: "Configure host names"
+    include_role:
+      name: configure-hostname-deb
+    vars:
+      hostname: "{{ newHostname }}"
+
+  - name: "Add default dns"
+    include_role:
+      name: set-dns-deb
+    vars:
+      dns_address: "10.0.0.1"
+
+#  - name: "Reboot"
+#    include_role: name=reboot

@@ -1,0 +1,21 @@
+---
+- hosts: cluster
+
+  tasks:
+  - name: "Configure interfaces"
+    include_role:
+      name: configure-interfaces-coreos
+    vars:
+      interfaceName: "ens192"
+      address: "{{ newAddress }}"
+      gateway: "{{ newGateway }}"
+      dns: "{{ newDns }}"
+
+  - name: "Configure host names"
+    include_role:
+      name: configure-hostname-coreos
+    vars:
+      hostname: "{{ newHostname }}"
+
+  - name: "Reboot"
+    include_role: name=reboot

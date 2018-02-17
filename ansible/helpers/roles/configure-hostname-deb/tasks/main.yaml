@@ -1,0 +1,4 @@
+- name: "Template /etc/hostname"
+  template:
+    src: "hostname"
+    dest: "/etc/hostname"

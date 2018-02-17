@@ -1,0 +1,13 @@
+[Install]
+WantedBy=multi-user.target
+
+[Unit]
+Description=NATS messaging server
+
+[Service]
+ExecStart={{ nats_base_path }}/gnatsd-v1.0.2-linux-amd64/gnatsd -c {{ nats_config_basepath }}/gnatsd.config
+User=nats
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

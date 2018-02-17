@@ -1,0 +1,12 @@
+registry:
+  # Docker registry url
+  url: https://{{ docker_registry_internal_host }}:5000/v2
+  # Docker registry fqdn
+  name: {{ docker_registry_internal_host }}:5000
+  # To allow image delete, should be false
+  readonly: false
+  basic_auth: {{ docker_registry_web_auth }}
+  auth:
+    # Disable authentication
+    enabled: false
+  trust_any_ssl: true

@@ -1,0 +1,56 @@
+- name: "Ensure registry configuration dir is present"
+  file:
+    path: "/etc/docker/registry/certs"
+    state: directory
+    recurse: yes
+
+
+- name: "Ensure registry data dir is present"
+  file:
+    path: "{{ docker_registry_data_dir }}"
+    state: directory
+    recurse: yes
+
+
+- name: "Add registry configuration"
+  template:
+    src: registry-config.yml
+    dest: /etc/docker/registry/config.yml
+
+
+- name: "Add garbage collection configuration"
+  copy:
+    src: garbage-collect.yml
+    dest: /etc/docker/registry/garbage-collect.yml
+
+
+- name: "Add htpasswd configuration"
+  copy:
+    src: "{{ playbook_dir }}/keys/htpasswd"
+    dest: /etc/docker/registry/htpasswd
+
+
+- name: "Add registry certificate"
+  copy:
+    src: "{{ playbook_dir }}/keys/registry.crt"
+    dest: /etc/docker/registry/certs/registry.crt
+
+
+- name: "Add registry key"
+  copy:
+    src: "{{ playbook_dir }}/keys/registry.key"
+    dest: /etc/docker/registry/certs/registry.key
+
+
+- name: "Create a registry container"
+  docker_container:
+    name: registry
+    image: registry:2.6
+    state: started
+    restart_policy: always
+    volumes:
+      - "/etc/docker/registry:/etc/docker/registry"
+      - "{{ docker_registry_data_dir }}:/var/lib/registry"
+    published_ports:
+      - 5000:5000
+

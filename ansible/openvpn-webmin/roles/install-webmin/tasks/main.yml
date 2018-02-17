@@ -1,0 +1,16 @@
+- name: Ensure tar is installed
+  apt:
+    name: tar
+    state: latest
+    update_cache: yes
+
+- name: Download webmin if needed
+  get_url:
+    url: http://prdownloads.sourceforge.net/webadmin/webmin_1.860_all.deb
+    dest: /opt/
+
+- name: Install webmin if needed
+  apt: deb="/opt/webmin_1.860_all.deb"
+
+- name: Fix dependencies
+  shell:  apt-get -f -y install

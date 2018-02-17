@@ -1,0 +1,67 @@
+---
+- name: Add Nodesource apt key.
+  apt_key:
+    url: https://keyserver.ubuntu.com/pks/lookup?op=get&fingerprint=on&search=0x1655A0AB68576280
+    id: "68576280"
+    state: present
+
+
+- name: Add NodeSource repositories for Node.js.
+  apt_repository:
+    repo: "{{ item }}"
+    state: present
+  with_items:
+    - "deb https://deb.nodesource.com/node_{{ nodejs_version }} {{ ansible_distribution_release }} main"
+    - "deb-src https://deb.nodesource.com/node_{{ nodejs_version }} {{ ansible_distribution_release }} main"
+  register: node_repo
+
+
+- name: Update apt cache if repo was added.
+  apt: update_cache=yes
+  when: node_repo.changed
+
+
+- name: Ensure Node.js and npm are installed.
+  apt: "name=nodejs={{ nodejs_version|regex_replace('x', '') }}* state=present"
+
+
+- name: "Package cleaner script on localhost"
+  shell: cd {{ playbook_dir }}/image-cleaner && npm pack
+  args:
+    executable: /bin/bash
+  run_once: yes
+  delegate_to: localhost
+
+- name: "Ensure image-cleaner dir is present"
+  file:
+    path: "/opt/image-cleaner"
+    state: directory
+    recurse: yes
+
+
+- name: "Copy image cleaner package"
+  copy:
+    src: "{{ playbook_dir }}/image-cleaner/image-cleaner-1.0.0.tgz"
+    dest: /opt/image-cleaner/image-cleaner-1.0.0.tgz
+
+
+- name: "Install cleaner"
+  shell: cd /opt/image-cleaner/ && npm install image-cleaner-1.0.0.tgz
+  args:
+    executable: /bin/bash
+
+
+- name: "Make image cleaner executable"
+  file:
+    path: /opt/image-cleaner/node_modules/image-cleaner/index.js
+    owner: root
+    group: root
+    mode: 0544
+
+
+- name: "Add cron task for image cleaning"
+  cron:
+    hour: "4"
+    job: "/opt/image-cleaner/node_modules/image-cleaner/index.js >> /var/log/docker-image-cleaning.log 2&>1"
+    name: docker-image-cleaning
+    state: present

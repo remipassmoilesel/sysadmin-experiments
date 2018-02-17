@@ -1,0 +1,8 @@
+- hosts: centreon-poller
+  roles:
+  - prepare-poller
+- hosts: centreon-central
+  roles:
+  - register-ssh-identities
+  - configure-ssh-tunnels
+  - configure-central

@@ -1,0 +1,71 @@
+
+## =============================================
+## Set SSH configuration for centreon user
+## =============================================
+
+- name: On central, add bastion configuration to centreon user ssh config
+  blockinfile:
+    path: /var/spool/centreon/.ssh/config
+    marker: "# {mark} # {{ hostvars['bastion']['ansible_host'] }} # SSH TUNNEL CONFIG FOR POLLERS, DO NOT REMOVE IT"
+    create: yes
+    block: |
+      Host ssh-tunnel.bastion.{{ hostvars['bastion']['ansible_host'] }}
+          User {{ bastion_ssh_user }}
+          IdentityFile ~/.ssh/id_rsa
+          HostName {{ hostvars['bastion']['ansible_host'] }}
+          Port 22
+
+- name: On central, add poller configuration to centreon user ssh config
+  blockinfile:
+    path: /var/spool/centreon/.ssh/config
+    marker: "# {mark} # {{ hostvars['centreon-poller']['ansible_host'] }} # SSH TUNNEL CONFIG FOR POLLERS, DO NOT REMOVE IT"
+    create: yes
+    block: |
+      Host ssh-tunnel.poller.{{ hostvars['centreon-poller']['ansible_host'] }}
+          User centreon
+          IdentityFile ~/.ssh/id_rsa
+          Port 22
+          HostKeyAlias {{ hostvars['centreon-poller']['ansible_host'] }}
+          ProxyCommand ssh ssh-tunnel.bastion.{{ hostvars['bastion']['ansible_host'] }} nc -q0 {{ hostvars['centreon-poller']['ansible_host'] }} 22
+
+      Host {{ poller_name }}.ssh
+          User centreon
+          Port {{ local_poller_ssh_port }}
+          IdentityFile ~/.ssh/id_rsa
+
+## =============================================
+## Add tunnel script and cron job on reboot
+## =============================================
+
+- name: Add tunnel creation script directory
+  file:
+    path: /usr/local/tunnels
+    state: directory
+    recurse: yes
+
+- name: Add tunnel creation script
+  template:
+    src: init-tunnel.sh
+    dest: /usr/local/tunnels/init-tunnel-{{ hostvars['centreon-poller']['ansible_host'] }}.sh
+    mode: ugo+x
+
+- name: Add cronjob for tunnel launch
+  cron:
+    name: "Tunnel for poller {{ hostvars['centreon-poller']['ansible_host'] }}"
+    special_time: reboot
+    job: "sudo -iu centreon /usr/local/tunnels/init-tunnel-{{ hostvars['centreon-poller']['ansible_host'] }}.sh"
+
+## =============================================
+## Launch tunnel if necessary
+## =============================================
+
+- name: Check if tunnel is launched
+  shell: "ps -ef | grep autossh | awk '{print $13}' | cut -d ':' -f 1 | grep {{ local_poller_ssh_port }}"
+  args:
+    executable: /bin/bash
+  register: tunnel_launched
+  ignore_errors: yes
+
+- name: Launch tunnel if necessary
+  shell: "sudo -iu centreon /usr/local/tunnels/init-tunnel-{{ hostvars['centreon-poller']['ansible_host'] }}.sh"
+  when: tunnel_launched.rc != 0

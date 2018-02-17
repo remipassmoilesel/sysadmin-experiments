@@ -1,0 +1,10 @@
+.idea
+*.retry
+playbooks/inventory/sshinit*
+node_modules
+.nyc_output
+coverage
+sportsdb_sample_postgresql*
+postgres-recovery/db_sport_complete.sql
+before_recovery*
+db_sport_complete.sql.gz

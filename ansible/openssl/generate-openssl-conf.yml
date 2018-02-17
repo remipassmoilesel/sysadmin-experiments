@@ -1,0 +1,9 @@
+- hosts: all
+#  vars:
+#    supplementary_addresses_in_ssl_keys: [10.0.0.1, 10.0.0.2, 10.0.0.3]
+
+  tasks:
+  - name: "Generate openssl configuration"
+    template:
+      src: "openssl.conf.j2"
+      dest: "/tmp/openssl.conf"

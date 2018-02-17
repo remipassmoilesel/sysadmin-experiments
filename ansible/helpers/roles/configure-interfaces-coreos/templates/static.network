@@ -1,0 +1,7 @@
+[Match]
+Name={{ interfaceName }}
+
+[Network]
+Address={{ address }}
+Gateway={{ gateway }}
+DNS={{ dns }}

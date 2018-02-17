@@ -1,0 +1,27 @@
+---
+# tasks file for update-kubeproxy-config
+- name: "Export kube-proxy configuration"
+  shell:
+    cmd: "kubectl get -n kube-system configmap/kube-proxy -o yaml > /root/kube-proxy.yaml"
+
+- name: "Delete old kube-proxy instances"
+  shell:
+    cmd: "kubectl delete -f /root/kube-proxy.yaml"
+
+- name: "Update kube-proxy configuration"
+  replace:
+    dest: '/root/kube-proxy.yaml'
+    regexp: 'server: https://.+$'
+    replace: 'server: https://{{ keepalived_virtualaddress }}:6443'
+
+- name: "Reload kube-proxy configmap"
+  shell:
+    cmd: "kubectl -n kube-system apply -f /root/kube-proxy.yaml"
+
+- name: "Kill old kube-proxy pods"
+  shell:
+    cmd: "kubectl delete pods -n kube-system \
+              $(kubectl get pods -n kube-system | grep -i kube-proxy | cut -d ' ' -f 1)"
+    executable: /bin/bash
+  ignore_errors: yes
+

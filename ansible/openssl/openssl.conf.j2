@@ -1,0 +1,6 @@
+{% if supplementary_addresses_in_ssl_keys is defined %}
+{% set is = 1000 %}
+{% for addr in supplementary_addresses_in_ssl_keys %}
+IP.{{ is + loop.index }} = {{ addr }}
+{% endfor %}
+{% endif %}

@@ -1,0 +1,97 @@
+
+## =========================
+## Install prerequisites
+## =========================
+
+- name: "Ensure prerequisites are installed"
+  apt:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+   - python-pip
+   - rsync
+   - sshpass
+
+- name: "Ensure psycopg is present"
+  pip:
+    name: psycopg2
+    state: latest
+
+## =========================
+## Prepare backup
+## =========================
+
+- name: "Ensure previous restored file is absent"
+  file:
+    path: "{{ item }}"
+    state: absent
+  delegate_to: localhost
+  run_once: yes
+  with_items:
+    - /tmp/to_restore.sql.gz
+    - /tmp/to_restore.sql
+
+- name: "Fetch backup from remote host"
+  command: "sshpass -p '{{ remote_backup_password }}' rsync -e 'ssh -o PubkeyAuthentication=no -o StrictHostKeyChecking=no' \
+                {{ remote_backup_user }}@{{ backup_to_restore }} /tmp/to_restore.sql.gz"
+  delegate_to: localhost
+  run_once: yes
+
+- name: "Send backup to target remote server"
+  copy:
+    src: /tmp/to_restore.sql.gz
+    dest: /tmp/to_restore.sql.gz
+    owner: "{{ postgresql_admin_user }}"
+    group: "{{ postgresql_admin_user }}"
+
+## ===============================
+## Make a backup before backup :)
+## ===============================
+
+- name: "Set fact for recovery made before dump restoration"
+  set_fact:
+    recovery_name: "before_recovery_{{ ansible_date_time.date }}.sql"
+
+- name: "Make a backup of present db in /tmp/"
+  shell: "pg_dump {{ database_to_restore }} > /tmp/{{ recovery_name }}"
+  args:
+    executable: /bin/bash
+  become: yes
+  become_user: "{{ postgresql_admin_user }}"
+  ignore_errors: yes  # Ignore  errors here in order to allow restoration even after
+                      # failed playbook
+
+- name: "Fetch database backup to localhost before restoration"
+  fetch:
+    src: "/tmp/{{ recovery_name }}"
+    dest: "{{ playbook_dir }}/{{ recovery_name }}"
+    flat: yes
+
+## ===============================
+## Delete previous database and restore SQL dump
+## ===============================
+
+- name: "Restart postgres in order to clear connections"
+  systemd:
+    name: postgresql
+    state: restarted
+
+- name: "Delete previous database"
+  postgresql_db:
+    name: "{{ database_to_restore }}"
+    state: absent
+  become: yes
+  become_user: "{{ postgresql_admin_user }}"
+
+- name: "Restore dump"
+  shell: "gunzip -f /tmp/to_restore.sql.gz && psql < /tmp/to_restore.sql &> /tmp/restoration-log.txt"
+  args:
+    executable: /bin/bash
+  become: yes
+  become_user: "{{ postgresql_admin_user }}"
+
+- name: "Fetch restoration log"
+  fetch:
+    src: "/tmp/restoration-log.txt"
+    dest: "{{ playbook_dir }}/restoration-log.txt"
+    flat: yes

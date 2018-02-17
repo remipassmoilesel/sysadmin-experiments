@@ -1,0 +1,48 @@
+---
+- name: "Create a user nats"
+  user:
+    name: nats
+
+- name: "Download NATS server 1.0.2"
+  get_url:
+    url: "https://github.com/nats-io/gnatsd/releases/download/v1.0.2/gnatsd-v1.0.2-linux-amd64.zip"
+    dest: "{{ nats_base_path }}/gnatsd-v1.0.2-linux-amd64.zip"
+    owner: nats
+
+- name: "Ensure unzip is installed"
+  apt:
+    name: unzip
+    update_cache: yes
+
+- name: "Extract server"
+  unarchive:
+    remote_src: yes
+    src: "{{ nats_base_path }}/gnatsd-v1.0.2-linux-amd64.zip"
+    dest: "{{ nats_base_path }}"
+    owner: nats
+    creates: "{{ nats_base_path }}/gnatsd-v1.0.2-linux-amd64/gnatsd"
+
+- name: "Create configuration directory"
+  file:
+    path: "{{ nats_config_basepath }}"
+    state: directory
+    owner: nats
+
+- name: "Add configuration file"
+  template:
+    src: "{{ role_path }}/templates/gnatsd.config"
+    dest: "{{ nats_config_basepath }}"
+    owner: nats
+
+- name: "Add systemd service"
+  template:
+    src: "{{ role_path }}/templates/nats.service"
+    dest: "/lib/systemd/system/nats.service"
+
+- name: "Enable and restart nats.service"
+  systemd:
+    state: restarted
+    enabled: yes
+    daemon_reload: yes
+    name: nats
+

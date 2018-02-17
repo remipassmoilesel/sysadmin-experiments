@@ -1,0 +1,4 @@
+- hosts: postgresql
+  roles:
+  - install-postgresql
+  - add-keycloak-user

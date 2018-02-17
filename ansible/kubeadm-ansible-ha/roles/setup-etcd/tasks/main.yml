@@ -1,0 +1,39 @@
+---
+# tasks file for setup-etcd
+# TODO: Use tls
+# TODO: set urls to vitual_ip
+# TODO: check cluster at the end
+
+- name: Create ETCD data directory
+  file:
+    path: "/var/lib/etcd"
+    state: directory
+    recurse: yes
+
+- name: Download ETCD github release
+  get_url:
+    url: https://github.com/coreos/etcd/releases/download/v3.2.6/etcd-v3.2.6-linux-amd64.tar.gz
+    dest: /opt/etcd-v3.2.6-linux-amd64.tar.gz
+
+- name: Unzip etcd
+  unarchive:
+    src: /opt/etcd-v3.2.6-linux-amd64.tar.gz
+    dest: /opt/
+    remote_src: yes
+    creates: /opt/etcd-v3.2.6-linux-amd64/etcd
+
+- name: Set usefull facts for ETCD installation
+  set_fact:
+    etcd_ip_addr: "{{ inventory_hostname }}"
+
+- name: Template service file
+  template:
+    src: etcd.service.j2
+    dest: /lib/systemd/system/etcd.service
+
+- name: Enable ETCD
+  systemd:
+    name: etcd
+    state: restarted
+    enabled: yes
+    daemon-reload: yes

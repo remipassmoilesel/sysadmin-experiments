@@ -1,0 +1,5 @@
+- name: "Ensure openvpn is installed"
+  apt:
+    name: openvpn
+    state: latest
+    update_cache: yes

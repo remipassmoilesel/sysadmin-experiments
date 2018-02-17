@@ -1,0 +1,6 @@
+# Not suitable for production use !
+
+- name: "Set dns"
+  copy:
+    content: "nameserver {{ dns_address }}"
+    dest: "/etc/resolv.conf"

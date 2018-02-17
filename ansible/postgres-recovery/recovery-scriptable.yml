@@ -1,0 +1,10 @@
+- hosts: postgresql
+  vars:
+    - ansible_ssh_pass:       "{{ lookup('env','PGREC_SSH_PASS') }}"
+    - remote_backup_password: "{{ lookup('env','PGREC_REMOTE_BACKUP_PASSWORD') }}"
+    - postgresql_admin_user:  "{{ lookup('env','PGREC_ADMIN_USER') }}"
+    - backup_to_restore:      "{{ lookup('env','PGREC_BACKUP_TO_RESTORE') }}"
+    - remote_backup_user:     "{{ lookup('env','PGREC_REMOTE_BACKUP_USER') }}"
+    - database_to_restore:    "{{ lookup('env','PGREC_DATABASE_TO_RESTORE') }}"
+  roles:
+    - pg-recovery-from-backup

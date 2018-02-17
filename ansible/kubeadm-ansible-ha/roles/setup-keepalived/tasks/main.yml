@@ -1,0 +1,29 @@
+---
+# tasks file for install-keepalived
+- name: Install keepalived
+  apt:
+    name: keepalived
+    state: latest
+
+- name: Copy k8s test script
+  copy:
+    src: keepalived-check-k8s.sh
+    dest: /etc/keepalived/keepalived-check-k8s.sh
+    mode: "u+rwx"
+
+- name: Check if host should be master
+  set_fact:
+    keepalived_state: "{{ 'MASTER' if groups.keepalived.index(inventory_hostname) == 0 else 'BACKUP' }}"
+
+- name: Configure keepalived
+  template:
+    src: keepalived.conf.j2
+    dest: /etc/keepalived/keepalived.conf
+
+- name: Start and enable keepalived
+  systemd:
+    name: keepalived
+    daemon_reload: yes
+    enabled: yes
+    state: restarted
+

@@ -1,0 +1,59 @@
+---
+
+- name: Copy modified controller configuration to controllers
+  shell:
+    cmd: "rsync -avz remote-files/controller.etc.kubernetes/* root@{{ inventory_hostname }}:/etc/kubernetes/"
+  delegate_to: localhost
+
+- name: Update admin configuration with localhost address
+  replace:
+    dest: /etc/kubernetes/admin.conf
+    regexp: 'server: https://.+$'
+    replace: 'server: https://{{ inventory_hostname }}:6443'
+
+- name: Update controller-manager configuration localhost address
+  replace:
+    dest: /etc/kubernetes/controller-manager.conf
+    regexp: 'server: https://.+$'
+    replace: 'server: https://{{ inventory_hostname }}:6443'
+
+- name: Update kubelet configuration with localhost address
+  replace:
+    dest: /etc/kubernetes/kubelet.conf
+    regexp: 'server: https://.+$'
+    replace: 'server: https://{{ inventory_hostname }}:6443'
+
+- name: Update scheduler configuration with localhost address
+  replace:
+    dest: /etc/kubernetes/scheduler.conf
+    regexp: 'server: https://.+$'
+    replace: 'server: https://{{ inventory_hostname }}:6443'
+
+- name: Restart Docker services
+  systemd:
+    name: docker
+    state: restarted
+    daemon-reload: yes
+
+- name: Restart kubelet services
+  systemd:
+    name: kubelet
+    state: restarted
+
+- name: Ensure root has an .kube directory for configuration
+  file:
+    path: /root/.kube
+    state: directory
+    recurse: yes
+
+- name: Copy admin config to root home
+  copy:
+    src: /etc/kubernetes/admin.conf
+    dest: /root/.kube/config
+    remote_src: yes
+
+- name: Use of virtual address in root config
+  replace:
+    dest: /root/.kube/config
+    regexp: 'server: https://.+$'
+    replace: 'server: https://{{ keepalived_virtualaddress }}:6443'

@@ -1,0 +1,12 @@
+---
+- hosts: jessie
+  tasks:
+  - include_role:
+      name: install-nats
+    vars:
+      nats_base_path: "/opt"
+      nats_config_basepath: "/etc/nats"
+      nats_port: "4222"
+      nats_monitoring_port: "8222"
+      nats_user: "jean"
+      nats_password: "claude"

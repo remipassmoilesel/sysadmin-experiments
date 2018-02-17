@@ -1,0 +1,4 @@
+- name: "Template /etc/network/interfaces"
+  template:
+    src: "interfaces"
+    dest: "{{ interfacesPath }}"

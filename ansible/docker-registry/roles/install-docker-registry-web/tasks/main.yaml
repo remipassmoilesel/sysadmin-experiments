@@ -1,0 +1,27 @@
+- name: "Ensure registry-web configuration dir is present"
+  file:
+    path: "/etc/docker/registry-web"
+    state: directory
+    recurse: yes
+
+
+- name: "Add registry-web configuration"
+  template:
+    src: registry-web-config.yml
+    dest: /etc/docker/registry-web/config.yml
+
+
+# TODO: use other option than deprecated option link
+- name: "Create a registry-web container"
+  docker_container:
+    name: registry-web
+    image: hyper/docker-registry-web:v0.1.2
+    state: started
+    restart_policy: always
+    links:
+      - registry
+    volumes:
+      - "/etc/docker/registry-web/config.yml:/conf/config.yml"
+    published_ports:
+      - 80:8080
+

@@ -1,0 +1,36 @@
+
+# This playbook have been tested only with ip addresses
+
+
+# Here goes the first controller wich will be initialized with kubeadm
+# At the end of the process, this cluster will be replicated
+[primary_controller]
+192.168.0.100
+
+# List of all controllers including the primary controller
+[controllers]
+192.168.0.100
+192.168.0.101
+192.168.0.102
+
+# List of all workers
+[workers]
+192.168.0.113
+
+[cluster:children]
+controllers
+workers
+
+# List of keepalived instances. Each controller should be a keepalived instance
+[keepalived:children]
+controllers
+
+## List of all hosts for ETCD
+## ETCD use a quporum mechanism for election, so if there is only 3 instances,
+## only one instances of ETCD can be lost
+[etcd_cluster:children]
+controllers
+workers
+
+[all:vars]
+ansible_user=root

@@ -1,0 +1,85 @@
+
+## =============================================
+## Get facts and add a host entry for poller
+## =============================================
+
+- name: Get public identity of bastion server
+  shell: "cat /etc/ssh/ssh_host_rsa_key.pub"
+  register: bastion_ssh_identity
+  delegate_to: bastion
+
+- name: Get public identity of poller server
+  shell: "cat /etc/ssh/ssh_host_rsa_key.pub"
+  register: poller_ssh_identity
+  delegate_to: centreon-poller
+
+- name: Get publick key of central centreon user
+  shell: cat /var/spool/centreon/.ssh/id_rsa.pub
+  register: central_centreon_ssh_identity
+
+## =============================================
+## Add host entry to distinguish several poller
+## =============================================
+
+- name: Add host entry for poller on centreon central
+  lineinfile:
+    path: /etc/hosts
+    insertafter: EOF
+    line: "127.0.0.1    {{ poller_name }}.ssh"
+
+## =============================================
+## Register centreon user on poller
+## =============================================
+
+- name: Make sure the known hosts file exists on central for centreon user
+  file: "path=/var/spool/centreon/.ssh/known_hosts state=touch"
+
+- name: Check poller address availability on central for centreon user
+  shell: "ssh-keygen -f /var/spool/centreon/.ssh/known_hosts -R {{ hostvars['centreon-poller']['ansible_host'] }}"
+  ignore_errors: yes
+
+- name: Check bastion name availability on central for centreon user
+  shell: "ssh-keygen -f /var/spool/centreon/.ssh/known_hosts -R {{ hostvars['bastion']['ansible_host'] }}"
+  ignore_errors: yes
+
+- name: Check poller name availability on central for centreon user
+  shell: "ssh-keygen -f /var/spool/centreon/.ssh/known_hosts -R {{ poller_name }}.ssh"
+  ignore_errors: yes
+
+- name: Add poller identity to central known hosts for centreon user
+  known_hosts:
+    path: /var/spool/centreon/.ssh/known_hosts
+    name: "{{ hostvars['centreon-poller']['ansible_host'] }}"
+    key: "{{ hostvars['centreon-poller']['ansible_host'] }} {{ poller_ssh_identity.stdout }}"
+
+- name: Add central public key to authorized hosts of poller for centreon user
+  authorized_key:
+    user: centreon
+    state: present
+    key: "{{ central_centreon_ssh_identity.stdout }}"
+  delegate_to: centreon-poller
+
+- name: Add central centreon user public key to authorized keys of bastion
+  authorized_key:
+    user: "{{ bastion_ssh_user }}"
+    state: present
+    key: "{{ central_centreon_ssh_identity.stdout }}"
+  delegate_to: bastion
+
+- name: Add bastion identity to central known hosts for centreon user
+  known_hosts:
+    path: /var/spool/centreon/.ssh/known_hosts
+    name: "{{ hostvars['bastion']['ansible_host'] }}"
+    key: "{{ hostvars['bastion']['ansible_host'] }} {{ bastion_ssh_identity.stdout }}"
+
+- name: Add poller identity to central known hosts for centreon user with a new name
+  known_hosts:
+    path: /var/spool/centreon/.ssh/known_hosts
+    name: "{{ poller_name }}.ssh"
+    key: "{{ poller_name + '.ssh' }} {{ poller_ssh_identity.stdout }}"
+
+- name: Ensure known host file access for centreon user
+  file:
+    path: /var/spool/centreon/.ssh/known_hosts
+    owner: centreon
+    group: centreon

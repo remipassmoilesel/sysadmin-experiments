@@ -1,0 +1,17 @@
+---
+# tasks file for get-keys-from-source-controller
+
+- name: Create local directory for configuration
+  file:
+    path: "remote-files/controller.etc.kubernetes"
+    state: directory
+    recurse: yes
+  delegate_to: localhost
+  run_once: yes
+
+- name: Fetch files from primary controller
+  shell:
+    cmd: "rsync -avz root@{{ inventory_hostname }}:/etc/kubernetes/* remote-files/controller.etc.kubernetes/"
+    executable: /bin/bash
+  delegate_to: localhost
+  run_once: yes

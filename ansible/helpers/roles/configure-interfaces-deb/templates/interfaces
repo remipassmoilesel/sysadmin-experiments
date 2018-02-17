@@ -1,0 +1,11 @@
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+# The primary network interface
+auto {{ interfaceName }}
+        allow-hotplug {{ interfaceName }}
+        iface {{ interfaceName }} inet static
+        address {{ newAddress }}
+        netmask {{ netmask }}
+        gateway {{ gateway }}

@@ -1,0 +1,2 @@
+- name: "Change host name"
+  raw: "sudo hostnamectl set-hostname {{ hostname }}"

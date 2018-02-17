@@ -1,0 +1,42 @@
+---
+- name: "Install rabbitmq from APT repositories"
+  apt:
+    name: rabbitmq-server
+    update_cache: yes
+
+- name: "Template configuration file"
+  template:
+    src: "{{ role_path }}/templates/rabbitmq.config"
+    dest: "/etc/rabbitmq/"
+    owner: rabbitmq
+
+- name: "Enable rabbitmq management plugin"
+  rabbitmq_plugin:
+    names: rabbitmq_management
+    state: enabled
+
+- name: "Add guest user"
+  rabbitmq_user:
+    user: guest
+    password: guest
+    tags: "administrator"
+    configure_priv: .*
+    read_priv: .*
+    write_priv: .*
+    state: present
+
+- name: "Add bee user (guest cannot connect to the web interface from outside)"
+  rabbitmq_user:
+    user: "{{ rabbitmq_user }}"
+    password: "{{ rabbitmq_password }}"
+    tags: "administrator"
+    configure_priv: .*
+    read_priv: .*
+    write_priv: .*
+    state: present
+
+- name: "Enable and restart rabbitmq-server service"
+  systemd:
+    state: restarted
+    enabled: yes
+    name: rabbitmq-server

@@ -1,0 +1,24 @@
+- name: Ensure NFS common is installed.
+  apt:
+    name: nfs-common
+    state: installed
+    update_cache: yes
+
+
+- name: Create mountable dir
+  file:
+    path: "{{ docker_registry_data_dir }}"
+    state: directory
+    owner: root
+    group: root
+    recurse: yes
+
+
+- name: Mount NFS volume
+  mount:
+    name: "{{ docker_registry_data_dir }}"
+    src: "{{ nfs_server_address }}:{{ nfs_volume_name  }}"
+    fstype: nfs
+    opts: defaults
+    state: mounted
+

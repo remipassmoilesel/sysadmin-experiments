@@ -1,0 +1,4 @@
+- name: "Template /etc/systemd/network/"
+  template:
+    src: "static.network"
+    dest: "/etc/systemd/network/"

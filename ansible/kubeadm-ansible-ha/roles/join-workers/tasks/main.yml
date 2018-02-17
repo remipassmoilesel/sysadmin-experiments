@@ -1,0 +1,24 @@
+---
+# tasks file for join-workers
+- name: Join worker
+  shell:
+    cmd: "kubeadm join --skip-preflight-checks --token {{ kubeadm_token }} \
+          {{ keepalived_virtualaddress }}:6443"
+  ignore_errors: yes
+
+- name: Ensure root has an .kube directory for configuration
+  file:
+    path: /root/.kube
+    state: directory
+    recurse: yes
+
+- name: Copy config to root home
+  copy:
+    src: /etc/kubernetes/kubelet.conf
+    dest: /root/.kube/config
+    remote_src: yes
+
+- name: Restart kubelet
+  systemd:
+    name: kubelet
+    state: restarted

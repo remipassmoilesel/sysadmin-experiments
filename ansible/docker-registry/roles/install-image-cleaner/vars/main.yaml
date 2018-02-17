@@ -1,0 +1,2 @@
+# Set the version of Node.js to install ("0.12", "4.x", "5.x", "6.x", "8.x").
+nodejs_version: "8.x"

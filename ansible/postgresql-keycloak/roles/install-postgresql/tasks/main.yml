@@ -1,0 +1,17 @@
+- name: Install PostgreSQL
+  apt:
+    name: postgresql
+    state: latest
+    update_cache: yes
+
+- name: Make postgresql listen on all addresses
+  lineinfile:
+    path: /etc/postgresql/9.5/main/postgresql.conf
+    regexp: "^#?listen_addresses.*"
+    line: "listen_addresses = '*'"
+    state: present
+
+- name: Install python-psycopg2 for Ansible
+  apt:
+    name: python-psycopg2
+    state: latest

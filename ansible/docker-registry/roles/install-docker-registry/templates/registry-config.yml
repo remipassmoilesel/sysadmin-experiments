@@ -1,0 +1,33 @@
+# see https://docs.docker.com/registry/configuration/
+# TODO: explore health checks
+version: 0.1
+log:
+  fields:
+    service: registry
+loglevel: warn
+storage:
+  cache:
+    blobdescriptor: inmemory
+  filesystem:
+    rootdirectory: /var/lib/registry
+  delete:
+    enabled: true
+http:
+  addr: :5000
+  host: https://{{ docker_registry_external_host }}
+  tls:
+    certificate: /etc/docker/registry/certs/registry.crt
+    key: /etc/docker/registry/certs/registry.key
+  headers:
+    X-Content-Type-Options: [nosniff]
+  debug:
+    addr: :5001
+health:
+  storagedriver:
+    enabled: true
+    interval: 10s
+    threshold: 3
+auth:
+  htpasswd:
+    realm: basic-realm
+    path: /etc/docker/registry/htpasswd

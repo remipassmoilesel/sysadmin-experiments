@@ -1,0 +1,26 @@
+- name: Create a database for Keycloak
+  postgresql_db:
+    name: keycloak
+  become: true
+  become_user: postgres
+
+- name: Create a keycloak user
+  postgresql_user:
+    db: keycloak
+    name: keycloak
+    password: keycloak
+  become: true
+  become_user: postgres
+
+- name: Allow keycloak user to connect from remote addr
+  lineinfile:
+    path: /etc/postgresql/9.5/main/pg_hba.conf
+    line: "host keycloak  keycloak  10.0.0.0/8  password"
+    insertafter: EOF
+    state: present
+
+- name: Restart postgresql server
+  systemd:
+    name: postgresql
+    state: restarted
+    enabled: yes

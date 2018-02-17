@@ -1,0 +1,5 @@
+---
+- hosts: k2
+  tasks:
+  - include_role:
+      name: install-helpers

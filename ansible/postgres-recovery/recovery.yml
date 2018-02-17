@@ -1,0 +1,6 @@
+- hosts: postgresql
+  vars_prompt:
+    - name: "remote_backup_password"
+      prompt: "Remote backup SSH password"
+  roles:
+    - pg-recovery-from-backup

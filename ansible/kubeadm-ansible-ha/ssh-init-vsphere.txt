@@ -1,0 +1,5 @@
+
+10.0.2.201   ##no-hostname##     root    azerty  ~/.ssh/id_rsa
+10.0.2.211   ##no-hostname##     root    azerty  ~/.ssh/id_rsa
+10.0.2.212   ##no-hostname##     root    azerty  ~/.ssh/id_rsa
+10.0.2.213   ##no-hostname##     root    azerty  ~/.ssh/id_rsa

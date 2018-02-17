@@ -1,0 +1,55 @@
+---
+# tasks file for setup-flannel
+- name: Ensure keepalived service is up
+  systemd:
+    name: keepalived
+    state: started
+
+- name: Ensure kubelet service is up
+  systemd:
+    name: kubelet
+    state: started
+
+- name: Copy flannel manifest to remote
+  copy:
+    src: kube-flannel.yaml
+    dest: /root/kube-flannel.yaml
+
+- name: Copy flannel RBAC manifest to remote
+  copy:
+    src: kube-flannel-rbac.yaml
+    dest: /root/kube-flannel-rbac.yaml
+
+- name: Pause few minutes to ensure all services are up
+  pause:
+    minutes: 1
+
+- name: Remove old flannel setup
+  shell:
+    cmd: kubectl delete -f /root/kube-flannel.yaml
+  ignore_errors: yes
+
+- name: Remove old flannel RBAC setup
+  shell:
+    cmd: kubectl delete -f /root/kube-flannel-rbac.yaml
+  ignore_errors: yes
+
+- name: Setup new flannel network
+  shell:
+    cmd: kubectl apply -f /root/kube-flannel.yaml
+
+- name: Setup new flannel RBAC
+  shell:
+    cmd: kubectl apply -f /root/kube-flannel-rbac.yaml
+
+- name: Pausing for 3 minutes to let flannel set up
+  pause:
+    minutes: 3
+
+- name: Kill old kube-dns pods
+  shell:
+    cmd: "kubectl delete pods -n kube-system \
+              $(kubectl get pods -n kube-system | grep -i kube-dns | cut -d ' ' -f 1)"
+    executable: /bin/bash
+  ignore_errors: yes
+

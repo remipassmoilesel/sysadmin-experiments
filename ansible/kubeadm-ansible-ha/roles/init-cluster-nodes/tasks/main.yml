@@ -1,0 +1,22 @@
+---
+# tasks file for setup-cluster-nodes
+
+- name: "Ensure pip is installed"
+  apt:
+    name: python-pip
+    state: present
+    update_cache: yes
+
+- name: "Ensure pip is up to date"
+  pip:
+    name: pip
+    state: latest
+
+- name: "Ensure docker-py is installed"
+  pip:
+    name: docker-py
+
+- name: "Ensure unzip is installed"
+  apt:
+    name: unzip
+    state: present

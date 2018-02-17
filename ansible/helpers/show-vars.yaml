@@ -1,0 +1,19 @@
+---
+- hosts: cluster
+  strategy: debug # see http://docs.ansible.com/ansible/latest/playbooks_debugger.html
+
+  tasks:
+
+  - name: "ansible_hostname"
+    debug: msg="{{ ansible_hostname }}"   # Machine hostname
+
+  - name: "ansible_nodename"
+    debug: msg="{{ ansible_nodename }}"   # Machine hostname
+
+  - name: "inventory_hostname"
+    debug: msg="{{ inventory_hostname }}"   # Machine hostname
+
+  - name: "hostvars[inventory_hostname]"
+    debug: msg="{{ hostvars[inventory_hostname] }}"
+
+#  - debug: msg="{{ hostvars }}"  // très grosse sortie, voir hostname-output.txt
