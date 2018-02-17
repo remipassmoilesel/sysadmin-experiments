@@ -3,7 +3,7 @@
   vars_files:
   - keys/htpasswd.base64.yml
   roles:
-  - role: install-prerequisites
+  - role: remipassmoilesel.ansible-prerequisites
   - role: mount-nfs-volume
   - role: remipassmoilesel.install-docker
   - role: install-docker-registry

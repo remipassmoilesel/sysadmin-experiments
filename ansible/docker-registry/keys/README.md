@@ -2,6 +2,6 @@
 
 Mettre ici une clef et deux certificats:
 
-    - bbuzg.crt
+    - self-signed.crt
     - registry.crt
     - registry.key
