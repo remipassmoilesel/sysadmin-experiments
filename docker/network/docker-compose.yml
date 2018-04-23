@@ -1,0 +1,24 @@
+version: '3'
+services:
+  mariadb:
+    image: mariadb:10.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: db1
+      MYSQL_USER: db1
+      MYSQL_PASSWORD: db1
+    networks:
+      spring-k8s-demo-dev-network:
+        aliases:
+        - mariadb.docker.net
+  nginx:
+    image: nginx:1.13.12
+    restart: always
+    networks:
+      spring-k8s-demo-dev-network:
+        aliases:
+        - nginx.docker.net
+
+networks:
+  spring-k8s-demo-dev-network:
