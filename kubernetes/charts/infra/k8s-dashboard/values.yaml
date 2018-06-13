@@ -1,0 +1,5 @@
+kubernetes-dashboard:
+  ingress:
+    enabled: true
+    hosts:
+      - kubernetes-dashboard.predev.kubernetes

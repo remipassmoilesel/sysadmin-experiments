@@ -1,0 +1,10 @@
+---
+- name: Distribute keys to workers
+  copy:
+    src: "{{ item }}"
+    dest: "/root"
+  with_items:
+    - "{{ playbook_dir }}/certificates/ca/ca.pem"
+    - "{{ playbook_dir }}/certificates/certs/kube-proxy.pem"
+    - "{{ playbook_dir }}/certificates/certs/kube-proxy-key.pem"
+

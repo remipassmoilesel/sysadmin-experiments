@@ -1,0 +1,23 @@
+[Unit]
+Description=etcd
+Documentation=https://github.com/coreos
+
+[Service]
+ExecStart=/opt/etcd-v3.2.6-linux-amd64/etcd \
+    --name=etcd{{ inventory_hostname | regex_replace("[^a-zA-Z0-9]+", "") }} \
+    --advertise-client-urls=http://{{ etcd_ip_addr }}:2379,http://{{ etcd_ip_addr }}:4001 \
+    --listen-client-urls=http://0.0.0.0:2379,http://0.0.0.0:4001 \
+    --initial-advertise-peer-urls=http://{{ etcd_ip_addr }}:2380 \
+    --listen-peer-urls=http://0.0.0.0:2380 \
+    --initial-cluster-token={{ etcd_cluster_token }} \
+    --initial-cluster={% for item in groups.etcd_cluster %}etcd{{ item | regex_replace("[^a-zA-Z0-9]+", "") }}=http://{{ item }}:2380,{% endfor %}\
+    --initial-cluster-state=new \
+    --auto-tls \
+    --peer-auto-tls \
+    --data-dir=/var/lib/etcd
+
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

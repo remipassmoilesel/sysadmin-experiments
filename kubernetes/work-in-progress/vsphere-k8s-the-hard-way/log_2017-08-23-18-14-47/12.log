@@ -1,0 +1,412 @@
++ source config.sh
+++ export KUBERNETES_PUBLIC_ADDRESS=10.0.6.100
+++ KUBERNETES_PUBLIC_ADDRESS=10.0.6.100
+++ export IP_M1=10.0.6.100
+++ IP_M1=10.0.6.100
+++ export IP_M2=10.0.6.101
+++ IP_M2=10.0.6.101
+++ export IP_M3=10.0.6.102
+++ IP_M3=10.0.6.102
+++ export HOST_M1=ubuntu16-k6-master1.kubernetes
+++ HOST_M1=ubuntu16-k6-master1.kubernetes
+++ export HOST_M2=ubuntu16-k6-master2.kubernetes
+++ HOST_M2=ubuntu16-k6-master2.kubernetes
+++ export HOST_M3=ubuntu16-k6-master3.kubernetes
+++ HOST_M3=ubuntu16-k6-master3.kubernetes
+++ export IP_W1=10.0.6.110
+++ IP_W1=10.0.6.110
+++ export IP_W2=10.0.6.111
+++ IP_W2=10.0.6.111
+++ export IP_W3=10.0.6.112
+++ IP_W3=10.0.6.112
+++ export HOST_W1=ubuntu16-k6-node1.kubernetes
+++ HOST_W1=ubuntu16-k6-node1.kubernetes
+++ export HOST_W2=ubuntu16-k6-node2.kubernetes
+++ HOST_W2=ubuntu16-k6-node2.kubernetes
+++ export HOST_W3=ubuntu16-k6-node3.kubernetes
+++ HOST_W3=ubuntu16-k6-node3.kubernetes
+++ export CLUSTER_SERVICE_IP_RANGE=10.5.0.0/24
+++ CLUSTER_SERVICE_IP_RANGE=10.5.0.0/24
+++ export CLUSTER_CIDR=10.244.0.0/16
+++ CLUSTER_CIDR=10.244.0.0/16
+Connection to 10.0.6.100
+++ export CLUSTER_DNS=10.0.5.1
+++ CLUSTER_DNS=10.0.5.1
+++ export DOWNLOAD_DEPENDENCIES=true
+++ DOWNLOAD_DEPENDENCIES=true
+++ export CERT_DIR_PATH=certs
+++ CERT_DIR_PATH=certs
+++ export TOKEN_DIR_PATH=token
+++ TOKEN_DIR_PATH=token
+++ export CA_DIR_PATH=ca
+++ CA_DIR_PATH=ca
+++ export CONFIG_DIR_PATH=configs
+++ CONFIG_DIR_PATH=configs
++ for host in '"$IP_M1"' '"$IP_M2"' '"$IP_M3"'
++ echo 'Connection to 10.0.6.100'
++ ssh root@10.0.6.100 '
+
+        set -x
+
+        echo "Commands executed on bash by $USER@$HOSTNAME"
+
+        INTERNAL_IP=$(ifconfig | grep -Eo '\''inet (adr:)?([0-9]*\.){3}[0-9]*'\'' | grep -Eo '\''([0-9]*\.){3}[0-9]*'\'' | grep -v '\''127.0.0.1'\'')
+
+        ETCD_NAME=controller$(echo $INTERNAL_IP | cut -c 10)
+
+        echo Internal IP=$INTERNAL_IP Etcd Name=$ETCD_NAME
+
+        # create etcd directory
+        mkdir -p /etc/etcd/
+
+        # copy keys
+        cd ~
+        cp ca.pem kubernetes-key.pem kubernetes.pem /etc/etcd/
+
+        # download and extract etcd
+        if [ true = true ]; then
+          wget https://github.com/coreos/etcd/releases/download/v3.1.4/etcd-v3.1.4-linux-amd64.tar.gz -q
+        fi
+
+        tar -xf etcd-v3.1.4-linux-amd64.tar.gz
+
+        # move to etcd and etcdctl to bin dir
+        mv etcd-v3.1.4-linux-amd64/etcd* /usr/bin/
+
+        # create a folder for datas
+        mkdir -p /var/lib/etcd
+
+        # create service file
+        cat > etcd.service <<EOF
+[Unit]
+Description=etcd
+Documentation=https://github.com/coreos
+
+[Service]
+ExecStart=/usr/bin/etcd \\
+  --name ${ETCD_NAME} \\
+  --cert-file=/etc/etcd/kubernetes.pem \\
+  --key-file=/etc/etcd/kubernetes-key.pem \\
+  --peer-cert-file=/etc/etcd/kubernetes.pem \\
+  --peer-key-file=/etc/etcd/kubernetes-key.pem \\
+  --trusted-ca-file=/etc/etcd/ca.pem \\
+  --peer-trusted-ca-file=/etc/etcd/ca.pem \\
+  --peer-client-cert-auth \\
+  --client-cert-auth \\
+  --initial-advertise-peer-urls https://${INTERNAL_IP}:2380 \\
+  --listen-peer-urls https://${INTERNAL_IP}:2380 \\
+  --listen-client-urls https://${INTERNAL_IP}:2379,http://127.0.0.1:2379 \\
+  --advertise-client-urls https://${INTERNAL_IP}:2379 \\
+  --initial-cluster-token etcd-cluster-0 \\
+  --initial-cluster controller0=https://10.0.6.100:2380,controller1=https://10.0.6.101:2380,controller2=https://10.0.6.102:2380 \\
+  --initial-cluster-state new \\
+  --data-dir=/var/lib/etcd
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+        # move service file and start etcd
+         mv etcd.service /etc/systemd/system/
+         systemctl daemon-reload
+         systemctl enable etcd
+         systemctl restart etcd
+         systemctl status etcd --no-pager
+
+    '
+Commands executed on bash by root@
++zsh:5> echo 'Commands executed on bash by root@'
++zsh:7> INTERNAL_IP=+zsh:7> ifconfig
++zsh:7> INTERNAL_IP=+zsh:7> grep -Eo 'inet (adr:)?([0-9]*\.){3}[0-9]*'
++zsh:7> INTERNAL_IP=+zsh:7> INTERNAL_IP=+zsh:7> grep -v 127.0.0.1
++zsh:7> grep -Eo '([0-9]*\.){3}[0-9]*'
++zsh:7> INTERNAL_IP=10.0.6.100 
++zsh:9> ETCD_NAME=+zsh:9> echo 10.0.6.100
++zsh:9> ETCD_NAME=+zsh:9> cut -c 10
++zsh:9> ETCD_NAME=controller0 
++zsh:11> echo Internal 'IP=10.0.6.100' Etcd 'Name=controller0'
+Internal IP=10.0.6.100 Etcd Name=controller0
++zsh:14> mkdir -p /etc/etcd/
++zsh:17> cd /root
++zsh:18> cp ca.pem kubernetes-key.pem kubernetes.pem /etc/etcd/
++zsh:21> [ true '=' true ']'
++zsh:22> wget https://github.com/coreos/etcd/releases/download/v3.1.4/etcd-v3.1.4-linux-amd64.tar.gz -q
++zsh:25> tar -xf etcd-v3.1.4-linux-amd64.tar.gz
++zsh:28> mv etcd-v3.1.4-linux-amd64/etcd etcd-v3.1.4-linux-amd64/etcdctl /usr/bin/
++zsh:31> mkdir -p /var/lib/etcd
++zsh:34> cat
++zsh:66> mv etcd.service /etc/systemd/system/
++zsh:67> systemctl daemon-reload
++zsh:68> systemctl enable etcd
+Created symlink from /etc/systemd/system/multi-user.target.wants/etcd.service to /etc/systemd/system/etcd.service.
++zsh:69> systemctl restart etcd
++zsh:70> systemctl status etcd --no-pager
+● etcd.service - etcd
+   Loaded: loaded (/etc/systemd/system/etcd.service; enabled; vendor preset: enabled)
+   Active: active (running) since mer. 2017-08-23 18:19:45 CEST; 24ms ago
+     Docs: https://github.com/coreos
+ Main PID: 27227 (etcd)
+    Tasks: 8
+   Memory: 2.4M
+      CPU: 16ms
+   CGroup: /system.slice/etcd.service
+           └─27227 /usr/bin/etcd --name controller0 --cert-file=/etc/etcd/kubernetes.pem --key-file=/etc/etcd/kubernetes-key.pem --peer-cert-file=/etc/etcd/kubernetes.pem --peer-key-file=/etc/etcd/kubernetes-key.pem --trusted-ca-file=/etc/etcd/ca.pem --peer-trusted-ca-file=/etc/etcd/ca.pem --peer-client-cert-auth --client-cert-auth --initial-advertise-peer-urls https://10.0.6.100:2380 --listen-peer-urls https://10.0.6.100:2380 --listen-client-urls https://10.0.6.100:2379,http://127.0.0.1:2379 --advertise-client-urls https://10.0.6.100:2379 --initial-cluster-token etcd-cluster-0 --initial-cluster controller0=https://10.0.6.100:2380,controller1=https://10.0.6.101:2380,controller2=https://10.0.6.102:2380 --initial-cluster-state new --data-dir=/var/lib/etcd
+
+août 23 18:19:45 ubuntu16-k6-master1.kubernetes etcd[27227]: initial cluster = controller0=https://10.0.6.100:2380,controller1=https://10.0.6.101:2380,controller2=https://10.0.6.102:2380
+août 23 18:19:45 ubuntu16-k6-master1.kubernetes etcd[27227]: starting member 45b1839c56dde6a0 in cluster c428fd559fe3e806
+août 23 18:19:45 ubuntu16-k6-master1.kubernetes etcd[27227]: 45b1839c56dde6a0 became follower at term 0
+août 23 18:19:45 ubuntu16-k6-master1.kubernetes etcd[27227]: newRaft 45b1839c56dde6a0 [peers: [], term: 0, commit: 0, applied: 0, lastindex: 0, lastterm: 0]
+août 23 18:19:45 ubuntu16-k6-master1.kubernetes etcd[27227]: 45b1839c56dde6a0 became follower at term 1
+août 23 18:19:45 ubuntu16-k6-master1.kubernetes etcd[27227]: warning: ignoring ServerName for user-provided CA for backwards compatibility is deprecated
+août 23 18:19:45 ubuntu16-k6-master1.kubernetes etcd[27227]: warning: ignoring ServerName for user-provided CA for backwards compatibility is deprecated
+août 23 18:19:45 ubuntu16-k6-master1.kubernetes etcd[27227]: starting peer 2671618168158b97...
+août 23 18:19:45 ubuntu16-k6-master1.kubernetes etcd[27227]: started HTTP pipelining with peer 2671618168158b97
+août 23 18:19:45 ubuntu16-k6-master1.kubernetes etcd[27227]: started streaming with peer 2671618168158b97 (writer)
++ for host in '"$IP_M1"' '"$IP_M2"' '"$IP_M3"'
++ echo 'Connection to 10.0.6.101'
+Connection to 10.0.6.101
++ ssh root@10.0.6.101 '
+
+        set -x
+
+        echo "Commands executed on bash by $USER@$HOSTNAME"
+
+        INTERNAL_IP=$(ifconfig | grep -Eo '\''inet (adr:)?([0-9]*\.){3}[0-9]*'\'' | grep -Eo '\''([0-9]*\.){3}[0-9]*'\'' | grep -v '\''127.0.0.1'\'')
+
+        ETCD_NAME=controller$(echo $INTERNAL_IP | cut -c 10)
+
+        echo Internal IP=$INTERNAL_IP Etcd Name=$ETCD_NAME
+
+        # create etcd directory
+        mkdir -p /etc/etcd/
+
+        # copy keys
+        cd ~
+        cp ca.pem kubernetes-key.pem kubernetes.pem /etc/etcd/
+
+        # download and extract etcd
+        if [ true = true ]; then
+          wget https://github.com/coreos/etcd/releases/download/v3.1.4/etcd-v3.1.4-linux-amd64.tar.gz -q
+        fi
+
+        tar -xf etcd-v3.1.4-linux-amd64.tar.gz
+
+        # move to etcd and etcdctl to bin dir
+        mv etcd-v3.1.4-linux-amd64/etcd* /usr/bin/
+
+        # create a folder for datas
+        mkdir -p /var/lib/etcd
+
+        # create service file
+        cat > etcd.service <<EOF
+[Unit]
+Description=etcd
+Documentation=https://github.com/coreos
+
+[Service]
+ExecStart=/usr/bin/etcd \\
+  --name ${ETCD_NAME} \\
+  --cert-file=/etc/etcd/kubernetes.pem \\
+  --key-file=/etc/etcd/kubernetes-key.pem \\
+  --peer-cert-file=/etc/etcd/kubernetes.pem \\
+  --peer-key-file=/etc/etcd/kubernetes-key.pem \\
+  --trusted-ca-file=/etc/etcd/ca.pem \\
+  --peer-trusted-ca-file=/etc/etcd/ca.pem \\
+  --peer-client-cert-auth \\
+  --client-cert-auth \\
+  --initial-advertise-peer-urls https://${INTERNAL_IP}:2380 \\
+  --listen-peer-urls https://${INTERNAL_IP}:2380 \\
+  --listen-client-urls https://${INTERNAL_IP}:2379,http://127.0.0.1:2379 \\
+  --advertise-client-urls https://${INTERNAL_IP}:2379 \\
+  --initial-cluster-token etcd-cluster-0 \\
+  --initial-cluster controller0=https://10.0.6.100:2380,controller1=https://10.0.6.101:2380,controller2=https://10.0.6.102:2380 \\
+  --initial-cluster-state new \\
+  --data-dir=/var/lib/etcd
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+        # move service file and start etcd
+         mv etcd.service /etc/systemd/system/
+         systemctl daemon-reload
+         systemctl enable etcd
+         systemctl restart etcd
+         systemctl status etcd --no-pager
+
+    '
+Commands executed on bash by root@
++zsh:5> echo 'Commands executed on bash by root@'
++zsh:7> INTERNAL_IP=+zsh:7> ifconfig
++zsh:7> INTERNAL_IP=+zsh:7> grep -Eo 'inet (adr:)?([0-9]*\.){3}[0-9]*'
++zsh:7> INTERNAL_IP=+zsh:7> grep -Eo '([0-9]*\.){3}[0-9]*'
++zsh:7> INTERNAL_IP=+zsh:7> grep -v 127.0.0.1
++zsh:7> INTERNAL_IP=10.0.6.101 
++zsh:9> ETCD_NAME=+zsh:9> echo 10.0.6.101
++zsh:9> ETCD_NAME=+zsh:9> cut -c 10
++zsh:9> ETCD_NAME=controller1 
++zsh:11> echo Internal 'IP=10.0.6.101' Etcd 'Name=controller1'
+Internal IP=10.0.6.101 Etcd Name=controller1
++zsh:14> mkdir -p /etc/etcd/
++zsh:17> cd /root
++zsh:18> cp ca.pem kubernetes-key.pem kubernetes.pem /etc/etcd/
++zsh:21> [ true '=' true ']'
++zsh:22> wget https://github.com/coreos/etcd/releases/download/v3.1.4/etcd-v3.1.4-linux-amd64.tar.gz -q
++zsh:25> tar -xf etcd-v3.1.4-linux-amd64.tar.gz
++zsh:28> mv etcd-v3.1.4-linux-amd64/etcd etcd-v3.1.4-linux-amd64/etcdctl /usr/bin/
++zsh:31> mkdir -p /var/lib/etcd
++zsh:34> cat
++zsh:66> mv etcd.service /etc/systemd/system/
++zsh:67> systemctl daemon-reload
++zsh:68> systemctl enable etcd
+Created symlink from /etc/systemd/system/multi-user.target.wants/etcd.service to /etc/systemd/system/etcd.service.
++zsh:69> systemctl restart etcd
++zsh:70> systemctl status etcd --no-pager
+● etcd.service - etcd
+   Loaded: loaded (/etc/systemd/system/etcd.service; enabled; vendor preset: enabled)
+   Active: active (running) since mer. 2017-08-23 18:19:56 CEST; 16ms ago
+     Docs: https://github.com/coreos
+ Main PID: 26902 (etcd)
+    Tasks: 6
+   Memory: 2.0M
+      CPU: 7ms
+   CGroup: /system.slice/etcd.service
+           └─26902 /usr/bin/etcd --name controller1 --cert-file=/etc/etcd/kubernetes.pem --key-file=/etc/etcd/kubernetes-key.pem --peer-cert-file=/etc/etcd/kubernetes.pem --peer-key-file=/etc/etcd/kubernetes-key.pem --trusted-ca-file=/etc/etcd/ca.pem --peer-trusted-ca-file=/etc/etcd/ca.pem --peer-client-cert-auth --client-cert-auth --initial-advertise-peer-urls https://10.0.6.101:2380 --listen-peer-urls https://10.0.6.101:2380 --listen-client-urls https://10.0.6.101:2379,http://127.0.0.1:2379 --advertise-client-urls https://10.0.6.101:2379 --initial-cluster-token etcd-cluster-0 --initial-cluster controller0=https://10.0.6.100:2380,controller1=https://10.0.6.101:2380,controller2=https://10.0.6.102:2380 --initial-cluster-state new --data-dir=/var/lib/etcd
+
+août 23 18:19:56 ubuntu16-k6-master2.kubernetes etcd[26902]: Go Version: go1.7.5
+août 23 18:19:56 ubuntu16-k6-master2.kubernetes etcd[26902]: Go OS/Arch: linux/amd64
+août 23 18:19:56 ubuntu16-k6-master2.kubernetes etcd[26902]: setting maximum number of CPUs to 2, total number of available CPUs is 2
+août 23 18:19:56 ubuntu16-k6-master2.kubernetes etcd[26902]: peerTLS: cert = /etc/etcd/kubernetes.pem, key = /etc/etcd/kubernetes-key.pem, ca = , trusted-ca = /etc/etcd/ca.pem, client-cert-auth = true
+août 23 18:19:56 ubuntu16-k6-master2.kubernetes etcd[26902]: listening for peers on https://10.0.6.101:2380
+août 23 18:19:56 ubuntu16-k6-master2.kubernetes etcd[26902]: The scheme of client url http://127.0.0.1:2379 is HTTP while peer key/cert files are presented. Ignored key/cert files.
+août 23 18:19:56 ubuntu16-k6-master2.kubernetes etcd[26902]: The scheme of client url http://127.0.0.1:2379 is HTTP while client cert auth (--client-cert-auth) is enabled. Ignored client cert auth for this url.
+août 23 18:19:56 ubuntu16-k6-master2.kubernetes etcd[26902]: listening for client requests on 127.0.0.1:2379
+août 23 18:19:56 ubuntu16-k6-master2.kubernetes etcd[26902]: listening for client requests on 10.0.6.101:2379
+août 23 18:19:56 ubuntu16-k6-master2.kubernetes etcd[26902]: warning: ignoring ServerName for user-provided CA for backwards compatibility is deprecated
++ for host in '"$IP_M1"' '"$IP_M2"' '"$IP_M3"'
++ echo 'Connection to 10.0.6.102'
++ ssh root@10.0.6.102 '
+
+        set -x
+
+        echo "Commands executed on bash by $USER@$HOSTNAME"
+
+        INTERNAL_IP=$(ifconfig | grep -Eo '\''inet (adr:)?([0-9]*\.){3}[0-9]*'\'' | grep -Eo '\''([0-9]*\.){3}[0-9]*'\'' | grep -v '\''127.0.0.1'\'')
+
+        ETCD_NAME=controller$(echo $INTERNAL_IP | cut -c 10)
+
+        echo Internal IP=$INTERNAL_IP Etcd Name=$ETCD_NAME
+
+        # create etcd directory
+        mkdir -p /etc/etcd/
+
+        # copy keys
+        cd ~
+        cp ca.pem kubernetes-key.pem kubernetes.pem /etc/etcd/
+
+        # download and extract etcd
+        if [ true = true ]; then
+          wget https://github.com/coreos/etcd/releases/download/v3.1.4/etcd-v3.1.4-linux-amd64.tar.gz -q
+        fi
+
+        tar -xf etcd-v3.1.4-linux-amd64.tar.gz
+
+        # move to etcd and etcdctl to bin dir
+        mv etcd-v3.1.4-linux-amd64/etcd* /usr/bin/
+
+        # create a folder for datas
+        mkdir -p /var/lib/etcd
+
+        # create service file
+        cat > etcd.service <<EOF
+[Unit]
+Description=etcd
+Documentation=https://github.com/coreos
+
+[Service]
+ExecStart=/usr/bin/etcd \\
+  --name ${ETCD_NAME} \\
+  --cert-file=/etc/etcd/kubernetes.pem \\
+  --key-file=/etc/etcd/kubernetes-key.pem \\
+  --peer-cert-file=/etc/etcd/kubernetes.pem \\
+  --peer-key-file=/etc/etcd/kubernetes-key.pem \\
+  --trusted-ca-file=/etc/etcd/ca.pem \\
+  --peer-trusted-ca-file=/etc/etcd/ca.pem \\
+  --peer-client-cert-auth \\
+  --client-cert-auth \\
+  --initial-advertise-peer-urls https://${INTERNAL_IP}:2380 \\
+  --listen-peer-urls https://${INTERNAL_IP}:2380 \\
+  --listen-client-urls https://${INTERNAL_IP}:2379,http://127.0.0.1:2379 \\
+  --advertise-client-urls https://${INTERNAL_IP}:2379 \\
+  --initial-cluster-token etcd-cluster-0 \\
+  --initial-cluster controller0=https://10.0.6.100:2380,controller1=https://10.0.6.101:2380,controller2=https://10.0.6.102:2380 \\
+  --initial-cluster-state new \\
+  --data-dir=/var/lib/etcd
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+        # move service file and start etcd
+         mv etcd.service /etc/systemd/system/
+         systemctl daemon-reload
+         systemctl enable etcd
+         systemctl restart etcd
+         systemctl status etcd --no-pager
+
+    '
+Connection to 10.0.6.102
+Commands executed on bash by root@
++zsh:5> echo 'Commands executed on bash by root@'
++zsh:7> INTERNAL_IP=+zsh:7> ifconfig
++zsh:7> INTERNAL_IP=+zsh:7> grep -Eo 'inet (adr:)?([0-9]*\.){3}[0-9]*'
++zsh:7> INTERNAL_IP=+zsh:7> grep -Eo '([0-9]*\.){3}[0-9]*'
++zsh:7> INTERNAL_IP=+zsh:7> grep -v 127.0.0.1
++zsh:7> INTERNAL_IP=10.0.6.102 
++zsh:9> ETCD_NAME=+zsh:9> echo 10.0.6.102
++zsh:9> ETCD_NAME=+zsh:9> cut -c 10
++zsh:9> ETCD_NAME=controller2 
++zsh:11> echo Internal 'IP=10.0.6.102' Etcd 'Name=controller2'
+Internal IP=10.0.6.102 Etcd Name=controller2
++zsh:14> mkdir -p /etc/etcd/
++zsh:17> cd /root
++zsh:18> cp ca.pem kubernetes-key.pem kubernetes.pem /etc/etcd/
++zsh:21> [ true '=' true ']'
++zsh:22> wget https://github.com/coreos/etcd/releases/download/v3.1.4/etcd-v3.1.4-linux-amd64.tar.gz -q
++zsh:25> tar -xf etcd-v3.1.4-linux-amd64.tar.gz
++zsh:28> mv etcd-v3.1.4-linux-amd64/etcd etcd-v3.1.4-linux-amd64/etcdctl /usr/bin/
++zsh:31> mkdir -p /var/lib/etcd
++zsh:34> cat
++zsh:66> mv etcd.service /etc/systemd/system/
++zsh:67> systemctl daemon-reload
++zsh:68> systemctl enable etcd
+Created symlink from /etc/systemd/system/multi-user.target.wants/etcd.service to /etc/systemd/system/etcd.service.
++zsh:69> systemctl restart etcd
++zsh:70> systemctl status etcd --no-pager
+● etcd.service - etcd
+   Loaded: loaded (/etc/systemd/system/etcd.service; enabled; vendor preset: enabled)
+   Active: active (running) since mer. 2017-08-23 18:20:05 CEST; 19ms ago
+     Docs: https://github.com/coreos
+ Main PID: 26920 (etcd)
+    Tasks: 7
+   Memory: 2.1M
+      CPU: 8ms
+   CGroup: /system.slice/etcd.service
+           └─26920 /usr/bin/etcd --name controller2 --cert-file=/etc/etcd/kubernetes.pem --key-file=/etc/etcd/kubernetes-key.pem --peer-cert-file=/etc/etcd/kubernetes.pem --peer-key-file=/etc/etcd/kubernetes-key.pem --trusted-ca-file=/etc/etcd/ca.pem --peer-trusted-ca-file=/etc/etcd/ca.pem --peer-client-cert-auth --client-cert-auth --initial-advertise-peer-urls https://10.0.6.102:2380 --listen-peer-urls https://10.0.6.102:2380 --listen-client-urls https://10.0.6.102:2379,http://127.0.0.1:2379 --advertise-client-urls https://10.0.6.102:2379 --initial-cluster-token etcd-cluster-0 --initial-cluster controller0=https://10.0.6.100:2380,controller1=https://10.0.6.101:2380,controller2=https://10.0.6.102:2380 --initial-cluster-state new --data-dir=/var/lib/etcd
+
+août 23 18:20:05 ubuntu16-k6-master3.kubernetes etcd[26920]: Go Version: go1.7.5
+août 23 18:20:05 ubuntu16-k6-master3.kubernetes etcd[26920]: Go OS/Arch: linux/amd64
+août 23 18:20:05 ubuntu16-k6-master3.kubernetes etcd[26920]: setting maximum number of CPUs to 2, total number of available CPUs is 2
+août 23 18:20:05 ubuntu16-k6-master3.kubernetes etcd[26920]: peerTLS: cert = /etc/etcd/kubernetes.pem, key = /etc/etcd/kubernetes-key.pem, ca = , trusted-ca = /etc/etcd/ca.pem, client-cert-auth = true
+août 23 18:20:05 ubuntu16-k6-master3.kubernetes etcd[26920]: listening for peers on https://10.0.6.102:2380
+août 23 18:20:05 ubuntu16-k6-master3.kubernetes etcd[26920]: The scheme of client url http://127.0.0.1:2379 is HTTP while peer key/cert files are presented. Ignored key/cert files.
+août 23 18:20:05 ubuntu16-k6-master3.kubernetes etcd[26920]: The scheme of client url http://127.0.0.1:2379 is HTTP while client cert auth (--client-cert-auth) is enabled. Ignored client cert auth for this url.
+août 23 18:20:05 ubuntu16-k6-master3.kubernetes etcd[26920]: listening for client requests on 127.0.0.1:2379
+août 23 18:20:05 ubuntu16-k6-master3.kubernetes etcd[26920]: listening for client requests on 10.0.6.102:2379
+août 23 18:20:05 ubuntu16-k6-master3.kubernetes etcd[26920]: warning: ignoring ServerName for user-provided CA for backwards compatibility is deprecated

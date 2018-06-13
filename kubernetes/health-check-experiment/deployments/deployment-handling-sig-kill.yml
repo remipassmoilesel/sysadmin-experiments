@@ -1,0 +1,70 @@
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: health-check-test-handling-kill-deployment
+spec:
+  replicas: 10
+  template:
+    metadata:
+      labels:
+        run: health-check-test-handling-kill-deployment
+    spec:
+      containers:
+      - name: health-check-test-handling-kill-deployment
+        image: docker.bbuzcloud.com/health-check-test:1.0
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        - containerPort: 8888
+        - containerPort: 9999
+        env:
+        - name: HANDLE_KILL_SIGNAL
+          value: "true"
+
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8888
+            scheme: HTTP
+          initialDelaySeconds: 1
+          periodSeconds: 1
+          timeoutSeconds: 1
+          failureThreshold: 2
+          successThreshold: 1
+
+        readinessProbe:
+          failureThreshold: 2
+          httpGet:
+            path: /
+            port: 80
+            scheme: HTTP
+          initialDelaySeconds: 1
+          periodSeconds: 1
+          timeoutSeconds: 1
+          failureThreshold: 2
+          successThreshold: 1
+
+      imagePullSecrets:
+          - name: regsecret
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: health-check-test-handling-kill-service
+  labels:
+    run: health-check-test-handling-kill-service
+spec:
+  type: NodePort
+  ports:
+  - port: 80
+    nodePort: 30180
+    name: http
+  - port: 8888
+    nodePort: 30188
+    name: http-health
+  - port: 9999
+    nodePort: 30189
+    name: http-kill
+  selector:
+    run: health-check-test-handling-kill-deployment

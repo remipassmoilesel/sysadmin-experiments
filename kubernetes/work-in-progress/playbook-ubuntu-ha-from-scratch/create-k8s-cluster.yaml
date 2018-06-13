@@ -1,0 +1,36 @@
+---
+- hosts: masters
+  vars_files:
+    - "config.yaml"
+
+  tasks:
+  - name: "Install various helpers"
+    include_role: name=rpssl.install-helpers
+    when: vars.install_helpers == true
+
+  - name: "Create certification authority"
+    include_role: name=rpssl.create-ca
+
+  - name: "Create certificates"
+    include_role: name=rpssl.create-certs
+
+  - name: "Distribute certificates to masters"
+    include_role: name=rpssl.distribute-master-certs
+
+- hosts: workers
+  vars_files:
+    - "config.yaml"
+
+  tasks:
+  - name: "Install various helpers"
+    include_role: name=rpssl.install-helpers
+    when: vars.install_helpers == true
+
+  - name: "Distribute certificates to workers"
+    include_role: name=rpssl.distribute-worker-certs
+
+  - name: "Create token and distribute it to workers"
+    include_role: name=rpssl.create-and-distribute-token
+
+  - name: "Create bootstrap configuration"
+    include_role: name=rpssl.create-bootstrap-config

@@ -1,0 +1,22 @@
+apiVersion: kubeadm.k8s.io/v1alpha1
+kind: MasterConfiguration
+kubernetesVersion: v1.7.0
+networking:
+  podSubnet: 10.244.0.0/16
+apiServerCertSANs:
+- 10.0.2.201
+- 10.0.2.211
+- 10.0.2.212
+- 10.0.2.213
+- 10.0.4.101
+- ubuntu16-k3-master1.kubernetes
+- ubuntu16-k3-node1.kubernetes
+- ubuntu16-k3-node2.kubernetes
+- ubuntu16-k3-node3.kubernetes
+- ubuntu16-k5-master1.kubernetes
+- 10.0.2.202 # Virtual IP for load balancing
+etcd:
+  endpoints:
+  - http://10.0.2.201:2379
+  - http://10.0.2.211:2379
+  - http://10.0.2.212:2379

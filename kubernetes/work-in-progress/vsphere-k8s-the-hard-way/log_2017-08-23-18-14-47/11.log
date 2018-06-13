@@ -1,0 +1,74 @@
++ source config.sh
+++ export KUBERNETES_PUBLIC_ADDRESS=10.0.6.100
+++ KUBERNETES_PUBLIC_ADDRESS=10.0.6.100
+++ export IP_M1=10.0.6.100
+++ IP_M1=10.0.6.100
+++ export IP_M2=10.0.6.101
+++ IP_M2=10.0.6.101
+++ export IP_M3=10.0.6.102
+++ IP_M3=10.0.6.102
+++ export HOST_M1=ubuntu16-k6-master1.kubernetes
+++ HOST_M1=ubuntu16-k6-master1.kubernetes
+++ export HOST_M2=ubuntu16-k6-master2.kubernetes
+++ HOST_M2=ubuntu16-k6-master2.kubernetes
+++ export HOST_M3=ubuntu16-k6-master3.kubernetes
+++ HOST_M3=ubuntu16-k6-master3.kubernetes
+++ export IP_W1=10.0.6.110
+++ IP_W1=10.0.6.110
+++ export IP_W2=10.0.6.111
+++ IP_W2=10.0.6.111
+++ export IP_W3=10.0.6.112
+++ IP_W3=10.0.6.112
+++ export HOST_W1=ubuntu16-k6-node1.kubernetes
+++ HOST_W1=ubuntu16-k6-node1.kubernetes
+++ export HOST_W2=ubuntu16-k6-node2.kubernetes
+++ HOST_W2=ubuntu16-k6-node2.kubernetes
+++ export HOST_W3=ubuntu16-k6-node3.kubernetes
+++ HOST_W3=ubuntu16-k6-node3.kubernetes
+++ export CLUSTER_SERVICE_IP_RANGE=10.5.0.0/24
+++ CLUSTER_SERVICE_IP_RANGE=10.5.0.0/24
+++ export CLUSTER_CIDR=10.244.0.0/16
+++ CLUSTER_CIDR=10.244.0.0/16
+++ export CLUSTER_DNS=10.0.5.1
+++ CLUSTER_DNS=10.0.5.1
+++ export DOWNLOAD_DEPENDENCIES=true
+++ DOWNLOAD_DEPENDENCIES=true
+++ export CERT_DIR_PATH=certs
+++ CERT_DIR_PATH=certs
+++ export TOKEN_DIR_PATH=token
+++ TOKEN_DIR_PATH=token
+++ export CA_DIR_PATH=ca
+++ CA_DIR_PATH=ca
+++ export CONFIG_DIR_PATH=configs
+++ CONFIG_DIR_PATH=configs
++ mkdir -p configs
++ cd configs
+++ awk -F , '{print $1}' ../token/token.csv
++ export BOOTSTRAP_TOKEN=16386d5817c1e1641cadd1ca89f38915
++ BOOTSTRAP_TOKEN=16386d5817c1e1641cadd1ca89f38915
++ echo BOOTSTRAP CONFIG
+BOOTSTRAP CONFIG
++ kubectl config set-cluster kubernetes-the-hard-way --certificate-authority=../ca/ca.pem --embed-certs=true --server=https://10.0.6.100:6443 --kubeconfig=bootstrap.kubeconfig
+Cluster "kubernetes-the-hard-way" set.
++ kubectl config set-credentials kubelet-bootstrap --token=16386d5817c1e1641cadd1ca89f38915 --kubeconfig=bootstrap.kubeconfig
+User "kubelet-bootstrap" set.
++ kubectl config set-context default --cluster=kubernetes-the-hard-way --user=kubelet-bootstrap --kubeconfig=bootstrap.kubeconfig
+Context "default" set.
++ kubectl config use-context default --kubeconfig=bootstrap.kubeconfig
+Switched to context "default".
+KUBE-PROXY CONFIG
++ echo KUBE-PROXY CONFIG
++ kubectl config set-cluster kubernetes-the-hard-way --certificate-authority=../ca/ca.pem --embed-certs=true --server=https://10.0.6.100:6443 --kubeconfig=kube-proxy.kubeconfig
+Cluster "kubernetes-the-hard-way" set.
++ kubectl config set-credentials kube-proxy --client-certificate=../certs/kube-proxy.pem --client-key=../certs/kube-proxy-key.pem --embed-certs=true --kubeconfig=kube-proxy.kubeconfig
+User "kube-proxy" set.
++ kubectl config set-context default --cluster=kubernetes-the-hard-way --user=kube-proxy --kubeconfig=kube-proxy.kubeconfig
+Context "default" set.
++ kubectl config use-context default --kubeconfig=kube-proxy.kubeconfig
+Switched to context "default".
++ for host in '"$IP_W1"' '"$IP_W2"' '"$IP_W3"'
++ scp bootstrap.kubeconfig kube-proxy.kubeconfig 'root@10.0.6.110:~/'
++ for host in '"$IP_W1"' '"$IP_W2"' '"$IP_W3"'
++ scp bootstrap.kubeconfig kube-proxy.kubeconfig 'root@10.0.6.111:~/'
++ for host in '"$IP_W1"' '"$IP_W2"' '"$IP_W3"'
++ scp bootstrap.kubeconfig kube-proxy.kubeconfig 'root@10.0.6.112:~/'

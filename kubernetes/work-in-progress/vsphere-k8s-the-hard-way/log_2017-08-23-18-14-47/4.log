@@ -1,0 +1,844 @@
++ source config.sh
+++ export KUBERNETES_PUBLIC_ADDRESS=10.0.6.100
+++ KUBERNETES_PUBLIC_ADDRESS=10.0.6.100
+++ export IP_M1=10.0.6.100
+++ IP_M1=10.0.6.100
+++ export IP_M2=10.0.6.101
+++ IP_M2=10.0.6.101
+++ export IP_M3=10.0.6.102
+++ IP_M3=10.0.6.102
+++ export HOST_M1=ubuntu16-k6-master1.kubernetes
+++ HOST_M1=ubuntu16-k6-master1.kubernetes
+++ export HOST_M2=ubuntu16-k6-master2.kubernetes
+++ HOST_M2=ubuntu16-k6-master2.kubernetes
+++ export HOST_M3=ubuntu16-k6-master3.kubernetes
+++ HOST_M3=ubuntu16-k6-master3.kubernetes
+++ export IP_W1=10.0.6.110
+++ IP_W1=10.0.6.110
+++ export IP_W2=10.0.6.111
+++ IP_W2=10.0.6.111
+++ export IP_W3=10.0.6.112
+++ IP_W3=10.0.6.112
+++ export HOST_W1=ubuntu16-k6-node1.kubernetes
+++ HOST_W1=ubuntu16-k6-node1.kubernetes
+++ export HOST_W2=ubuntu16-k6-node2.kubernetes
+++ HOST_W2=ubuntu16-k6-node2.kubernetes
+++ export HOST_W3=ubuntu16-k6-node3.kubernetes
+++ HOST_W3=ubuntu16-k6-node3.kubernetes
+++ export CLUSTER_SERVICE_IP_RANGE=10.5.0.0/24
+++ CLUSTER_SERVICE_IP_RANGE=10.5.0.0/24
+++ export CLUSTER_CIDR=10.244.0.0/16
+++ CLUSTER_CIDR=10.244.0.0/16
+++ export CLUSTER_DNS=10.0.5.1
+++ CLUSTER_DNS=10.0.5.1
+++ export DOWNLOAD_DEPENDENCIES=true
+++ DOWNLOAD_DEPENDENCIES=true
+++ export CERT_DIR_PATH=certs
+++ CERT_DIR_PATH=certs
+++ export TOKEN_DIR_PATH=token
+++ TOKEN_DIR_PATH=token
+++ export CA_DIR_PATH=ca
+++ CA_DIR_PATH=ca
+++ export CONFIG_DIR_PATH=configs
+++ CONFIG_DIR_PATH=configs
++ for host in '"$IP_W1"' '"$IP_W2"' '"$IP_W3"'
++ echo 'Connection to 10.0.6.110'
++ ssh root@10.0.6.110 '
+
+        set -x
+
+        echo "Commands executed on bash by $USER@10.0.6.110"
+
+        apt-get update
+        apt-get upgrade -y
+        apt-get install -y socat  # tool used to have full functionnalities on kubelet
+
+    '
+Connection to 10.0.6.110
++zsh:5> echo 'Commands executed on bash by root@10.0.6.110'
+Commands executed on bash by root@10.0.6.110
++zsh:7> apt-get update
+Atteint:1 http://fr.archive.ubuntu.com/ubuntu xenial InRelease
+Atteint:2 http://fr.archive.ubuntu.com/ubuntu xenial-updates InRelease
+Atteint:3 http://fr.archive.ubuntu.com/ubuntu xenial-backports InRelease
+Réception de:4 http://archive.ubuntu.com/ubuntu xenial-proposed InRelease [253 kB]
+Réception de:5 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 Packages [106 kB]
+Réception de:6 http://archive.ubuntu.com/ubuntu xenial-proposed/main i386 Packages [100 kB]
+Réception de:7 http://archive.ubuntu.com/ubuntu xenial-proposed/main Translation-en [38,5 kB]
+Réception de:8 http://security.ubuntu.com/ubuntu xenial-security InRelease [102 kB]
+601 ko réceptionnés en 5s (116 ko/s)
+Lecture des listes de paquets…
++zsh:8> apt-get upgrade -y
+Lecture des listes de paquets…
+Construction de l'arbre des dépendances…
+Lecture des informations d'état…
+Calcul de la mise à jour…
+Les paquets suivants seront mis à jour :
+  grub-legacy-ec2 libgnutls-openssl27 libgnutls30 libmspack0 linux-firmware
+  lxd lxd-client python3-update-manager snapd update-manager-core
+  update-notifier-common
+11 mis à jour, 0 nouvellement installés, 0 à enlever et 0 non mis à jour.
+Il est nécessaire de prendre 55,8 Mo dans les archives.
+Après cette opération, 5 297 ko d'espace disque supplémentaires seront utilisés.
+Réception de:1 http://fr.archive.ubuntu.com/ubuntu xenial-updates/main amd64 libmspack0 amd64 0.5-1ubuntu0.16.04.1 [37,0 kB]
+Réception de:2 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 lxd amd64 2.0.10-0ubuntu1~16.04.2 [3 416 kB]
+Réception de:3 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 lxd-client amd64 2.0.10-0ubuntu1~16.04.2 [1 857 kB]
+Réception de:4 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 update-manager-core all 1:16.04.9 [5 330 B]
+Réception de:5 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 python3-update-manager all 1:16.04.9 [31,9 kB]
+Réception de:6 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 update-notifier-common all 3.168.5 [165 kB]
+Réception de:7 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 libgnutls-openssl27 amd64 3.4.10-4ubuntu1.4 [22,0 kB]
+Réception de:8 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 libgnutls30 amd64 3.4.10-4ubuntu1.4 [548 kB]
+Réception de:9 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 linux-firmware all 1.157.12 [38,8 MB]
+Réception de:10 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 snapd amd64 2.27.3 [10,9 MB]
+Réception de:11 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 grub-legacy-ec2 all 0.7.9-233-ge586fe35-0ubuntu1~16.04.1 [28,3 kB]
+debconf: Impossible d'initialiser l'interface : Dialog
+debconf: (La variable TERM n'a pas de valeur, l'interface dialog est donc inutilisable.)
+debconf: Utilisation de l'interface Readline en remplacement
+debconf: Impossible d'initialiser l'interface : Readline
+debconf: (Cette interface a besoin d'un terminal de contrôle.)
+debconf: Utilisation de l'interface Teletype en remplacement
+dpkg-preconfigure: impossible de réouvrir stdin : 
+55,8 Mo réceptionnés en 4s (13,8 Mo/s)
+(Lecture de la base de données... (Lecture de la base de données... 5%(Lecture de la base de données... 10%(Lecture de la base de données... 15%(Lecture de la base de données... 20%(Lecture de la base de données... 25%(Lecture de la base de données... 30%(Lecture de la base de données... 35%(Lecture de la base de données... 40%(Lecture de la base de données... 45%(Lecture de la base de données... 50%(Lecture de la base de données... 55%(Lecture de la base de données... 60%(Lecture de la base de données... 65%(Lecture de la base de données... 70%(Lecture de la base de données... 75%(Lecture de la base de données... 80%(Lecture de la base de données... 85%(Lecture de la base de données... 90%(Lecture de la base de données... 95%(Lecture de la base de données... 100%(Lecture de la base de données... 96854 fichiers et répertoires déjà installés.)
+Préparation du dépaquetage de .../lxd_2.0.10-0ubuntu1~16.04.2_amd64.deb ...
+Warning: Stopping lxd.service, but it can still be activated by:
+  lxd.socket
+Dépaquetage de lxd (2.0.10-0ubuntu1~16.04.2) sur (2.0.10-0ubuntu1~16.04.1) ...
+Warning: Stopping lxd.service, but it can still be activated by:
+  lxd.socket
+Préparation du dépaquetage de .../lxd-client_2.0.10-0ubuntu1~16.04.2_amd64.deb ...
+Dépaquetage de lxd-client (2.0.10-0ubuntu1~16.04.2) sur (2.0.10-0ubuntu1~16.04.1) ...
+Préparation du dépaquetage de .../update-manager-core_1%3a16.04.9_all.deb ...
+Dépaquetage de update-manager-core (1:16.04.9) sur (1:16.04.8) ...
+Préparation du dépaquetage de .../python3-update-manager_1%3a16.04.9_all.deb ...
+Dépaquetage de python3-update-manager (1:16.04.9) sur (1:16.04.8) ...
+Préparation du dépaquetage de .../update-notifier-common_3.168.5_all.deb ...
+Dépaquetage de update-notifier-common (3.168.5) sur (3.168.4) ...
+Préparation du dépaquetage de .../libgnutls-openssl27_3.4.10-4ubuntu1.4_amd64.deb ...
+Dépaquetage de libgnutls-openssl27:amd64 (3.4.10-4ubuntu1.4) sur (3.4.10-4ubuntu1.3) ...
+Préparation du dépaquetage de .../libgnutls30_3.4.10-4ubuntu1.4_amd64.deb ...
+Dépaquetage de libgnutls30:amd64 (3.4.10-4ubuntu1.4) sur (3.4.10-4ubuntu1.3) ...
+Préparation du dépaquetage de .../libmspack0_0.5-1ubuntu0.16.04.1_amd64.deb ...
+Dépaquetage de libmspack0:amd64 (0.5-1ubuntu0.16.04.1) sur (0.5-1) ...
+Préparation du dépaquetage de .../linux-firmware_1.157.12_all.deb ...
+Dépaquetage de linux-firmware (1.157.12) sur (1.157.11) ...
+Préparation du dépaquetage de .../snapd_2.27.3_amd64.deb ...
+Warning: Stopping snapd.service, but it can still be activated by:
+  snapd.socket
+Dépaquetage de snapd (2.27.3) sur (2.26.10) ...
+Préparation du dépaquetage de .../grub-legacy-ec2_0.7.9-233-ge586fe35-0ubuntu1~16.04.1_all.deb ...
+Conservation de « détournement de /usr/sbin/grub-set-default en /usr/sbin/grub-set-default.real par grub-legacy-ec2 »
+Dépaquetage de grub-legacy-ec2 (0.7.9-233-ge586fe35-0ubuntu1~16.04.1) sur (0.7.9-153-g16a7302f-0ubuntu1~16.04.2) ...
+Traitement des actions différées (« triggers ») pour man-db (2.7.5-1) ...
+Traitement des actions différées (« triggers ») pour ureadahead (0.100.0-19) ...
+Traitement des actions différées (« triggers ») pour systemd (229-4ubuntu19) ...
+Traitement des actions différées (« triggers ») pour libc-bin (2.23-0ubuntu9) ...
+Paramétrage de lxd-client (2.0.10-0ubuntu1~16.04.2) ...
+Paramétrage de lxd (2.0.10-0ubuntu1~16.04.2) ...
+Paramétrage de python3-update-manager (1:16.04.9) ...
+Paramétrage de update-manager-core (1:16.04.9) ...
+Paramétrage de update-notifier-common (3.168.5) ...
+Paramétrage de libgnutls30:amd64 (3.4.10-4ubuntu1.4) ...
+Paramétrage de libgnutls-openssl27:amd64 (3.4.10-4ubuntu1.4) ...
+Paramétrage de libmspack0:amd64 (0.5-1ubuntu0.16.04.1) ...
+Paramétrage de linux-firmware (1.157.12) ...
+update-initramfs: Generating /boot/initrd.img-4.4.0-93-generic
+W: mdadm: /etc/mdadm/mdadm.conf defines no arrays.
+update-initramfs: Generating /boot/initrd.img-4.4.0-92-generic
+W: mdadm: /etc/mdadm/mdadm.conf defines no arrays.
+Paramétrage de snapd (2.27.3) ...
+Installation de la nouvelle version du fichier de configuration /etc/apparmor.d/usr.lib.snapd.snap-confine.real ...
+Paramétrage de grub-legacy-ec2 (0.7.9-233-ge586fe35-0ubuntu1~16.04.1) ...
+debconf: Impossible d'initialiser l'interface : Dialog
+debconf: (La variable TERM n'a pas de valeur, l'interface dialog est donc inutilisable.)
+debconf: Utilisation de l'interface Readline en remplacement
+Searching for GRUB installation directory ... found: /boot/grub
+Searching for default file ... found: /boot/grub/default
+Testing for an existing GRUB menu.lst file ... found: /boot/grub/menu.lst
+Searching for splash image ... none found, skipping ...
+Found kernel: /vmlinuz-4.4.0-92-generic
+Found kernel: /vmlinuz-4.4.0-93-generic
+Found kernel: /vmlinuz-4.4.0-92-generic
+Replacing config file /run/grub/menu.lst with new version
+Updating /boot/grub/menu.lst ... done
+
+Traitement des actions différées (« triggers ») pour libc-bin (2.23-0ubuntu9) ...
++zsh:9> apt-get install -y socat
+Lecture des listes de paquets…
+Construction de l'arbre des dépendances…
+Lecture des informations d'état…
+Les NOUVEAUX paquets suivants seront installés :
+  socat
+0 mis à jour, 1 nouvellement installés, 0 à enlever et 0 non mis à jour.
+Il est nécessaire de prendre 321 ko dans les archives.
+Après cette opération, 941 ko d'espace disque supplémentaires seront utilisés.
+Réception de:1 http://fr.archive.ubuntu.com/ubuntu xenial/universe amd64 socat amd64 1.7.3.1-1 [321 kB]
+debconf: Impossible d'initialiser l'interface : Dialog
+debconf: (La variable TERM n'a pas de valeur, l'interface dialog est donc inutilisable.)
+debconf: Utilisation de l'interface Readline en remplacement
+debconf: Impossible d'initialiser l'interface : Readline
+debconf: (Cette interface a besoin d'un terminal de contrôle.)
+debconf: Utilisation de l'interface Teletype en remplacement
+dpkg-preconfigure: impossible de réouvrir stdin : 
+321 ko réceptionnés en 0s (4 770 ko/s)
+Sélection du paquet socat précédemment désélectionné.
+(Lecture de la base de données... (Lecture de la base de données... 5%(Lecture de la base de données... 10%(Lecture de la base de données... 15%(Lecture de la base de données... 20%(Lecture de la base de données... 25%(Lecture de la base de données... 30%(Lecture de la base de données... 35%(Lecture de la base de données... 40%(Lecture de la base de données... 45%(Lecture de la base de données... 50%(Lecture de la base de données... 55%(Lecture de la base de données... 60%(Lecture de la base de données... 65%(Lecture de la base de données... 70%(Lecture de la base de données... 75%(Lecture de la base de données... 80%(Lecture de la base de données... 85%(Lecture de la base de données... 90%(Lecture de la base de données... 95%(Lecture de la base de données... 100%(Lecture de la base de données... 96861 fichiers et répertoires déjà installés.)
+Préparation du dépaquetage de .../socat_1.7.3.1-1_amd64.deb ...
+Dépaquetage de socat (1.7.3.1-1) ...
+Traitement des actions différées (« triggers ») pour man-db (2.7.5-1) ...
+Paramétrage de socat (1.7.3.1-1) ...
++ for host in '"$IP_W1"' '"$IP_W2"' '"$IP_W3"'
+Connection to 10.0.6.111
++ echo 'Connection to 10.0.6.111'
++ ssh root@10.0.6.111 '
+
+        set -x
+
+        echo "Commands executed on bash by $USER@10.0.6.111"
+
+        apt-get update
+        apt-get upgrade -y
+        apt-get install -y socat  # tool used to have full functionnalities on kubelet
+
+    '
++zsh:5> echo 'Commands executed on bash by root@10.0.6.111'
+Commands executed on bash by root@10.0.6.111
++zsh:7> apt-get update
+Atteint:1 http://fr.archive.ubuntu.com/ubuntu xenial InRelease
+Atteint:2 http://fr.archive.ubuntu.com/ubuntu xenial-updates InRelease
+Réception de:3 http://security.ubuntu.com/ubuntu xenial-security InRelease [102 kB]
+Atteint:4 http://fr.archive.ubuntu.com/ubuntu xenial-backports InRelease
+Réception de:5 http://archive.ubuntu.com/ubuntu xenial-proposed InRelease [253 kB]
+Réception de:6 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 Packages [106 kB]
+Réception de:7 http://archive.ubuntu.com/ubuntu xenial-proposed/main i386 Packages [100 kB]
+Réception de:8 http://archive.ubuntu.com/ubuntu xenial-proposed/main Translation-en [38,5 kB]
+601 ko réceptionnés en 5s (114 ko/s)
+Lecture des listes de paquets…
++zsh:8> apt-get upgrade -y
+Lecture des listes de paquets…
+Construction de l'arbre des dépendances…
+Lecture des informations d'état…
+Calcul de la mise à jour…
+Les paquets suivants seront mis à jour :
+  grub-legacy-ec2 libgnutls-openssl27 libgnutls30 libmspack0 linux-firmware
+  lxd lxd-client python3-update-manager snapd update-manager-core
+  update-notifier-common
+11 mis à jour, 0 nouvellement installés, 0 à enlever et 0 non mis à jour.
+Il est nécessaire de prendre 55,8 Mo dans les archives.
+Après cette opération, 5 297 ko d'espace disque supplémentaires seront utilisés.
+Réception de:1 http://fr.archive.ubuntu.com/ubuntu xenial-updates/main amd64 libmspack0 amd64 0.5-1ubuntu0.16.04.1 [37,0 kB]
+Réception de:2 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 lxd amd64 2.0.10-0ubuntu1~16.04.2 [3 416 kB]
+Réception de:3 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 lxd-client amd64 2.0.10-0ubuntu1~16.04.2 [1 857 kB]
+Réception de:4 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 update-manager-core all 1:16.04.9 [5 330 B]
+Réception de:5 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 python3-update-manager all 1:16.04.9 [31,9 kB]
+Réception de:6 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 update-notifier-common all 3.168.5 [165 kB]
+Réception de:7 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 libgnutls-openssl27 amd64 3.4.10-4ubuntu1.4 [22,0 kB]
+Réception de:8 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 libgnutls30 amd64 3.4.10-4ubuntu1.4 [548 kB]
+Réception de:9 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 linux-firmware all 1.157.12 [38,8 MB]
+Réception de:10 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 snapd amd64 2.27.3 [10,9 MB]
+Réception de:11 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 grub-legacy-ec2 all 0.7.9-233-ge586fe35-0ubuntu1~16.04.1 [28,3 kB]
+debconf: Impossible d'initialiser l'interface : Dialog
+debconf: (La variable TERM n'a pas de valeur, l'interface dialog est donc inutilisable.)
+debconf: Utilisation de l'interface Readline en remplacement
+debconf: Impossible d'initialiser l'interface : Readline
+debconf: (Cette interface a besoin d'un terminal de contrôle.)
+debconf: Utilisation de l'interface Teletype en remplacement
+dpkg-preconfigure: impossible de réouvrir stdin : 
+55,8 Mo réceptionnés en 1s (52,1 Mo/s)
+(Lecture de la base de données... (Lecture de la base de données... 5%(Lecture de la base de données... 10%(Lecture de la base de données... 15%(Lecture de la base de données... 20%(Lecture de la base de données... 25%(Lecture de la base de données... 30%(Lecture de la base de données... 35%(Lecture de la base de données... 40%(Lecture de la base de données... 45%(Lecture de la base de données... 50%(Lecture de la base de données... 55%(Lecture de la base de données... 60%(Lecture de la base de données... 65%(Lecture de la base de données... 70%(Lecture de la base de données... 75%(Lecture de la base de données... 80%(Lecture de la base de données... 85%(Lecture de la base de données... 90%(Lecture de la base de données... 95%(Lecture de la base de données... 100%(Lecture de la base de données... 96854 fichiers et répertoires déjà installés.)
+Préparation du dépaquetage de .../lxd_2.0.10-0ubuntu1~16.04.2_amd64.deb ...
+Warning: Stopping lxd.service, but it can still be activated by:
+  lxd.socket
+Dépaquetage de lxd (2.0.10-0ubuntu1~16.04.2) sur (2.0.10-0ubuntu1~16.04.1) ...
+Warning: Stopping lxd.service, but it can still be activated by:
+  lxd.socket
+Préparation du dépaquetage de .../lxd-client_2.0.10-0ubuntu1~16.04.2_amd64.deb ...
+Dépaquetage de lxd-client (2.0.10-0ubuntu1~16.04.2) sur (2.0.10-0ubuntu1~16.04.1) ...
+Préparation du dépaquetage de .../update-manager-core_1%3a16.04.9_all.deb ...
+Dépaquetage de update-manager-core (1:16.04.9) sur (1:16.04.8) ...
+Préparation du dépaquetage de .../python3-update-manager_1%3a16.04.9_all.deb ...
+Dépaquetage de python3-update-manager (1:16.04.9) sur (1:16.04.8) ...
+Préparation du dépaquetage de .../update-notifier-common_3.168.5_all.deb ...
+Dépaquetage de update-notifier-common (3.168.5) sur (3.168.4) ...
+Préparation du dépaquetage de .../libgnutls-openssl27_3.4.10-4ubuntu1.4_amd64.deb ...
+Dépaquetage de libgnutls-openssl27:amd64 (3.4.10-4ubuntu1.4) sur (3.4.10-4ubuntu1.3) ...
+Préparation du dépaquetage de .../libgnutls30_3.4.10-4ubuntu1.4_amd64.deb ...
+Dépaquetage de libgnutls30:amd64 (3.4.10-4ubuntu1.4) sur (3.4.10-4ubuntu1.3) ...
+Préparation du dépaquetage de .../libmspack0_0.5-1ubuntu0.16.04.1_amd64.deb ...
+Dépaquetage de libmspack0:amd64 (0.5-1ubuntu0.16.04.1) sur (0.5-1) ...
+Préparation du dépaquetage de .../linux-firmware_1.157.12_all.deb ...
+Dépaquetage de linux-firmware (1.157.12) sur (1.157.11) ...
+Préparation du dépaquetage de .../snapd_2.27.3_amd64.deb ...
+Warning: Stopping snapd.service, but it can still be activated by:
+  snapd.socket
+Dépaquetage de snapd (2.27.3) sur (2.26.10) ...
+Préparation du dépaquetage de .../grub-legacy-ec2_0.7.9-233-ge586fe35-0ubuntu1~16.04.1_all.deb ...
+Conservation de « détournement de /usr/sbin/grub-set-default en /usr/sbin/grub-set-default.real par grub-legacy-ec2 »
+Dépaquetage de grub-legacy-ec2 (0.7.9-233-ge586fe35-0ubuntu1~16.04.1) sur (0.7.9-153-g16a7302f-0ubuntu1~16.04.2) ...
+Traitement des actions différées (« triggers ») pour man-db (2.7.5-1) ...
+Traitement des actions différées (« triggers ») pour ureadahead (0.100.0-19) ...
+Traitement des actions différées (« triggers ») pour systemd (229-4ubuntu19) ...
+Traitement des actions différées (« triggers ») pour libc-bin (2.23-0ubuntu9) ...
+Paramétrage de lxd-client (2.0.10-0ubuntu1~16.04.2) ...
+Paramétrage de lxd (2.0.10-0ubuntu1~16.04.2) ...
+Paramétrage de python3-update-manager (1:16.04.9) ...
+Paramétrage de update-manager-core (1:16.04.9) ...
+Paramétrage de update-notifier-common (3.168.5) ...
+Paramétrage de libgnutls30:amd64 (3.4.10-4ubuntu1.4) ...
+Paramétrage de libgnutls-openssl27:amd64 (3.4.10-4ubuntu1.4) ...
+Paramétrage de libmspack0:amd64 (0.5-1ubuntu0.16.04.1) ...
+Paramétrage de linux-firmware (1.157.12) ...
+update-initramfs: Generating /boot/initrd.img-4.4.0-93-generic
+W: mdadm: /etc/mdadm/mdadm.conf defines no arrays.
+update-initramfs: Generating /boot/initrd.img-4.4.0-92-generic
+W: mdadm: /etc/mdadm/mdadm.conf defines no arrays.
+Paramétrage de snapd (2.27.3) ...
+Installation de la nouvelle version du fichier de configuration /etc/apparmor.d/usr.lib.snapd.snap-confine.real ...
+Paramétrage de grub-legacy-ec2 (0.7.9-233-ge586fe35-0ubuntu1~16.04.1) ...
+debconf: Impossible d'initialiser l'interface : Dialog
+debconf: (La variable TERM n'a pas de valeur, l'interface dialog est donc inutilisable.)
+debconf: Utilisation de l'interface Readline en remplacement
+Searching for GRUB installation directory ... found: /boot/grub
+Searching for default file ... found: /boot/grub/default
+Testing for an existing GRUB menu.lst file ... found: /boot/grub/menu.lst
+Searching for splash image ... none found, skipping ...
+Found kernel: /vmlinuz-4.4.0-92-generic
+Found kernel: /vmlinuz-4.4.0-93-generic
+Found kernel: /vmlinuz-4.4.0-92-generic
+Replacing config file /run/grub/menu.lst with new version
+Updating /boot/grub/menu.lst ... done
+
+Traitement des actions différées (« triggers ») pour libc-bin (2.23-0ubuntu9) ...
++zsh:9> apt-get install -y socat
+Lecture des listes de paquets…
+Construction de l'arbre des dépendances…
+Lecture des informations d'état…
+Les NOUVEAUX paquets suivants seront installés :
+  socat
+0 mis à jour, 1 nouvellement installés, 0 à enlever et 0 non mis à jour.
+Il est nécessaire de prendre 321 ko dans les archives.
+Après cette opération, 941 ko d'espace disque supplémentaires seront utilisés.
+Réception de:1 http://fr.archive.ubuntu.com/ubuntu xenial/universe amd64 socat amd64 1.7.3.1-1 [321 kB]
+debconf: Impossible d'initialiser l'interface : Dialog
+debconf: (La variable TERM n'a pas de valeur, l'interface dialog est donc inutilisable.)
+debconf: Utilisation de l'interface Readline en remplacement
+debconf: Impossible d'initialiser l'interface : Readline
+debconf: (Cette interface a besoin d'un terminal de contrôle.)
+debconf: Utilisation de l'interface Teletype en remplacement
+dpkg-preconfigure: impossible de réouvrir stdin : 
+321 ko réceptionnés en 0s (3 545 ko/s)
+Sélection du paquet socat précédemment désélectionné.
+(Lecture de la base de données... (Lecture de la base de données... 5%(Lecture de la base de données... 10%(Lecture de la base de données... 15%(Lecture de la base de données... 20%(Lecture de la base de données... 25%(Lecture de la base de données... 30%(Lecture de la base de données... 35%(Lecture de la base de données... 40%(Lecture de la base de données... 45%(Lecture de la base de données... 50%(Lecture de la base de données... 55%(Lecture de la base de données... 60%(Lecture de la base de données... 65%(Lecture de la base de données... 70%(Lecture de la base de données... 75%(Lecture de la base de données... 80%(Lecture de la base de données... 85%(Lecture de la base de données... 90%(Lecture de la base de données... 95%(Lecture de la base de données... 100%(Lecture de la base de données... 96861 fichiers et répertoires déjà installés.)
+Préparation du dépaquetage de .../socat_1.7.3.1-1_amd64.deb ...
+Dépaquetage de socat (1.7.3.1-1) ...
+Traitement des actions différées (« triggers ») pour man-db (2.7.5-1) ...
+Paramétrage de socat (1.7.3.1-1) ...
++ for host in '"$IP_W1"' '"$IP_W2"' '"$IP_W3"'
++ echo 'Connection to 10.0.6.112'
+Connection to 10.0.6.112
++ ssh root@10.0.6.112 '
+
+        set -x
+
+        echo "Commands executed on bash by $USER@10.0.6.112"
+
+        apt-get update
+        apt-get upgrade -y
+        apt-get install -y socat  # tool used to have full functionnalities on kubelet
+
+    '
+Commands executed on bash by root@10.0.6.112
++zsh:5> echo 'Commands executed on bash by root@10.0.6.112'
++zsh:7> apt-get update
+Atteint:1 http://fr.archive.ubuntu.com/ubuntu xenial InRelease
+Atteint:2 http://fr.archive.ubuntu.com/ubuntu xenial-updates InRelease
+Atteint:3 http://fr.archive.ubuntu.com/ubuntu xenial-backports InRelease
+Réception de:4 http://security.ubuntu.com/ubuntu xenial-security InRelease [102 kB]
+Réception de:5 http://archive.ubuntu.com/ubuntu xenial-proposed InRelease [253 kB]
+Réception de:6 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 Packages [106 kB]
+Réception de:7 http://archive.ubuntu.com/ubuntu xenial-proposed/main i386 Packages [100 kB]
+Réception de:8 http://archive.ubuntu.com/ubuntu xenial-proposed/main Translation-en [38,5 kB]
+601 ko réceptionnés en 5s (114 ko/s)
+Lecture des listes de paquets…
++zsh:8> apt-get upgrade -y
+Lecture des listes de paquets…
+Construction de l'arbre des dépendances…
+Lecture des informations d'état…
+Calcul de la mise à jour…
+Les paquets suivants seront mis à jour :
+  grub-legacy-ec2 libgnutls-openssl27 libgnutls30 libmspack0 linux-firmware
+  lxd lxd-client python3-update-manager snapd update-manager-core
+  update-notifier-common
+11 mis à jour, 0 nouvellement installés, 0 à enlever et 0 non mis à jour.
+Il est nécessaire de prendre 55,8 Mo dans les archives.
+Après cette opération, 5 297 ko d'espace disque supplémentaires seront utilisés.
+Réception de:1 http://fr.archive.ubuntu.com/ubuntu xenial-updates/main amd64 libmspack0 amd64 0.5-1ubuntu0.16.04.1 [37,0 kB]
+Réception de:2 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 lxd amd64 2.0.10-0ubuntu1~16.04.2 [3 416 kB]
+Réception de:3 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 lxd-client amd64 2.0.10-0ubuntu1~16.04.2 [1 857 kB]
+Réception de:4 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 update-manager-core all 1:16.04.9 [5 330 B]
+Réception de:5 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 python3-update-manager all 1:16.04.9 [31,9 kB]
+Réception de:6 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 update-notifier-common all 3.168.5 [165 kB]
+Réception de:7 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 libgnutls-openssl27 amd64 3.4.10-4ubuntu1.4 [22,0 kB]
+Réception de:8 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 libgnutls30 amd64 3.4.10-4ubuntu1.4 [548 kB]
+Réception de:9 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 linux-firmware all 1.157.12 [38,8 MB]
+Réception de:10 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 snapd amd64 2.27.3 [10,9 MB]
+Réception de:11 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 grub-legacy-ec2 all 0.7.9-233-ge586fe35-0ubuntu1~16.04.1 [28,3 kB]
+debconf: Impossible d'initialiser l'interface : Dialog
+debconf: (La variable TERM n'a pas de valeur, l'interface dialog est donc inutilisable.)
+debconf: Utilisation de l'interface Readline en remplacement
+debconf: Impossible d'initialiser l'interface : Readline
+debconf: (Cette interface a besoin d'un terminal de contrôle.)
+debconf: Utilisation de l'interface Teletype en remplacement
+dpkg-preconfigure: impossible de réouvrir stdin : 
+55,8 Mo réceptionnés en 0s (57,6 Mo/s)
+(Lecture de la base de données... (Lecture de la base de données... 5%(Lecture de la base de données... 10%(Lecture de la base de données... 15%(Lecture de la base de données... 20%(Lecture de la base de données... 25%(Lecture de la base de données... 30%(Lecture de la base de données... 35%(Lecture de la base de données... 40%(Lecture de la base de données... 45%(Lecture de la base de données... 50%(Lecture de la base de données... 55%(Lecture de la base de données... 60%(Lecture de la base de données... 65%(Lecture de la base de données... 70%(Lecture de la base de données... 75%(Lecture de la base de données... 80%(Lecture de la base de données... 85%(Lecture de la base de données... 90%(Lecture de la base de données... 95%(Lecture de la base de données... 100%(Lecture de la base de données... 96854 fichiers et répertoires déjà installés.)
+Préparation du dépaquetage de .../lxd_2.0.10-0ubuntu1~16.04.2_amd64.deb ...
+Warning: Stopping lxd.service, but it can still be activated by:
+  lxd.socket
+Dépaquetage de lxd (2.0.10-0ubuntu1~16.04.2) sur (2.0.10-0ubuntu1~16.04.1) ...
+Warning: Stopping lxd.service, but it can still be activated by:
+  lxd.socket
+Préparation du dépaquetage de .../lxd-client_2.0.10-0ubuntu1~16.04.2_amd64.deb ...
+Dépaquetage de lxd-client (2.0.10-0ubuntu1~16.04.2) sur (2.0.10-0ubuntu1~16.04.1) ...
+Préparation du dépaquetage de .../update-manager-core_1%3a16.04.9_all.deb ...
+Dépaquetage de update-manager-core (1:16.04.9) sur (1:16.04.8) ...
+Préparation du dépaquetage de .../python3-update-manager_1%3a16.04.9_all.deb ...
+Dépaquetage de python3-update-manager (1:16.04.9) sur (1:16.04.8) ...
+Préparation du dépaquetage de .../update-notifier-common_3.168.5_all.deb ...
+Dépaquetage de update-notifier-common (3.168.5) sur (3.168.4) ...
+Préparation du dépaquetage de .../libgnutls-openssl27_3.4.10-4ubuntu1.4_amd64.deb ...
+Dépaquetage de libgnutls-openssl27:amd64 (3.4.10-4ubuntu1.4) sur (3.4.10-4ubuntu1.3) ...
+Préparation du dépaquetage de .../libgnutls30_3.4.10-4ubuntu1.4_amd64.deb ...
+Dépaquetage de libgnutls30:amd64 (3.4.10-4ubuntu1.4) sur (3.4.10-4ubuntu1.3) ...
+Préparation du dépaquetage de .../libmspack0_0.5-1ubuntu0.16.04.1_amd64.deb ...
+Dépaquetage de libmspack0:amd64 (0.5-1ubuntu0.16.04.1) sur (0.5-1) ...
+Préparation du dépaquetage de .../linux-firmware_1.157.12_all.deb ...
+Dépaquetage de linux-firmware (1.157.12) sur (1.157.11) ...
+Préparation du dépaquetage de .../snapd_2.27.3_amd64.deb ...
+Warning: Stopping snapd.service, but it can still be activated by:
+  snapd.socket
+Dépaquetage de snapd (2.27.3) sur (2.26.10) ...
+Préparation du dépaquetage de .../grub-legacy-ec2_0.7.9-233-ge586fe35-0ubuntu1~16.04.1_all.deb ...
+Conservation de « détournement de /usr/sbin/grub-set-default en /usr/sbin/grub-set-default.real par grub-legacy-ec2 »
+Dépaquetage de grub-legacy-ec2 (0.7.9-233-ge586fe35-0ubuntu1~16.04.1) sur (0.7.9-153-g16a7302f-0ubuntu1~16.04.2) ...
+Traitement des actions différées (« triggers ») pour man-db (2.7.5-1) ...
+Traitement des actions différées (« triggers ») pour ureadahead (0.100.0-19) ...
+Traitement des actions différées (« triggers ») pour systemd (229-4ubuntu19) ...
+Traitement des actions différées (« triggers ») pour libc-bin (2.23-0ubuntu9) ...
+Paramétrage de lxd-client (2.0.10-0ubuntu1~16.04.2) ...
+Paramétrage de lxd (2.0.10-0ubuntu1~16.04.2) ...
+Paramétrage de python3-update-manager (1:16.04.9) ...
+Paramétrage de update-manager-core (1:16.04.9) ...
+Paramétrage de update-notifier-common (3.168.5) ...
+Paramétrage de libgnutls30:amd64 (3.4.10-4ubuntu1.4) ...
+Paramétrage de libgnutls-openssl27:amd64 (3.4.10-4ubuntu1.4) ...
+Paramétrage de libmspack0:amd64 (0.5-1ubuntu0.16.04.1) ...
+Paramétrage de linux-firmware (1.157.12) ...
+update-initramfs: Generating /boot/initrd.img-4.4.0-93-generic
+W: mdadm: /etc/mdadm/mdadm.conf defines no arrays.
+update-initramfs: Generating /boot/initrd.img-4.4.0-92-generic
+W: mdadm: /etc/mdadm/mdadm.conf defines no arrays.
+Paramétrage de snapd (2.27.3) ...
+Installation de la nouvelle version du fichier de configuration /etc/apparmor.d/usr.lib.snapd.snap-confine.real ...
+Paramétrage de grub-legacy-ec2 (0.7.9-233-ge586fe35-0ubuntu1~16.04.1) ...
+debconf: Impossible d'initialiser l'interface : Dialog
+debconf: (La variable TERM n'a pas de valeur, l'interface dialog est donc inutilisable.)
+debconf: Utilisation de l'interface Readline en remplacement
+Searching for GRUB installation directory ... found: /boot/grub
+Searching for default file ... found: /boot/grub/default
+Testing for an existing GRUB menu.lst file ... found: /boot/grub/menu.lst
+Searching for splash image ... none found, skipping ...
+Found kernel: /vmlinuz-4.4.0-92-generic
+Found kernel: /vmlinuz-4.4.0-93-generic
+Found kernel: /vmlinuz-4.4.0-92-generic
+Replacing config file /run/grub/menu.lst with new version
+Updating /boot/grub/menu.lst ... done
+
+Traitement des actions différées (« triggers ») pour libc-bin (2.23-0ubuntu9) ...
++zsh:9> apt-get install -y socat
+Lecture des listes de paquets…
+Construction de l'arbre des dépendances…
+Lecture des informations d'état…
+Les NOUVEAUX paquets suivants seront installés :
+  socat
+0 mis à jour, 1 nouvellement installés, 0 à enlever et 0 non mis à jour.
+Il est nécessaire de prendre 321 ko dans les archives.
+Après cette opération, 941 ko d'espace disque supplémentaires seront utilisés.
+Réception de:1 http://fr.archive.ubuntu.com/ubuntu xenial/universe amd64 socat amd64 1.7.3.1-1 [321 kB]
+debconf: Impossible d'initialiser l'interface : Dialog
+debconf: (La variable TERM n'a pas de valeur, l'interface dialog est donc inutilisable.)
+debconf: Utilisation de l'interface Readline en remplacement
+debconf: Impossible d'initialiser l'interface : Readline
+debconf: (Cette interface a besoin d'un terminal de contrôle.)
+debconf: Utilisation de l'interface Teletype en remplacement
+dpkg-preconfigure: impossible de réouvrir stdin : 
+321 ko réceptionnés en 0s (4 882 ko/s)
+Sélection du paquet socat précédemment désélectionné.
+(Lecture de la base de données... (Lecture de la base de données... 5%(Lecture de la base de données... 10%(Lecture de la base de données... 15%(Lecture de la base de données... 20%(Lecture de la base de données... 25%(Lecture de la base de données... 30%(Lecture de la base de données... 35%(Lecture de la base de données... 40%(Lecture de la base de données... 45%(Lecture de la base de données... 50%(Lecture de la base de données... 55%(Lecture de la base de données... 60%(Lecture de la base de données... 65%(Lecture de la base de données... 70%(Lecture de la base de données... 75%(Lecture de la base de données... 80%(Lecture de la base de données... 85%(Lecture de la base de données... 90%(Lecture de la base de données... 95%(Lecture de la base de données... 100%(Lecture de la base de données... 96861 fichiers et répertoires déjà installés.)
+Préparation du dépaquetage de .../socat_1.7.3.1-1_amd64.deb ...
+Dépaquetage de socat (1.7.3.1-1) ...
+Traitement des actions différées (« triggers ») pour man-db (2.7.5-1) ...
+Paramétrage de socat (1.7.3.1-1) ...
++ for host in '"$IP_M1"' '"$IP_M2"' '"$IP_M3"'
++ echo 'Connection to 10.0.6.100'
+Connection to 10.0.6.100
++ ssh root@10.0.6.100 '
+
+        set -x
+
+        echo "Commands executed on bash by $USER@10.0.6.100"
+
+        apt-get update
+        apt-get upgrade -y
+
+    '
+Commands executed on bash by root@10.0.6.100
++zsh:5> echo 'Commands executed on bash by root@10.0.6.100'
++zsh:7> apt-get update
+Atteint:1 http://fr.archive.ubuntu.com/ubuntu xenial InRelease
+Atteint:2 http://fr.archive.ubuntu.com/ubuntu xenial-updates InRelease
+Réception de:3 http://security.ubuntu.com/ubuntu xenial-security InRelease [102 kB]
+Atteint:4 http://fr.archive.ubuntu.com/ubuntu xenial-backports InRelease
+Réception de:5 http://archive.ubuntu.com/ubuntu xenial-proposed InRelease [253 kB]
+Réception de:6 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 Packages [106 kB]
+Réception de:7 http://archive.ubuntu.com/ubuntu xenial-proposed/main i386 Packages [100 kB]
+Réception de:8 http://archive.ubuntu.com/ubuntu xenial-proposed/main Translation-en [38,5 kB]
+601 ko réceptionnés en 0s (715 ko/s)
+Lecture des listes de paquets…
++zsh:8> apt-get upgrade -y
+Lecture des listes de paquets…
+Construction de l'arbre des dépendances…
+Lecture des informations d'état…
+Calcul de la mise à jour…
+Les paquets suivants seront mis à jour :
+  grub-legacy-ec2 libgnutls-openssl27 libgnutls30 libmspack0 linux-firmware
+  lxd lxd-client python3-update-manager snapd update-manager-core
+  update-notifier-common
+11 mis à jour, 0 nouvellement installés, 0 à enlever et 0 non mis à jour.
+Il est nécessaire de prendre 55,8 Mo dans les archives.
+Après cette opération, 5 297 ko d'espace disque supplémentaires seront utilisés.
+Réception de:1 http://fr.archive.ubuntu.com/ubuntu xenial-updates/main amd64 libmspack0 amd64 0.5-1ubuntu0.16.04.1 [37,0 kB]
+Réception de:2 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 lxd amd64 2.0.10-0ubuntu1~16.04.2 [3 416 kB]
+Réception de:3 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 lxd-client amd64 2.0.10-0ubuntu1~16.04.2 [1 857 kB]
+Réception de:4 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 update-manager-core all 1:16.04.9 [5 330 B]
+Réception de:5 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 python3-update-manager all 1:16.04.9 [31,9 kB]
+Réception de:6 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 update-notifier-common all 3.168.5 [165 kB]
+Réception de:7 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 libgnutls-openssl27 amd64 3.4.10-4ubuntu1.4 [22,0 kB]
+Réception de:8 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 libgnutls30 amd64 3.4.10-4ubuntu1.4 [548 kB]
+Réception de:9 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 linux-firmware all 1.157.12 [38,8 MB]
+Réception de:10 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 snapd amd64 2.27.3 [10,9 MB]
+Réception de:11 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 grub-legacy-ec2 all 0.7.9-233-ge586fe35-0ubuntu1~16.04.1 [28,3 kB]
+debconf: Impossible d'initialiser l'interface : Dialog
+debconf: (La variable TERM n'a pas de valeur, l'interface dialog est donc inutilisable.)
+debconf: Utilisation de l'interface Readline en remplacement
+debconf: Impossible d'initialiser l'interface : Readline
+debconf: (Cette interface a besoin d'un terminal de contrôle.)
+debconf: Utilisation de l'interface Teletype en remplacement
+dpkg-preconfigure: impossible de réouvrir stdin : 
+55,8 Mo réceptionnés en 1s (36,3 Mo/s)
+(Lecture de la base de données... (Lecture de la base de données... 5%(Lecture de la base de données... 10%(Lecture de la base de données... 15%(Lecture de la base de données... 20%(Lecture de la base de données... 25%(Lecture de la base de données... 30%(Lecture de la base de données... 35%(Lecture de la base de données... 40%(Lecture de la base de données... 45%(Lecture de la base de données... 50%(Lecture de la base de données... 55%(Lecture de la base de données... 60%(Lecture de la base de données... 65%(Lecture de la base de données... 70%(Lecture de la base de données... 75%(Lecture de la base de données... 80%(Lecture de la base de données... 85%(Lecture de la base de données... 90%(Lecture de la base de données... 95%(Lecture de la base de données... 100%(Lecture de la base de données... 96854 fichiers et répertoires déjà installés.)
+Préparation du dépaquetage de .../lxd_2.0.10-0ubuntu1~16.04.2_amd64.deb ...
+Warning: Stopping lxd.service, but it can still be activated by:
+  lxd.socket
+Dépaquetage de lxd (2.0.10-0ubuntu1~16.04.2) sur (2.0.10-0ubuntu1~16.04.1) ...
+Warning: Stopping lxd.service, but it can still be activated by:
+  lxd.socket
+Préparation du dépaquetage de .../lxd-client_2.0.10-0ubuntu1~16.04.2_amd64.deb ...
+Dépaquetage de lxd-client (2.0.10-0ubuntu1~16.04.2) sur (2.0.10-0ubuntu1~16.04.1) ...
+Préparation du dépaquetage de .../update-manager-core_1%3a16.04.9_all.deb ...
+Dépaquetage de update-manager-core (1:16.04.9) sur (1:16.04.8) ...
+Préparation du dépaquetage de .../python3-update-manager_1%3a16.04.9_all.deb ...
+Dépaquetage de python3-update-manager (1:16.04.9) sur (1:16.04.8) ...
+Préparation du dépaquetage de .../update-notifier-common_3.168.5_all.deb ...
+Dépaquetage de update-notifier-common (3.168.5) sur (3.168.4) ...
+Préparation du dépaquetage de .../libgnutls-openssl27_3.4.10-4ubuntu1.4_amd64.deb ...
+Dépaquetage de libgnutls-openssl27:amd64 (3.4.10-4ubuntu1.4) sur (3.4.10-4ubuntu1.3) ...
+Préparation du dépaquetage de .../libgnutls30_3.4.10-4ubuntu1.4_amd64.deb ...
+Dépaquetage de libgnutls30:amd64 (3.4.10-4ubuntu1.4) sur (3.4.10-4ubuntu1.3) ...
+Préparation du dépaquetage de .../libmspack0_0.5-1ubuntu0.16.04.1_amd64.deb ...
+Dépaquetage de libmspack0:amd64 (0.5-1ubuntu0.16.04.1) sur (0.5-1) ...
+Préparation du dépaquetage de .../linux-firmware_1.157.12_all.deb ...
+Dépaquetage de linux-firmware (1.157.12) sur (1.157.11) ...
+Préparation du dépaquetage de .../snapd_2.27.3_amd64.deb ...
+Warning: Stopping snapd.service, but it can still be activated by:
+  snapd.socket
+Dépaquetage de snapd (2.27.3) sur (2.26.10) ...
+Préparation du dépaquetage de .../grub-legacy-ec2_0.7.9-233-ge586fe35-0ubuntu1~16.04.1_all.deb ...
+Conservation de « détournement de /usr/sbin/grub-set-default en /usr/sbin/grub-set-default.real par grub-legacy-ec2 »
+Dépaquetage de grub-legacy-ec2 (0.7.9-233-ge586fe35-0ubuntu1~16.04.1) sur (0.7.9-153-g16a7302f-0ubuntu1~16.04.2) ...
+Traitement des actions différées (« triggers ») pour man-db (2.7.5-1) ...
+Traitement des actions différées (« triggers ») pour ureadahead (0.100.0-19) ...
+Traitement des actions différées (« triggers ») pour systemd (229-4ubuntu19) ...
+Traitement des actions différées (« triggers ») pour libc-bin (2.23-0ubuntu9) ...
+Paramétrage de lxd-client (2.0.10-0ubuntu1~16.04.2) ...
+Paramétrage de lxd (2.0.10-0ubuntu1~16.04.2) ...
+Paramétrage de python3-update-manager (1:16.04.9) ...
+Paramétrage de update-manager-core (1:16.04.9) ...
+Paramétrage de update-notifier-common (3.168.5) ...
+Paramétrage de libgnutls30:amd64 (3.4.10-4ubuntu1.4) ...
+Paramétrage de libgnutls-openssl27:amd64 (3.4.10-4ubuntu1.4) ...
+Paramétrage de libmspack0:amd64 (0.5-1ubuntu0.16.04.1) ...
+Paramétrage de linux-firmware (1.157.12) ...
+update-initramfs: Generating /boot/initrd.img-4.4.0-93-generic
+W: mdadm: /etc/mdadm/mdadm.conf defines no arrays.
+update-initramfs: Generating /boot/initrd.img-4.4.0-92-generic
+W: mdadm: /etc/mdadm/mdadm.conf defines no arrays.
+Paramétrage de snapd (2.27.3) ...
+Installation de la nouvelle version du fichier de configuration /etc/apparmor.d/usr.lib.snapd.snap-confine.real ...
+Paramétrage de grub-legacy-ec2 (0.7.9-233-ge586fe35-0ubuntu1~16.04.1) ...
+debconf: Impossible d'initialiser l'interface : Dialog
+debconf: (La variable TERM n'a pas de valeur, l'interface dialog est donc inutilisable.)
+debconf: Utilisation de l'interface Readline en remplacement
+Searching for GRUB installation directory ... found: /boot/grub
+Searching for default file ... found: /boot/grub/default
+Testing for an existing GRUB menu.lst file ... found: /boot/grub/menu.lst
+Searching for splash image ... none found, skipping ...
+Found kernel: /vmlinuz-4.4.0-92-generic
+Found kernel: /vmlinuz-4.4.0-93-generic
+Found kernel: /vmlinuz-4.4.0-92-generic
+Replacing config file /run/grub/menu.lst with new version
+Updating /boot/grub/menu.lst ... done
+
+Traitement des actions différées (« triggers ») pour libc-bin (2.23-0ubuntu9) ...
++ for host in '"$IP_M1"' '"$IP_M2"' '"$IP_M3"'
++ echo 'Connection to 10.0.6.101'
++ ssh root@10.0.6.101 '
+
+        set -x
+
+        echo "Commands executed on bash by $USER@10.0.6.101"
+
+        apt-get update
+        apt-get upgrade -y
+
+    '
+Connection to 10.0.6.101
++zsh:5> echo 'Commands executed on bash by root@10.0.6.101'
+Commands executed on bash by root@10.0.6.101
++zsh:7> apt-get update
+Atteint:1 http://fr.archive.ubuntu.com/ubuntu xenial InRelease
+Réception de:2 http://security.ubuntu.com/ubuntu xenial-security InRelease [102 kB]
+Atteint:3 http://fr.archive.ubuntu.com/ubuntu xenial-updates InRelease
+Atteint:4 http://fr.archive.ubuntu.com/ubuntu xenial-backports InRelease
+Réception de:5 http://archive.ubuntu.com/ubuntu xenial-proposed InRelease [253 kB]
+Réception de:6 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 Packages [106 kB]
+Réception de:7 http://archive.ubuntu.com/ubuntu xenial-proposed/main i386 Packages [100 kB]
+Réception de:8 http://archive.ubuntu.com/ubuntu xenial-proposed/main Translation-en [38,5 kB]
+601 ko réceptionnés en 5s (113 ko/s)
+Lecture des listes de paquets…
++zsh:8> apt-get upgrade -y
+Lecture des listes de paquets…
+Construction de l'arbre des dépendances…
+Lecture des informations d'état…
+Calcul de la mise à jour…
+Les paquets suivants seront mis à jour :
+  grub-legacy-ec2 libgnutls-openssl27 libgnutls30 libmspack0 linux-firmware
+  lxd lxd-client python3-update-manager snapd update-manager-core
+  update-notifier-common
+11 mis à jour, 0 nouvellement installés, 0 à enlever et 0 non mis à jour.
+Il est nécessaire de prendre 55,8 Mo dans les archives.
+Après cette opération, 5 297 ko d'espace disque supplémentaires seront utilisés.
+Réception de:1 http://fr.archive.ubuntu.com/ubuntu xenial-updates/main amd64 libmspack0 amd64 0.5-1ubuntu0.16.04.1 [37,0 kB]
+Réception de:2 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 lxd amd64 2.0.10-0ubuntu1~16.04.2 [3 416 kB]
+Réception de:3 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 lxd-client amd64 2.0.10-0ubuntu1~16.04.2 [1 857 kB]
+Réception de:4 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 update-manager-core all 1:16.04.9 [5 330 B]
+Réception de:5 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 python3-update-manager all 1:16.04.9 [31,9 kB]
+Réception de:6 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 update-notifier-common all 3.168.5 [165 kB]
+Réception de:7 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 libgnutls-openssl27 amd64 3.4.10-4ubuntu1.4 [22,0 kB]
+Réception de:8 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 libgnutls30 amd64 3.4.10-4ubuntu1.4 [548 kB]
+Réception de:9 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 linux-firmware all 1.157.12 [38,8 MB]
+Réception de:10 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 snapd amd64 2.27.3 [10,9 MB]
+Réception de:11 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 grub-legacy-ec2 all 0.7.9-233-ge586fe35-0ubuntu1~16.04.1 [28,3 kB]
+debconf: Impossible d'initialiser l'interface : Dialog
+debconf: (La variable TERM n'a pas de valeur, l'interface dialog est donc inutilisable.)
+debconf: Utilisation de l'interface Readline en remplacement
+debconf: Impossible d'initialiser l'interface : Readline
+debconf: (Cette interface a besoin d'un terminal de contrôle.)
+debconf: Utilisation de l'interface Teletype en remplacement
+dpkg-preconfigure: impossible de réouvrir stdin : 
+55,8 Mo réceptionnés en 0s (56,4 Mo/s)
+(Lecture de la base de données... (Lecture de la base de données... 5%(Lecture de la base de données... 10%(Lecture de la base de données... 15%(Lecture de la base de données... 20%(Lecture de la base de données... 25%(Lecture de la base de données... 30%(Lecture de la base de données... 35%(Lecture de la base de données... 40%(Lecture de la base de données... 45%(Lecture de la base de données... 50%(Lecture de la base de données... 55%(Lecture de la base de données... 60%(Lecture de la base de données... 65%(Lecture de la base de données... 70%(Lecture de la base de données... 75%(Lecture de la base de données... 80%(Lecture de la base de données... 85%(Lecture de la base de données... 90%(Lecture de la base de données... 95%(Lecture de la base de données... 100%(Lecture de la base de données... 96854 fichiers et répertoires déjà installés.)
+Préparation du dépaquetage de .../lxd_2.0.10-0ubuntu1~16.04.2_amd64.deb ...
+Warning: Stopping lxd.service, but it can still be activated by:
+  lxd.socket
+Dépaquetage de lxd (2.0.10-0ubuntu1~16.04.2) sur (2.0.10-0ubuntu1~16.04.1) ...
+Warning: Stopping lxd.service, but it can still be activated by:
+  lxd.socket
+Préparation du dépaquetage de .../lxd-client_2.0.10-0ubuntu1~16.04.2_amd64.deb ...
+Dépaquetage de lxd-client (2.0.10-0ubuntu1~16.04.2) sur (2.0.10-0ubuntu1~16.04.1) ...
+Préparation du dépaquetage de .../update-manager-core_1%3a16.04.9_all.deb ...
+Dépaquetage de update-manager-core (1:16.04.9) sur (1:16.04.8) ...
+Préparation du dépaquetage de .../python3-update-manager_1%3a16.04.9_all.deb ...
+Dépaquetage de python3-update-manager (1:16.04.9) sur (1:16.04.8) ...
+Préparation du dépaquetage de .../update-notifier-common_3.168.5_all.deb ...
+Dépaquetage de update-notifier-common (3.168.5) sur (3.168.4) ...
+Préparation du dépaquetage de .../libgnutls-openssl27_3.4.10-4ubuntu1.4_amd64.deb ...
+Dépaquetage de libgnutls-openssl27:amd64 (3.4.10-4ubuntu1.4) sur (3.4.10-4ubuntu1.3) ...
+Préparation du dépaquetage de .../libgnutls30_3.4.10-4ubuntu1.4_amd64.deb ...
+Dépaquetage de libgnutls30:amd64 (3.4.10-4ubuntu1.4) sur (3.4.10-4ubuntu1.3) ...
+Préparation du dépaquetage de .../libmspack0_0.5-1ubuntu0.16.04.1_amd64.deb ...
+Dépaquetage de libmspack0:amd64 (0.5-1ubuntu0.16.04.1) sur (0.5-1) ...
+Préparation du dépaquetage de .../linux-firmware_1.157.12_all.deb ...
+Dépaquetage de linux-firmware (1.157.12) sur (1.157.11) ...
+Préparation du dépaquetage de .../snapd_2.27.3_amd64.deb ...
+Warning: Stopping snapd.service, but it can still be activated by:
+  snapd.socket
+Dépaquetage de snapd (2.27.3) sur (2.26.10) ...
+Préparation du dépaquetage de .../grub-legacy-ec2_0.7.9-233-ge586fe35-0ubuntu1~16.04.1_all.deb ...
+Conservation de « détournement de /usr/sbin/grub-set-default en /usr/sbin/grub-set-default.real par grub-legacy-ec2 »
+Dépaquetage de grub-legacy-ec2 (0.7.9-233-ge586fe35-0ubuntu1~16.04.1) sur (0.7.9-153-g16a7302f-0ubuntu1~16.04.2) ...
+Traitement des actions différées (« triggers ») pour man-db (2.7.5-1) ...
+Traitement des actions différées (« triggers ») pour ureadahead (0.100.0-19) ...
+Traitement des actions différées (« triggers ») pour systemd (229-4ubuntu19) ...
+Traitement des actions différées (« triggers ») pour libc-bin (2.23-0ubuntu9) ...
+Paramétrage de lxd-client (2.0.10-0ubuntu1~16.04.2) ...
+Paramétrage de lxd (2.0.10-0ubuntu1~16.04.2) ...
+Paramétrage de python3-update-manager (1:16.04.9) ...
+Paramétrage de update-manager-core (1:16.04.9) ...
+Paramétrage de update-notifier-common (3.168.5) ...
+Paramétrage de libgnutls30:amd64 (3.4.10-4ubuntu1.4) ...
+Paramétrage de libgnutls-openssl27:amd64 (3.4.10-4ubuntu1.4) ...
+Paramétrage de libmspack0:amd64 (0.5-1ubuntu0.16.04.1) ...
+Paramétrage de linux-firmware (1.157.12) ...
+update-initramfs: Generating /boot/initrd.img-4.4.0-93-generic
+W: mdadm: /etc/mdadm/mdadm.conf defines no arrays.
+update-initramfs: Generating /boot/initrd.img-4.4.0-92-generic
+W: mdadm: /etc/mdadm/mdadm.conf defines no arrays.
+Paramétrage de snapd (2.27.3) ...
+Installation de la nouvelle version du fichier de configuration /etc/apparmor.d/usr.lib.snapd.snap-confine.real ...
+Paramétrage de grub-legacy-ec2 (0.7.9-233-ge586fe35-0ubuntu1~16.04.1) ...
+debconf: Impossible d'initialiser l'interface : Dialog
+debconf: (La variable TERM n'a pas de valeur, l'interface dialog est donc inutilisable.)
+debconf: Utilisation de l'interface Readline en remplacement
+Searching for GRUB installation directory ... found: /boot/grub
+Searching for default file ... found: /boot/grub/default
+Testing for an existing GRUB menu.lst file ... found: /boot/grub/menu.lst
+Searching for splash image ... none found, skipping ...
+Found kernel: /vmlinuz-4.4.0-92-generic
+Found kernel: /vmlinuz-4.4.0-93-generic
+Found kernel: /vmlinuz-4.4.0-92-generic
+Replacing config file /run/grub/menu.lst with new version
+Updating /boot/grub/menu.lst ... done
+
+Traitement des actions différées (« triggers ») pour libc-bin (2.23-0ubuntu9) ...
++ for host in '"$IP_M1"' '"$IP_M2"' '"$IP_M3"'
++ echo 'Connection to 10.0.6.102'
+Connection to 10.0.6.102
++ ssh root@10.0.6.102 '
+
+        set -x
+
+        echo "Commands executed on bash by $USER@10.0.6.102"
+
+        apt-get update
+        apt-get upgrade -y
+
+    '
++zsh:5> echo 'Commands executed on bash by root@10.0.6.102'
+Commands executed on bash by root@10.0.6.102
++zsh:7> apt-get update
+Atteint:1 http://fr.archive.ubuntu.com/ubuntu xenial InRelease
+Atteint:2 http://fr.archive.ubuntu.com/ubuntu xenial-updates InRelease
+Réception de:3 http://security.ubuntu.com/ubuntu xenial-security InRelease [102 kB]
+Atteint:4 http://fr.archive.ubuntu.com/ubuntu xenial-backports InRelease
+Réception de:5 http://archive.ubuntu.com/ubuntu xenial-proposed InRelease [253 kB]
+Réception de:6 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 Packages [106 kB]
+Réception de:7 http://archive.ubuntu.com/ubuntu xenial-proposed/main i386 Packages [100 kB]
+Réception de:8 http://archive.ubuntu.com/ubuntu xenial-proposed/main Translation-en [38,5 kB]
+601 ko réceptionnés en 5s (102 ko/s)
+Lecture des listes de paquets…
++zsh:8> apt-get upgrade -y
+Lecture des listes de paquets…
+Construction de l'arbre des dépendances…
+Lecture des informations d'état…
+Calcul de la mise à jour…
+Les paquets suivants seront mis à jour :
+  grub-legacy-ec2 libgnutls-openssl27 libgnutls30 libmspack0 linux-firmware
+  lxd lxd-client python3-update-manager snapd update-manager-core
+  update-notifier-common
+11 mis à jour, 0 nouvellement installés, 0 à enlever et 0 non mis à jour.
+Il est nécessaire de prendre 55,8 Mo dans les archives.
+Après cette opération, 5 297 ko d'espace disque supplémentaires seront utilisés.
+Réception de:1 http://fr.archive.ubuntu.com/ubuntu xenial-updates/main amd64 libmspack0 amd64 0.5-1ubuntu0.16.04.1 [37,0 kB]
+Réception de:2 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 lxd amd64 2.0.10-0ubuntu1~16.04.2 [3 416 kB]
+Réception de:3 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 lxd-client amd64 2.0.10-0ubuntu1~16.04.2 [1 857 kB]
+Réception de:4 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 update-manager-core all 1:16.04.9 [5 330 B]
+Réception de:5 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 python3-update-manager all 1:16.04.9 [31,9 kB]
+Réception de:6 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 update-notifier-common all 3.168.5 [165 kB]
+Réception de:7 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 libgnutls-openssl27 amd64 3.4.10-4ubuntu1.4 [22,0 kB]
+Réception de:8 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 libgnutls30 amd64 3.4.10-4ubuntu1.4 [548 kB]
+Réception de:9 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 linux-firmware all 1.157.12 [38,8 MB]
+Réception de:10 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 snapd amd64 2.27.3 [10,9 MB]
+Réception de:11 http://archive.ubuntu.com/ubuntu xenial-proposed/main amd64 grub-legacy-ec2 all 0.7.9-233-ge586fe35-0ubuntu1~16.04.1 [28,3 kB]
+debconf: Impossible d'initialiser l'interface : Dialog
+debconf: (La variable TERM n'a pas de valeur, l'interface dialog est donc inutilisable.)
+debconf: Utilisation de l'interface Readline en remplacement
+debconf: Impossible d'initialiser l'interface : Readline
+debconf: (Cette interface a besoin d'un terminal de contrôle.)
+debconf: Utilisation de l'interface Teletype en remplacement
+dpkg-preconfigure: impossible de réouvrir stdin : 
+55,8 Mo réceptionnés en 1s (55,0 Mo/s)
+(Lecture de la base de données... (Lecture de la base de données... 5%(Lecture de la base de données... 10%(Lecture de la base de données... 15%(Lecture de la base de données... 20%(Lecture de la base de données... 25%(Lecture de la base de données... 30%(Lecture de la base de données... 35%(Lecture de la base de données... 40%(Lecture de la base de données... 45%(Lecture de la base de données... 50%(Lecture de la base de données... 55%(Lecture de la base de données... 60%(Lecture de la base de données... 65%(Lecture de la base de données... 70%(Lecture de la base de données... 75%(Lecture de la base de données... 80%(Lecture de la base de données... 85%(Lecture de la base de données... 90%(Lecture de la base de données... 95%(Lecture de la base de données... 100%(Lecture de la base de données... 96854 fichiers et répertoires déjà installés.)
+Préparation du dépaquetage de .../lxd_2.0.10-0ubuntu1~16.04.2_amd64.deb ...
+Warning: Stopping lxd.service, but it can still be activated by:
+  lxd.socket
+Dépaquetage de lxd (2.0.10-0ubuntu1~16.04.2) sur (2.0.10-0ubuntu1~16.04.1) ...
+Warning: Stopping lxd.service, but it can still be activated by:
+  lxd.socket
+Préparation du dépaquetage de .../lxd-client_2.0.10-0ubuntu1~16.04.2_amd64.deb ...
+Dépaquetage de lxd-client (2.0.10-0ubuntu1~16.04.2) sur (2.0.10-0ubuntu1~16.04.1) ...
+Préparation du dépaquetage de .../update-manager-core_1%3a16.04.9_all.deb ...
+Dépaquetage de update-manager-core (1:16.04.9) sur (1:16.04.8) ...
+Préparation du dépaquetage de .../python3-update-manager_1%3a16.04.9_all.deb ...
+Dépaquetage de python3-update-manager (1:16.04.9) sur (1:16.04.8) ...
+Préparation du dépaquetage de .../update-notifier-common_3.168.5_all.deb ...
+Dépaquetage de update-notifier-common (3.168.5) sur (3.168.4) ...
+Préparation du dépaquetage de .../libgnutls-openssl27_3.4.10-4ubuntu1.4_amd64.deb ...
+Dépaquetage de libgnutls-openssl27:amd64 (3.4.10-4ubuntu1.4) sur (3.4.10-4ubuntu1.3) ...
+Préparation du dépaquetage de .../libgnutls30_3.4.10-4ubuntu1.4_amd64.deb ...
+Dépaquetage de libgnutls30:amd64 (3.4.10-4ubuntu1.4) sur (3.4.10-4ubuntu1.3) ...
+Préparation du dépaquetage de .../libmspack0_0.5-1ubuntu0.16.04.1_amd64.deb ...
+Dépaquetage de libmspack0:amd64 (0.5-1ubuntu0.16.04.1) sur (0.5-1) ...
+Préparation du dépaquetage de .../linux-firmware_1.157.12_all.deb ...
+Dépaquetage de linux-firmware (1.157.12) sur (1.157.11) ...
+Préparation du dépaquetage de .../snapd_2.27.3_amd64.deb ...
+Warning: Stopping snapd.service, but it can still be activated by:
+  snapd.socket
+Dépaquetage de snapd (2.27.3) sur (2.26.10) ...
+Préparation du dépaquetage de .../grub-legacy-ec2_0.7.9-233-ge586fe35-0ubuntu1~16.04.1_all.deb ...
+Conservation de « détournement de /usr/sbin/grub-set-default en /usr/sbin/grub-set-default.real par grub-legacy-ec2 »
+Dépaquetage de grub-legacy-ec2 (0.7.9-233-ge586fe35-0ubuntu1~16.04.1) sur (0.7.9-153-g16a7302f-0ubuntu1~16.04.2) ...
+Traitement des actions différées (« triggers ») pour man-db (2.7.5-1) ...
+Traitement des actions différées (« triggers ») pour ureadahead (0.100.0-19) ...
+Traitement des actions différées (« triggers ») pour systemd (229-4ubuntu19) ...
+Traitement des actions différées (« triggers ») pour libc-bin (2.23-0ubuntu9) ...
+Paramétrage de lxd-client (2.0.10-0ubuntu1~16.04.2) ...
+Paramétrage de lxd (2.0.10-0ubuntu1~16.04.2) ...
+Paramétrage de python3-update-manager (1:16.04.9) ...
+Paramétrage de update-manager-core (1:16.04.9) ...
+Paramétrage de update-notifier-common (3.168.5) ...
+Paramétrage de libgnutls30:amd64 (3.4.10-4ubuntu1.4) ...
+Paramétrage de libgnutls-openssl27:amd64 (3.4.10-4ubuntu1.4) ...
+Paramétrage de libmspack0:amd64 (0.5-1ubuntu0.16.04.1) ...
+Paramétrage de linux-firmware (1.157.12) ...
+update-initramfs: Generating /boot/initrd.img-4.4.0-93-generic
+W: mdadm: /etc/mdadm/mdadm.conf defines no arrays.
+update-initramfs: Generating /boot/initrd.img-4.4.0-92-generic
+W: mdadm: /etc/mdadm/mdadm.conf defines no arrays.
+Paramétrage de snapd (2.27.3) ...
+Installation de la nouvelle version du fichier de configuration /etc/apparmor.d/usr.lib.snapd.snap-confine.real ...
+Paramétrage de grub-legacy-ec2 (0.7.9-233-ge586fe35-0ubuntu1~16.04.1) ...
+debconf: Impossible d'initialiser l'interface : Dialog
+debconf: (La variable TERM n'a pas de valeur, l'interface dialog est donc inutilisable.)
+debconf: Utilisation de l'interface Readline en remplacement
+Searching for GRUB installation directory ... found: /boot/grub
+Searching for default file ... found: /boot/grub/default
+Testing for an existing GRUB menu.lst file ... found: /boot/grub/menu.lst
+Searching for splash image ... none found, skipping ...
+Found kernel: /vmlinuz-4.4.0-92-generic
+Found kernel: /vmlinuz-4.4.0-93-generic
+Found kernel: /vmlinuz-4.4.0-92-generic
+Replacing config file /run/grub/menu.lst with new version
+Updating /boot/grub/menu.lst ... done
+
+Traitement des actions différées (« triggers ») pour libc-bin (2.23-0ubuntu9) ...

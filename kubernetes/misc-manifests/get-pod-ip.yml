@@ -1,0 +1,87 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: keycloak
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: keycloak
+    spec:
+      containers:
+        - name: keycloak
+          image: docker.bbuzcloud.com/keycloak-ha-beebuzziness:1.0
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+            - containerPort: 8443
+            - containerPort: 45700
+            - containerPort: 7600
+            - containerPort: 57600
+            - containerPort: 55200
+            - containerPort: 45688
+            - containerPort: 54200
+            - containerPort: 23364
+            - containerPort: 23364
+            - containerPort: 4712
+            - containerPort: 4713
+          env:
+            - name: KEYSTORE_PASSWORD
+              value: azerty
+            - name: KEYCLOAK_USER
+              value: "keycloak-admin"
+            - name: KEYCLOAK_PASSWORD
+              value: "keycloak"
+            - name: POSTGRES_DATABASE
+              value: "keycloak"
+            - name: POSTGRES_USER
+              value: "keycloak"
+            - name: POSTGRES_PASSWORD
+              value: "keycloak"
+            - name: POSTGRES_PORT_5432_TCP_ADDR
+              value: "10.0.4.230"
+            - name: POSTGRES_PORT_5432_TCP_PORT
+              value: "5432"
+            - name: MY_POD_NAME                          # #######################
+              valueFrom:                                 # #######################
+                fieldRef:
+                  fieldPath: metadata.name               # This block allow to get informations in env vars
+            - name: MY_POD_NAMESPACE
+              valueFrom:                                 # #######################
+                fieldRef:                                # #######################
+                  fieldPath: metadata.namespace
+            - name: MY_POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          args:
+            - -b=0.0.0.0                          # Bind address
+            - -bmanagement=0.0.0.0                # Management address
+            - -u 230.0.0.4                        # Multicast address, used for synchronization
+            - --server-config=standalone-ha.xml   # Server configuration name
+
+
+          readinessProbe:
+            httpGet:
+              path: /auth
+              port: 8080
+            initialDelaySeconds: 40
+            periodSeconds: 20
+            timeoutSeconds: 2
+            failureThreshold: 4
+            successThreshold: 1
+
+          livenessProbe:
+            httpGet:
+              path: /auth
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 2
+            successThreshold: 1
+
+      imagePullSecrets:
+        - name: registry-secret
+

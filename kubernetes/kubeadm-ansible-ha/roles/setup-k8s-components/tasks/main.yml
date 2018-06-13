@@ -1,0 +1,24 @@
+---
+# tasks file for install-kube-components
+- name: Install apt-transport-https
+  apt:
+    name: apt-transport-https
+    state: latest
+    update_cache: true
+
+- name: Add k8s repository key
+  apt_key:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    state: present
+
+- name: Add k8s apt repository
+  apt_repository:
+    repo: 'deb http://apt.kubernetes.io/ kubernetes-xenial main'
+    filename: kubernetes
+    state: present
+
+- name: Install packages
+  apt:
+    name: '{{ kubeadm_packages | list }}'
+    state: present
+    update_cache: true

@@ -1,0 +1,56 @@
+---
+# tasks file for init-source-controller
+- name: Template kubeadm configuration
+  template:
+    src: kubeadm-init.yaml
+    dest: /root/kubeadm-init.yaml
+
+- name: Ensure kubelet service is started
+  systemd:
+    name: kubelet
+    state: started
+
+- name: Ensure keepalived service is up
+  systemd:
+    name: keepalived
+    state: started
+
+- name: Initialize primary controller -- This task may take a LOOONG time :) --
+  shell:
+    cmd: "kubeadm init --skip-preflight-checks --config=/root/kubeadm-init.yaml"
+    creates: /etc/kubernetes/pki/sa.key
+  ignore_errors: true
+
+- name: Ensure keepalived service is up
+  systemd:
+    name: keepalived
+    state: started
+
+- name: Ensure kubelet service is up
+  systemd:
+    name: kubelet
+    state: started
+
+- name: Create token
+  shell:
+    cmd: "kubeadm token create {{ kubeadm_token }} --ttl {{ kubeadm_token_ttl }}"
+  ignore_errors: true # errors can be thrown if token already exist
+
+- name: Ensure root has an .kube directory for configuration
+  file:
+    path: /root/.kube
+    state: directory
+    recurse: yes
+
+- name: Copy admin config to root home
+  copy:
+    src: /etc/kubernetes/admin.conf
+    dest: /root/.kube/config
+    remote_src: yes
+
+- name: Use of virtual address in root config
+  replace:
+    dest: /root/.kube/config
+    regexp: 'server: https://.+$'
+    replace: 'server: https://{{ keepalived_virtualaddress }}:6443'
+

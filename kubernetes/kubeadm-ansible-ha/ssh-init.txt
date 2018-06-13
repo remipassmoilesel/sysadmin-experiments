@@ -1,0 +1,5 @@
+
+192.168.0.100   ##no-hostname##     root    azerty  ~/.ssh/id_rsa
+192.168.0.101   ##no-hostname##     root    azerty  ~/.ssh/id_rsa
+192.168.0.102   ##no-hostname##     root    azerty  ~/.ssh/id_rsa
+192.168.0.113   ##no-hostname##     root    azerty  ~/.ssh/id_rsa

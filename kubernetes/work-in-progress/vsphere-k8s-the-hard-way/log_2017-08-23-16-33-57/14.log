@@ -1,0 +1,701 @@
++ source config.sh
+++ export KUBERNETES_PUBLIC_ADDRESS=10.0.6.100
+++ KUBERNETES_PUBLIC_ADDRESS=10.0.6.100
+++ export IP_M1=10.0.6.100
+++ IP_M1=10.0.6.100
+++ export IP_M2=10.0.6.101
+++ IP_M2=10.0.6.101
+++ export IP_M3=10.0.6.102
+++ IP_M3=10.0.6.102
+++ export HOST_M1=ubuntu16-k6-master1.kubernetes
+++ HOST_M1=ubuntu16-k6-master1.kubernetes
+++ export HOST_M2=ubuntu16-k6-master2.kubernetes
+++ HOST_M2=ubuntu16-k6-master2.kubernetes
+++ export HOST_M3=ubuntu16-k6-master3.kubernetes
+++ HOST_M3=ubuntu16-k6-master3.kubernetes
+++ export IP_W1=10.0.6.110
+++ IP_W1=10.0.6.110
+++ export IP_W2=10.0.6.111
+++ IP_W2=10.0.6.111
+++ export IP_W3=10.0.6.112
+++ IP_W3=10.0.6.112
+++ export HOST_W1=ubuntu16-k6-node1.kubernetes
+++ HOST_W1=ubuntu16-k6-node1.kubernetes
+++ export HOST_W2=ubuntu16-k6-node2.kubernetes
+++ HOST_W2=ubuntu16-k6-node2.kubernetes
+++ export HOST_W3=ubuntu16-k6-node3.kubernetes
+++ HOST_W3=ubuntu16-k6-node3.kubernetes
+++ export CLUSTER_SERVICE_IP_RANGE=10.5.0.0/24
+++ CLUSTER_SERVICE_IP_RANGE=10.5.0.0/24
+++ export CLUSTER_CIDR=10.244.0.0/16
+++ CLUSTER_CIDR=10.244.0.0/16
+++ export CLUSTER_DNS=10.32.0.1
+++ CLUSTER_DNS=10.32.0.1
+++ export DOWNLOAD_DEPENDENCIES=true
+++ DOWNLOAD_DEPENDENCIES=true
+++ export CERT_DIR_PATH=certs
+++ CERT_DIR_PATH=certs
+++ export TOKEN_DIR_PATH=token
+++ TOKEN_DIR_PATH=token
+++ export CA_DIR_PATH=ca
+++ CA_DIR_PATH=ca
+++ export CONFIG_DIR_PATH=configs
+++ CONFIG_DIR_PATH=configs
++ for host in '"$IP_M1"' '"$IP_M2"' '"$IP_M3"'
++ echo 'Connection to 10.0.6.100'
+Connection to 10.0.6.100
++ ssh root@10.0.6.100 '
+
+        set -x
+
+        echo "Commands executed on bash by $USER@$HOSTNAME"
+
+        # create master directory
+         mkdir -p /var/lib/kubernetes/
+
+        # move token and keys
+        cd ~
+         mv token.csv /var/lib/kubernetes/
+         mv ca.pem ca-key.pem kubernetes-key.pem kubernetes.pem /var/lib/kubernetes/
+
+        # download kubernetes
+        if [ true = true ]; then
+          wget https://storage.googleapis.com/kubernetes-release/release/v1.7.0/bin/linux/amd64/kube-apiserver -q
+          wget https://storage.googleapis.com/kubernetes-release/release/v1.7.0/bin/linux/amd64/kube-controller-manager -q
+          wget https://storage.googleapis.com/kubernetes-release/release/v1.7.0/bin/linux/amd64/kube-scheduler -q
+          wget https://storage.googleapis.com/kubernetes-release/release/v1.7.0/bin/linux/amd64/kubectl -q
+        fi
+
+        # install binaries
+        chmod +x kube-apiserver kube-controller-manager kube-scheduler kubectl
+         mv kube-apiserver kube-controller-manager kube-scheduler kubectl /usr/bin/
+
+        # create system file for kube-api
+        INTERNAL_IP=$(ifconfig | grep -Eo '\''inet (adr:)?([0-9]*\.){3}[0-9]*'\'' | grep -Eo '\''([0-9]*\.){3}[0-9]*'\'' | grep -v '\''127.0.0.1'\'')
+
+        cat > kube-apiserver.service <<EOF
+[Unit]
+Description=Kubernetes API Server
+Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+
+[Service]
+ExecStart=/usr/bin/kube-apiserver \\
+  --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota \\
+  --advertise-address=${INTERNAL_IP} \\
+  --allow-privileged=true \\
+  --apiserver-count=3 \\
+  --audit-log-maxage=30 \\
+  --audit-log-maxbackup=3 \\
+  --audit-log-maxsize=100 \\
+  --audit-log-path=/var/lib/audit.log \\
+  --authorization-mode=RBAC \\
+  --bind-address=0.0.0.0 \\
+  --client-ca-file=/var/lib/kubernetes/ca.pem \\
+  --enable-swagger-ui=true \\
+  --etcd-cafile=/var/lib/kubernetes/ca.pem \\
+  --etcd-certfile=/var/lib/kubernetes/kubernetes.pem \\
+  --etcd-keyfile=/var/lib/kubernetes/kubernetes-key.pem \\
+  --etcd-servers=https://10.0.6.100:2379,https://10.0.6.101:2379,https://10.0.6.102:2379 \\
+  --event-ttl=1h \\
+  --experimental-bootstrap-token-auth \\
+  --insecure-bind-address=0.0.0.0 \\
+  --kubelet-certificate-authority=/var/lib/kubernetes/ca.pem \\
+  --kubelet-client-certificate=/var/lib/kubernetes/kubernetes.pem \\
+  --kubelet-client-key=/var/lib/kubernetes/kubernetes-key.pem \\
+  --kubelet-https=true \\
+  --runtime-config=rbac.authorization.k8s.io/v1alpha1 \\
+  --service-account-key-file=/var/lib/kubernetes/ca-key.pem \\
+  --service-cluster-ip-range=10.5.0.0/24 \\
+  --service-node-port-range=30000-32767 \\
+  --tls-cert-file=/var/lib/kubernetes/kubernetes.pem \\
+  --tls-private-key-file=/var/lib/kubernetes/kubernetes-key.pem \\
+  --token-auth-file=/var/lib/kubernetes/token.csv \\
+  --v=2
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+        # move and enable service
+         mv kube-apiserver.service /etc/systemd/system/
+         systemctl daemon-reload
+         systemctl enable kube-apiserver
+         systemctl start kube-apiserver
+         systemctl status kube-apiserver --no-pager
+
+        # create file for k8s controller manager
+
+        cat > kube-controller-manager.service <<EOF
+[Unit]
+Description=Kubernetes Controller Manager
+Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+
+[Service]
+ExecStart=/usr/bin/kube-controller-manager \\
+  --address=0.0.0.0 \\
+  --allocate-node-cidrs=true \\
+  --cluster-cidr=10.244.0.0/16 \\
+  --cluster-name=kubernetes \\
+  --cluster-signing-cert-file=/var/lib/kubernetes/ca.pem \\
+  --cluster-signing-key-file=/var/lib/kubernetes/ca-key.pem \\
+  --leader-elect=true \\
+  --master=http://${INTERNAL_IP}:8080 \\
+  --root-ca-file=/var/lib/kubernetes/ca.pem \\
+  --service-account-private-key-file=/var/lib/kubernetes/ca-key.pem \\
+  --service-cluster-ip-range=10.5.0.0/24 \\
+  --v=2
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+        # enable service
+         mv kube-controller-manager.service /etc/systemd/system/
+         systemctl daemon-reload
+         systemctl enable kube-controller-manager
+         systemctl start kube-controller-manager
+         systemctl status kube-controller-manager --no-pager
+
+        # create service for scheduler
+        cat > kube-scheduler.service <<EOF
+[Unit]
+Description=Kubernetes Scheduler
+Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+
+[Service]
+ExecStart=/usr/bin/kube-scheduler \\
+  --leader-elect=true \\
+  --master=http://${INTERNAL_IP}:8080 \\
+  --v=2
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+        # move and enable service
+         mv kube-scheduler.service /etc/systemd/system/
+         systemctl daemon-reload
+         systemctl enable kube-scheduler
+         systemctl start kube-scheduler
+         systemctl status kube-scheduler --no-pager
+
+    '
+Commands executed on bash by root@
++zsh:5> echo 'Commands executed on bash by root@'
++zsh:8> mkdir -p /var/lib/kubernetes/
++zsh:11> cd /root
++zsh:12> mv token.csv /var/lib/kubernetes/
++zsh:13> mv ca.pem ca-key.pem kubernetes-key.pem kubernetes.pem /var/lib/kubernetes/
++zsh:16> [ true '=' true ']'
++zsh:17> wget https://storage.googleapis.com/kubernetes-release/release/v1.7.0/bin/linux/amd64/kube-apiserver -q
++zsh:18> wget https://storage.googleapis.com/kubernetes-release/release/v1.7.0/bin/linux/amd64/kube-controller-manager -q
++zsh:19> wget https://storage.googleapis.com/kubernetes-release/release/v1.7.0/bin/linux/amd64/kube-scheduler -q
++zsh:20> wget https://storage.googleapis.com/kubernetes-release/release/v1.7.0/bin/linux/amd64/kubectl -q
++zsh:24> chmod +x kube-apiserver kube-controller-manager kube-scheduler kubectl
++zsh:25> mv kube-apiserver kube-controller-manager kube-scheduler kubectl /usr/bin/
++zsh:28> INTERNAL_IP=+zsh:28> ifconfig
++zsh:28> INTERNAL_IP=+zsh:28> grep -Eo 'inet (adr:)?([0-9]*\.){3}[0-9]*'
++zsh:28> INTERNAL_IP=+zsh:28> grep -Eo '([0-9]*\.){3}[0-9]*'
++zsh:28> INTERNAL_IP=+zsh:28> grep -v 127.0.0.1
++zsh:28> INTERNAL_IP=10.0.6.100 
++zsh:30> cat
++zsh:76> mv kube-apiserver.service /etc/systemd/system/
++zsh:77> systemctl daemon-reload
++zsh:78> systemctl enable kube-apiserver
+Created symlink from /etc/systemd/system/multi-user.target.wants/kube-apiserver.service to /etc/systemd/system/kube-apiserver.service.
++zsh:79> systemctl start kube-apiserver
++zsh:80> systemctl status kube-apiserver --no-pager
+● kube-apiserver.service - Kubernetes API Server
+   Loaded: loaded (/etc/systemd/system/kube-apiserver.service; enabled; vendor preset: enabled)
+   Active: active (running) since mer. 2017-08-23 16:37:30 CEST; 18ms ago
+     Docs: https://github.com/GoogleCloudPlatform/kubernetes
+ Main PID: 17434 (kube-apiserver)
+    Tasks: 4
+   Memory: 4.5M
+      CPU: 16ms
+   CGroup: /system.slice/kube-apiserver.service
+           └─17434 /usr/bin/kube-apiserver --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota --advertise-address=10.0.6.100 --allow-privileged=true --apiserver-count=3 --audit-log-maxage=30 --audit-log-maxbackup=3 --audit-log-maxsize=100 --audit-log-path=/var/lib/audit.log --authorization-mode=RBAC --bind-address=0.0.0.0 --client-ca-file=/var/lib/kubernetes/ca.pem --enable-swagger-ui=true --etcd-cafile=/var/lib/kubernetes/ca.pem --etcd-certfile=/var/lib/kubernetes/kubernetes.pem --etcd-keyfile=/var/lib/kubernetes/kubernetes-key.pem --etcd-servers=https://10.0.6.100:2379,https://10.0.6.101:2379,https://10.0.6.102:2379 --event-ttl=1h --experimental-bootstrap-token-auth --insecure-bind-address=0.0.0.0 --kubelet-certificate-authority=/var/lib/kubernetes/ca.pem --kubelet-client-certificate=/var/lib/kubernetes/kubernetes.pem --kubelet-client-key=/var/lib/kubernetes/kubernetes-key.pem --kubelet-https=true --runtime-config=rbac.authorization.k8s.io/v1alpha1 --service-account-key-file=/var/lib/kubernetes/ca-key.pem --service-cluster-ip-range=10.5.0.0/24 --service-node-port-range=30000-32767 --tls-cert-file=/var/lib/kubernetes/kubernetes.pem --tls-private-key-file=/var/lib/kubernetes/kubernetes-key.pem --token-auth-file=/var/lib/kubernetes/token.csv --v=2
+
+août 23 16:37:30 ubuntu16-k6-master1.kubernetes systemd[1]: Started Kubernetes API Server.
++zsh:84> cat
++zsh:111> mv kube-controller-manager.service /etc/systemd/system/
++zsh:112> systemctl daemon-reload
++zsh:113> systemctl enable kube-controller-manager
+Created symlink from /etc/systemd/system/multi-user.target.wants/kube-controller-manager.service to /etc/systemd/system/kube-controller-manager.service.
++zsh:114> systemctl start kube-controller-manager
++zsh:115> systemctl status kube-controller-manager --no-pager
+● kube-controller-manager.service - Kubernetes Controller Manager
+   Loaded: loaded (/etc/systemd/system/kube-controller-manager.service; enabled; vendor preset: enabled)
+   Active: active (running) since mer. 2017-08-23 16:37:30 CEST; 22ms ago
+     Docs: https://github.com/GoogleCloudPlatform/kubernetes
+ Main PID: 17474 (kube-controller)
+    Tasks: 4
+   Memory: 3.4M
+      CPU: 13ms
+   CGroup: /system.slice/kube-controller-manager.service
+           └─17474 /usr/bin/kube-controller-manager --address=0.0.0.0 --allocate-node-cidrs=true --cluster-cidr=10.244.0.0/16 --cluster-name=kubernetes --cluster-signing-cert-file=/var/lib/kubernetes/ca.pem --cluster-signing-key-file=/var/lib/kubernetes/ca-key.pem --leader-elect=true --master=http://10.0.6.100:8080 --root-ca-file=/var/lib/kubernetes/ca.pem --service-account-private-key-file=/var/lib/kubernetes/ca-key.pem --service-cluster-ip-range=10.5.0.0/24 --v=2
+
+août 23 16:37:30 ubuntu16-k6-master1.kubernetes systemd[1]: Started Kubernetes Controller Manager.
++zsh:118> cat
++zsh:136> mv kube-scheduler.service /etc/systemd/system/
++zsh:137> systemctl daemon-reload
++zsh:138> systemctl enable kube-scheduler
+Created symlink from /etc/systemd/system/multi-user.target.wants/kube-scheduler.service to /etc/systemd/system/kube-scheduler.service.
++zsh:139> systemctl start kube-scheduler
++zsh:140> systemctl status kube-scheduler --no-pager
+● kube-scheduler.service - Kubernetes Scheduler
+   Loaded: loaded (/etc/systemd/system/kube-scheduler.service; enabled; vendor preset: enabled)
+   Active: active (running) since mer. 2017-08-23 16:37:30 CEST; 15ms ago
+     Docs: https://github.com/GoogleCloudPlatform/kubernetes
+ Main PID: 17513 (kube-scheduler)
+    Tasks: 4
+   Memory: 2.0M
+      CPU: 8ms
+   CGroup: /system.slice/kube-scheduler.service
+           └─17513 /usr/bin/kube-scheduler --leader-elect=true --master=http://10.0.6.100:8080 --v=2
+
+août 23 16:37:30 ubuntu16-k6-master1.kubernetes systemd[1]: Started Kubernetes Scheduler.
++ for host in '"$IP_M1"' '"$IP_M2"' '"$IP_M3"'
++ echo 'Connection to 10.0.6.101'
+Connection to 10.0.6.101
++ ssh root@10.0.6.101 '
+
+        set -x
+
+        echo "Commands executed on bash by $USER@$HOSTNAME"
+
+        # create master directory
+         mkdir -p /var/lib/kubernetes/
+
+        # move token and keys
+        cd ~
+         mv token.csv /var/lib/kubernetes/
+         mv ca.pem ca-key.pem kubernetes-key.pem kubernetes.pem /var/lib/kubernetes/
+
+        # download kubernetes
+        if [ true = true ]; then
+          wget https://storage.googleapis.com/kubernetes-release/release/v1.7.0/bin/linux/amd64/kube-apiserver -q
+          wget https://storage.googleapis.com/kubernetes-release/release/v1.7.0/bin/linux/amd64/kube-controller-manager -q
+          wget https://storage.googleapis.com/kubernetes-release/release/v1.7.0/bin/linux/amd64/kube-scheduler -q
+          wget https://storage.googleapis.com/kubernetes-release/release/v1.7.0/bin/linux/amd64/kubectl -q
+        fi
+
+        # install binaries
+        chmod +x kube-apiserver kube-controller-manager kube-scheduler kubectl
+         mv kube-apiserver kube-controller-manager kube-scheduler kubectl /usr/bin/
+
+        # create system file for kube-api
+        INTERNAL_IP=$(ifconfig | grep -Eo '\''inet (adr:)?([0-9]*\.){3}[0-9]*'\'' | grep -Eo '\''([0-9]*\.){3}[0-9]*'\'' | grep -v '\''127.0.0.1'\'')
+
+        cat > kube-apiserver.service <<EOF
+[Unit]
+Description=Kubernetes API Server
+Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+
+[Service]
+ExecStart=/usr/bin/kube-apiserver \\
+  --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota \\
+  --advertise-address=${INTERNAL_IP} \\
+  --allow-privileged=true \\
+  --apiserver-count=3 \\
+  --audit-log-maxage=30 \\
+  --audit-log-maxbackup=3 \\
+  --audit-log-maxsize=100 \\
+  --audit-log-path=/var/lib/audit.log \\
+  --authorization-mode=RBAC \\
+  --bind-address=0.0.0.0 \\
+  --client-ca-file=/var/lib/kubernetes/ca.pem \\
+  --enable-swagger-ui=true \\
+  --etcd-cafile=/var/lib/kubernetes/ca.pem \\
+  --etcd-certfile=/var/lib/kubernetes/kubernetes.pem \\
+  --etcd-keyfile=/var/lib/kubernetes/kubernetes-key.pem \\
+  --etcd-servers=https://10.0.6.100:2379,https://10.0.6.101:2379,https://10.0.6.102:2379 \\
+  --event-ttl=1h \\
+  --experimental-bootstrap-token-auth \\
+  --insecure-bind-address=0.0.0.0 \\
+  --kubelet-certificate-authority=/var/lib/kubernetes/ca.pem \\
+  --kubelet-client-certificate=/var/lib/kubernetes/kubernetes.pem \\
+  --kubelet-client-key=/var/lib/kubernetes/kubernetes-key.pem \\
+  --kubelet-https=true \\
+  --runtime-config=rbac.authorization.k8s.io/v1alpha1 \\
+  --service-account-key-file=/var/lib/kubernetes/ca-key.pem \\
+  --service-cluster-ip-range=10.5.0.0/24 \\
+  --service-node-port-range=30000-32767 \\
+  --tls-cert-file=/var/lib/kubernetes/kubernetes.pem \\
+  --tls-private-key-file=/var/lib/kubernetes/kubernetes-key.pem \\
+  --token-auth-file=/var/lib/kubernetes/token.csv \\
+  --v=2
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+        # move and enable service
+         mv kube-apiserver.service /etc/systemd/system/
+         systemctl daemon-reload
+         systemctl enable kube-apiserver
+         systemctl start kube-apiserver
+         systemctl status kube-apiserver --no-pager
+
+        # create file for k8s controller manager
+
+        cat > kube-controller-manager.service <<EOF
+[Unit]
+Description=Kubernetes Controller Manager
+Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+
+[Service]
+ExecStart=/usr/bin/kube-controller-manager \\
+  --address=0.0.0.0 \\
+  --allocate-node-cidrs=true \\
+  --cluster-cidr=10.244.0.0/16 \\
+  --cluster-name=kubernetes \\
+  --cluster-signing-cert-file=/var/lib/kubernetes/ca.pem \\
+  --cluster-signing-key-file=/var/lib/kubernetes/ca-key.pem \\
+  --leader-elect=true \\
+  --master=http://${INTERNAL_IP}:8080 \\
+  --root-ca-file=/var/lib/kubernetes/ca.pem \\
+  --service-account-private-key-file=/var/lib/kubernetes/ca-key.pem \\
+  --service-cluster-ip-range=10.5.0.0/24 \\
+  --v=2
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+        # enable service
+         mv kube-controller-manager.service /etc/systemd/system/
+         systemctl daemon-reload
+         systemctl enable kube-controller-manager
+         systemctl start kube-controller-manager
+         systemctl status kube-controller-manager --no-pager
+
+        # create service for scheduler
+        cat > kube-scheduler.service <<EOF
+[Unit]
+Description=Kubernetes Scheduler
+Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+
+[Service]
+ExecStart=/usr/bin/kube-scheduler \\
+  --leader-elect=true \\
+  --master=http://${INTERNAL_IP}:8080 \\
+  --v=2
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+        # move and enable service
+         mv kube-scheduler.service /etc/systemd/system/
+         systemctl daemon-reload
+         systemctl enable kube-scheduler
+         systemctl start kube-scheduler
+         systemctl status kube-scheduler --no-pager
+
+    '
+Commands executed on bash by root@
++zsh:5> echo 'Commands executed on bash by root@'
++zsh:8> mkdir -p /var/lib/kubernetes/
++zsh:11> cd /root
++zsh:12> mv token.csv /var/lib/kubernetes/
++zsh:13> mv ca.pem ca-key.pem kubernetes-key.pem kubernetes.pem /var/lib/kubernetes/
++zsh:16> [ true '=' true ']'
++zsh:17> wget https://storage.googleapis.com/kubernetes-release/release/v1.7.0/bin/linux/amd64/kube-apiserver -q
++zsh:18> wget https://storage.googleapis.com/kubernetes-release/release/v1.7.0/bin/linux/amd64/kube-controller-manager -q
++zsh:19> wget https://storage.googleapis.com/kubernetes-release/release/v1.7.0/bin/linux/amd64/kube-scheduler -q
++zsh:20> wget https://storage.googleapis.com/kubernetes-release/release/v1.7.0/bin/linux/amd64/kubectl -q
++zsh:24> chmod +x kube-apiserver kube-controller-manager kube-scheduler kubectl
++zsh:25> mv kube-apiserver kube-controller-manager kube-scheduler kubectl /usr/bin/
++zsh:28> INTERNAL_IP=+zsh:28> ifconfig
++zsh:28> INTERNAL_IP=+zsh:28> grep -Eo 'inet (adr:)?([0-9]*\.){3}[0-9]*'
++zsh:28> INTERNAL_IP=+zsh:28> grep -Eo '([0-9]*\.){3}[0-9]*'
++zsh:28> INTERNAL_IP=+zsh:28> grep -v 127.0.0.1
++zsh:28> INTERNAL_IP=10.0.6.101 
++zsh:30> cat
++zsh:76> mv kube-apiserver.service /etc/systemd/system/
++zsh:77> systemctl daemon-reload
++zsh:78> systemctl enable kube-apiserver
+Created symlink from /etc/systemd/system/multi-user.target.wants/kube-apiserver.service to /etc/systemd/system/kube-apiserver.service.
++zsh:79> systemctl start kube-apiserver
++zsh:80> systemctl status kube-apiserver --no-pager
+● kube-apiserver.service - Kubernetes API Server
+   Loaded: loaded (/etc/systemd/system/kube-apiserver.service; enabled; vendor preset: enabled)
+   Active: active (running) since mer. 2017-08-23 16:37:37 CEST; 22ms ago
+     Docs: https://github.com/GoogleCloudPlatform/kubernetes
+ Main PID: 17380 (kube-apiserver)
+    Tasks: 4
+   Memory: 3.8M
+      CPU: 20ms
+   CGroup: /system.slice/kube-apiserver.service
+           └─17380 /usr/bin/kube-apiserver --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota --advertise-address=10.0.6.101 --allow-privileged=true --apiserver-count=3 --audit-log-maxage=30 --audit-log-maxbackup=3 --audit-log-maxsize=100 --audit-log-path=/var/lib/audit.log --authorization-mode=RBAC --bind-address=0.0.0.0 --client-ca-file=/var/lib/kubernetes/ca.pem --enable-swagger-ui=true --etcd-cafile=/var/lib/kubernetes/ca.pem --etcd-certfile=/var/lib/kubernetes/kubernetes.pem --etcd-keyfile=/var/lib/kubernetes/kubernetes-key.pem --etcd-servers=https://10.0.6.100:2379,https://10.0.6.101:2379,https://10.0.6.102:2379 --event-ttl=1h --experimental-bootstrap-token-auth --insecure-bind-address=0.0.0.0 --kubelet-certificate-authority=/var/lib/kubernetes/ca.pem --kubelet-client-certificate=/var/lib/kubernetes/kubernetes.pem --kubelet-client-key=/var/lib/kubernetes/kubernetes-key.pem --kubelet-https=true --runtime-config=rbac.authorization.k8s.io/v1alpha1 --service-account-key-file=/var/lib/kubernetes/ca-key.pem --service-cluster-ip-range=10.5.0.0/24 --service-node-port-range=30000-32767 --tls-cert-file=/var/lib/kubernetes/kubernetes.pem --tls-private-key-file=/var/lib/kubernetes/kubernetes-key.pem --token-auth-file=/var/lib/kubernetes/token.csv --v=2
+
+août 23 16:37:37 ubuntu16-k6-master2.kubernetes systemd[1]: Started Kubernetes API Server.
++zsh:84> cat
++zsh:111> mv kube-controller-manager.service /etc/systemd/system/
++zsh:112> systemctl daemon-reload
++zsh:113> systemctl enable kube-controller-manager
+Created symlink from /etc/systemd/system/multi-user.target.wants/kube-controller-manager.service to /etc/systemd/system/kube-controller-manager.service.
++zsh:114> systemctl start kube-controller-manager
++zsh:115> systemctl status kube-controller-manager --no-pager
+● kube-controller-manager.service - Kubernetes Controller Manager
+   Loaded: loaded (/etc/systemd/system/kube-controller-manager.service; enabled; vendor preset: enabled)
+   Active: active (running) since mer. 2017-08-23 16:37:37 CEST; 30ms ago
+     Docs: https://github.com/GoogleCloudPlatform/kubernetes
+ Main PID: 17420 (kube-controller)
+    Tasks: 4
+   Memory: 1.6M
+      CPU: 7ms
+   CGroup: /system.slice/kube-controller-manager.service
+           └─17420 /usr/bin/kube-controller-manager --address=0.0.0.0 --allocate-node-cidrs=true --cluster-cidr=10.244.0.0/16 --cluster-name=kubernetes --cluster-signing-cert-file=/var/lib/kubernetes/ca.pem --cluster-signing-key-file=/var/lib/kubernetes/ca-key.pem --leader-elect=true --master=http://10.0.6.101:8080 --root-ca-file=/var/lib/kubernetes/ca.pem --service-account-private-key-file=/var/lib/kubernetes/ca-key.pem --service-cluster-ip-range=10.5.0.0/24 --v=2
++zsh:118> cat
++zsh:136> mv kube-scheduler.service /etc/systemd/system/
++zsh:137> systemctl daemon-reload
++zsh:138> systemctl enable kube-scheduler
+Created symlink from /etc/systemd/system/multi-user.target.wants/kube-scheduler.service to /etc/systemd/system/kube-scheduler.service.
++zsh:139> systemctl start kube-scheduler
++zsh:140> systemctl status kube-scheduler --no-pager
+● kube-scheduler.service - Kubernetes Scheduler
+   Loaded: loaded (/etc/systemd/system/kube-scheduler.service; enabled; vendor preset: enabled)
+   Active: active (running) since mer. 2017-08-23 16:37:37 CEST; 23ms ago
+     Docs: https://github.com/GoogleCloudPlatform/kubernetes
+ Main PID: 17460 (kube-scheduler)
+    Tasks: 4
+   Memory: 3.2M
+      CPU: 13ms
+   CGroup: /system.slice/kube-scheduler.service
+           └─17460 /usr/bin/kube-scheduler --leader-elect=true --master=http://10.0.6.101:8080 --v=2
+
+août 23 16:37:37 ubuntu16-k6-master2.kubernetes systemd[1]: Started Kubernetes Scheduler.
++ for host in '"$IP_M1"' '"$IP_M2"' '"$IP_M3"'
++ echo 'Connection to 10.0.6.102'
+Connection to 10.0.6.102
++ ssh root@10.0.6.102 '
+
+        set -x
+
+        echo "Commands executed on bash by $USER@$HOSTNAME"
+
+        # create master directory
+         mkdir -p /var/lib/kubernetes/
+
+        # move token and keys
+        cd ~
+         mv token.csv /var/lib/kubernetes/
+         mv ca.pem ca-key.pem kubernetes-key.pem kubernetes.pem /var/lib/kubernetes/
+
+        # download kubernetes
+        if [ true = true ]; then
+          wget https://storage.googleapis.com/kubernetes-release/release/v1.7.0/bin/linux/amd64/kube-apiserver -q
+          wget https://storage.googleapis.com/kubernetes-release/release/v1.7.0/bin/linux/amd64/kube-controller-manager -q
+          wget https://storage.googleapis.com/kubernetes-release/release/v1.7.0/bin/linux/amd64/kube-scheduler -q
+          wget https://storage.googleapis.com/kubernetes-release/release/v1.7.0/bin/linux/amd64/kubectl -q
+        fi
+
+        # install binaries
+        chmod +x kube-apiserver kube-controller-manager kube-scheduler kubectl
+         mv kube-apiserver kube-controller-manager kube-scheduler kubectl /usr/bin/
+
+        # create system file for kube-api
+        INTERNAL_IP=$(ifconfig | grep -Eo '\''inet (adr:)?([0-9]*\.){3}[0-9]*'\'' | grep -Eo '\''([0-9]*\.){3}[0-9]*'\'' | grep -v '\''127.0.0.1'\'')
+
+        cat > kube-apiserver.service <<EOF
+[Unit]
+Description=Kubernetes API Server
+Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+
+[Service]
+ExecStart=/usr/bin/kube-apiserver \\
+  --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota \\
+  --advertise-address=${INTERNAL_IP} \\
+  --allow-privileged=true \\
+  --apiserver-count=3 \\
+  --audit-log-maxage=30 \\
+  --audit-log-maxbackup=3 \\
+  --audit-log-maxsize=100 \\
+  --audit-log-path=/var/lib/audit.log \\
+  --authorization-mode=RBAC \\
+  --bind-address=0.0.0.0 \\
+  --client-ca-file=/var/lib/kubernetes/ca.pem \\
+  --enable-swagger-ui=true \\
+  --etcd-cafile=/var/lib/kubernetes/ca.pem \\
+  --etcd-certfile=/var/lib/kubernetes/kubernetes.pem \\
+  --etcd-keyfile=/var/lib/kubernetes/kubernetes-key.pem \\
+  --etcd-servers=https://10.0.6.100:2379,https://10.0.6.101:2379,https://10.0.6.102:2379 \\
+  --event-ttl=1h \\
+  --experimental-bootstrap-token-auth \\
+  --insecure-bind-address=0.0.0.0 \\
+  --kubelet-certificate-authority=/var/lib/kubernetes/ca.pem \\
+  --kubelet-client-certificate=/var/lib/kubernetes/kubernetes.pem \\
+  --kubelet-client-key=/var/lib/kubernetes/kubernetes-key.pem \\
+  --kubelet-https=true \\
+  --runtime-config=rbac.authorization.k8s.io/v1alpha1 \\
+  --service-account-key-file=/var/lib/kubernetes/ca-key.pem \\
+  --service-cluster-ip-range=10.5.0.0/24 \\
+  --service-node-port-range=30000-32767 \\
+  --tls-cert-file=/var/lib/kubernetes/kubernetes.pem \\
+  --tls-private-key-file=/var/lib/kubernetes/kubernetes-key.pem \\
+  --token-auth-file=/var/lib/kubernetes/token.csv \\
+  --v=2
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+        # move and enable service
+         mv kube-apiserver.service /etc/systemd/system/
+         systemctl daemon-reload
+         systemctl enable kube-apiserver
+         systemctl start kube-apiserver
+         systemctl status kube-apiserver --no-pager
+
+        # create file for k8s controller manager
+
+        cat > kube-controller-manager.service <<EOF
+[Unit]
+Description=Kubernetes Controller Manager
+Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+
+[Service]
+ExecStart=/usr/bin/kube-controller-manager \\
+  --address=0.0.0.0 \\
+  --allocate-node-cidrs=true \\
+  --cluster-cidr=10.244.0.0/16 \\
+  --cluster-name=kubernetes \\
+  --cluster-signing-cert-file=/var/lib/kubernetes/ca.pem \\
+  --cluster-signing-key-file=/var/lib/kubernetes/ca-key.pem \\
+  --leader-elect=true \\
+  --master=http://${INTERNAL_IP}:8080 \\
+  --root-ca-file=/var/lib/kubernetes/ca.pem \\
+  --service-account-private-key-file=/var/lib/kubernetes/ca-key.pem \\
+  --service-cluster-ip-range=10.5.0.0/24 \\
+  --v=2
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+        # enable service
+         mv kube-controller-manager.service /etc/systemd/system/
+         systemctl daemon-reload
+         systemctl enable kube-controller-manager
+         systemctl start kube-controller-manager
+         systemctl status kube-controller-manager --no-pager
+
+        # create service for scheduler
+        cat > kube-scheduler.service <<EOF
+[Unit]
+Description=Kubernetes Scheduler
+Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+
+[Service]
+ExecStart=/usr/bin/kube-scheduler \\
+  --leader-elect=true \\
+  --master=http://${INTERNAL_IP}:8080 \\
+  --v=2
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+        # move and enable service
+         mv kube-scheduler.service /etc/systemd/system/
+         systemctl daemon-reload
+         systemctl enable kube-scheduler
+         systemctl start kube-scheduler
+         systemctl status kube-scheduler --no-pager
+
+    '
++zsh:5> echo 'Commands executed on bash by root@'
+Commands executed on bash by root@
++zsh:8> mkdir -p /var/lib/kubernetes/
++zsh:11> cd /root
++zsh:12> mv token.csv /var/lib/kubernetes/
++zsh:13> mv ca.pem ca-key.pem kubernetes-key.pem kubernetes.pem /var/lib/kubernetes/
++zsh:16> [ true '=' true ']'
++zsh:17> wget https://storage.googleapis.com/kubernetes-release/release/v1.7.0/bin/linux/amd64/kube-apiserver -q
++zsh:18> wget https://storage.googleapis.com/kubernetes-release/release/v1.7.0/bin/linux/amd64/kube-controller-manager -q
++zsh:19> wget https://storage.googleapis.com/kubernetes-release/release/v1.7.0/bin/linux/amd64/kube-scheduler -q
++zsh:20> wget https://storage.googleapis.com/kubernetes-release/release/v1.7.0/bin/linux/amd64/kubectl -q
++zsh:24> chmod +x kube-apiserver kube-controller-manager kube-scheduler kubectl
++zsh:25> mv kube-apiserver kube-controller-manager kube-scheduler kubectl /usr/bin/
++zsh:28> INTERNAL_IP=+zsh:28> ifconfig
++zsh:28> INTERNAL_IP=+zsh:28> grep -Eo 'inet (adr:)?([0-9]*\.){3}[0-9]*'
++zsh:28> INTERNAL_IP=+zsh:28> grep -Eo '([0-9]*\.){3}[0-9]*'
++zsh:28> INTERNAL_IP=+zsh:28> grep -v 127.0.0.1
++zsh:28> INTERNAL_IP=10.0.6.102 
++zsh:30> cat
++zsh:76> mv kube-apiserver.service /etc/systemd/system/
++zsh:77> systemctl daemon-reload
++zsh:78> systemctl enable kube-apiserver
+Created symlink from /etc/systemd/system/multi-user.target.wants/kube-apiserver.service to /etc/systemd/system/kube-apiserver.service.
++zsh:79> systemctl start kube-apiserver
++zsh:80> systemctl status kube-apiserver --no-pager
+● kube-apiserver.service - Kubernetes API Server
+   Loaded: loaded (/etc/systemd/system/kube-apiserver.service; enabled; vendor preset: enabled)
+   Active: active (running) since mer. 2017-08-23 16:37:44 CEST; 18ms ago
+     Docs: https://github.com/GoogleCloudPlatform/kubernetes
+ Main PID: 17397 (kube-apiserver)
+    Tasks: 4
+   Memory: 4.2M
+      CPU: 16ms
+   CGroup: /system.slice/kube-apiserver.service
+           └─17397 /usr/bin/kube-apiserver --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota --advertise-address=10.0.6.102 --allow-privileged=true --apiserver-count=3 --audit-log-maxage=30 --audit-log-maxbackup=3 --audit-log-maxsize=100 --audit-log-path=/var/lib/audit.log --authorization-mode=RBAC --bind-address=0.0.0.0 --client-ca-file=/var/lib/kubernetes/ca.pem --enable-swagger-ui=true --etcd-cafile=/var/lib/kubernetes/ca.pem --etcd-certfile=/var/lib/kubernetes/kubernetes.pem --etcd-keyfile=/var/lib/kubernetes/kubernetes-key.pem --etcd-servers=https://10.0.6.100:2379,https://10.0.6.101:2379,https://10.0.6.102:2379 --event-ttl=1h --experimental-bootstrap-token-auth --insecure-bind-address=0.0.0.0 --kubelet-certificate-authority=/var/lib/kubernetes/ca.pem --kubelet-client-certificate=/var/lib/kubernetes/kubernetes.pem --kubelet-client-key=/var/lib/kubernetes/kubernetes-key.pem --kubelet-https=true --runtime-config=rbac.authorization.k8s.io/v1alpha1 --service-account-key-file=/var/lib/kubernetes/ca-key.pem --service-cluster-ip-range=10.5.0.0/24 --service-node-port-range=30000-32767 --tls-cert-file=/var/lib/kubernetes/kubernetes.pem --tls-private-key-file=/var/lib/kubernetes/kubernetes-key.pem --token-auth-file=/var/lib/kubernetes/token.csv --v=2
+
+août 23 16:37:44 ubuntu16-k6-master3.kubernetes systemd[1]: Started Kubernetes API Server.
++zsh:84> cat
++zsh:111> mv kube-controller-manager.service /etc/systemd/system/
++zsh:112> systemctl daemon-reload
++zsh:113> systemctl enable kube-controller-manager
+Created symlink from /etc/systemd/system/multi-user.target.wants/kube-controller-manager.service to /etc/systemd/system/kube-controller-manager.service.
++zsh:114> systemctl start kube-controller-manager
++zsh:115> systemctl status kube-controller-manager --no-pager
+● kube-controller-manager.service - Kubernetes Controller Manager
+   Loaded: loaded (/etc/systemd/system/kube-controller-manager.service; enabled; vendor preset: enabled)
+   Active: active (running) since mer. 2017-08-23 16:37:44 CEST; 31ms ago
+     Docs: https://github.com/GoogleCloudPlatform/kubernetes
+ Main PID: 17437 (kube-controller)
+    Tasks: 4
+   Memory: 2.2M
+      CPU: 9ms
+   CGroup: /system.slice/kube-controller-manager.service
+           └─17437 /usr/bin/kube-controller-manager --address=0.0.0.0 --allocate-node-cidrs=true --cluster-cidr=10.244.0.0/16 --cluster-name=kubernetes --cluster-signing-cert-file=/var/lib/kubernetes/ca.pem --cluster-signing-key-file=/var/lib/kubernetes/ca-key.pem --leader-elect=true --master=http://10.0.6.102:8080 --root-ca-file=/var/lib/kubernetes/ca.pem --service-account-private-key-file=/var/lib/kubernetes/ca-key.pem --service-cluster-ip-range=10.5.0.0/24 --v=2
+
+août 23 16:37:44 ubuntu16-k6-master3.kubernetes systemd[1]: Started Kubernetes Controller Manager.
++zsh:118> cat
++zsh:136> mv kube-scheduler.service /etc/systemd/system/
++zsh:137> systemctl daemon-reload
++zsh:138> systemctl enable kube-scheduler
+Created symlink from /etc/systemd/system/multi-user.target.wants/kube-scheduler.service to /etc/systemd/system/kube-scheduler.service.
++zsh:139> systemctl start kube-scheduler
++zsh:140> systemctl status kube-scheduler --no-pager
+● kube-scheduler.service - Kubernetes Scheduler
+   Loaded: loaded (/etc/systemd/system/kube-scheduler.service; enabled; vendor preset: enabled)
+   Active: active (running) since mer. 2017-08-23 16:37:44 CEST; 20ms ago
+     Docs: https://github.com/GoogleCloudPlatform/kubernetes
+ Main PID: 17475 (kube-scheduler)
+    Tasks: 4
+   Memory: 1.1M
+      CPU: 4ms
+   CGroup: /system.slice/kube-scheduler.service
+           └─17475 /usr/bin/kube-scheduler --leader-elect=true --master=http://10.0.6.102:8080 --v=2
+
+août 23 16:37:44 ubuntu16-k6-master3.kubernetes systemd[1]: Started Kubernetes Scheduler.

@@ -1,0 +1,10 @@
+dependencies:
+  - name: fluentd
+    repository: file://../fluentd/
+    version: 1.0
+  - name: ingress
+    repository: file://../ingress/
+    version: 1.0
+  - name: k8s-dashboard
+    repository: file://../k8s-dashboard/
+    version: 1.0

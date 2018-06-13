@@ -1,0 +1,15 @@
+---
+# tasks file for create-k8s-addons
+- name: "Copy manifests to remote"
+  shell:
+    cmd: "rsync -avz manifests root@{{ inventory_hostname }}:/root/"
+  delegate_to: localhost
+  run_once: yes
+
+- name: "Remove old instances and configuration"
+  shell:
+    cmd: "kubectl delete -f /root/manifests/*.yaml"
+  ignore_errors: yes
+
+- name: "Deploy manifests"
+  shell: "kubectl apply -f /root/manifests/*.yaml"

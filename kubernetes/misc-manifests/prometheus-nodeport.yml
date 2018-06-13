@@ -1,0 +1,18 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: prometheus-nodeport-service
+  labels:
+    run: prometheus-nodeport-service
+  namespace: monit01
+spec:
+  type: NodePort
+  ports:
+  - port: 9090
+    nodePort: 30080
+    name: tcp
+  selector:
+    app: prometheus
+    component: server
+    release: ordered-seahorse

@@ -1,0 +1,3 @@
+[submodule "k8s-not-so-hard-way/roles/ansible-role-peervpn"]
+	path = k8s-not-so-hard-way/roles/ansible-role-peervpn
+	url = https://github.com/githubixx/ansible-role-peervpn

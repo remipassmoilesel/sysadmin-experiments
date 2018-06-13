@@ -1,0 +1,40 @@
+# Not functionnal !
+# Not functionnal !
+# Not functionnal !
+# Not functionnal !
+
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: nginx-example-deployment
+spec:
+  replicas: 8
+  template:
+    metadata:
+      labels:
+        run: nginx-example-deployment
+    spec:
+      containers:
+      - name: nginx-example-deployment
+        image: nginx
+        ports:
+        - containerPort: 80
+selector:
+  matchLabels:
+    nginx: 'true'
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: nginx-example-service
+  labels:
+    run: nginx-example-service
+spec:
+  type: NodePort
+  ports:
+  - port: 80
+    nodePort: 30080
+    name: http
+  selector:
+    run: nginx-example-deployment

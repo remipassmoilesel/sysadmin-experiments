@@ -1,0 +1,9 @@
+---
+# vars file for install-kube-components
+kubeadm_packages:
+  - docker.io
+  - kubelet
+  - kubeadm
+  - kubectl
+  - kubernetes-cni
+

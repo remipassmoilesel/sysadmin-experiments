@@ -1,0 +1,340 @@
++ source config.sh
+++ export KUBERNETES_PUBLIC_ADDRESS=10.0.6.100
+++ KUBERNETES_PUBLIC_ADDRESS=10.0.6.100
+++ export IP_M1=10.0.6.100
+++ IP_M1=10.0.6.100
+++ export IP_M2=10.0.6.101
+++ IP_M2=10.0.6.101
+++ export IP_M3=10.0.6.102
+++ IP_M3=10.0.6.102
+++ export HOST_M1=ubuntu16-k6-master1.kubernetes
+++ HOST_M1=ubuntu16-k6-master1.kubernetes
+++ export HOST_M2=ubuntu16-k6-master2.kubernetes
+++ HOST_M2=ubuntu16-k6-master2.kubernetes
+++ export HOST_M3=ubuntu16-k6-master3.kubernetes
+++ HOST_M3=ubuntu16-k6-master3.kubernetes
+++ export IP_W1=10.0.6.110
+++ IP_W1=10.0.6.110
+++ export IP_W2=10.0.6.111
+++ IP_W2=10.0.6.111
+++ export IP_W3=10.0.6.112
+++ IP_W3=10.0.6.112
+++ export HOST_W1=ubuntu16-k6-node1.kubernetes
+++ HOST_W1=ubuntu16-k6-node1.kubernetes
+++ export HOST_W2=ubuntu16-k6-node2.kubernetes
+++ HOST_W2=ubuntu16-k6-node2.kubernetes
+++ export HOST_W3=ubuntu16-k6-node3.kubernetes
+++ HOST_W3=ubuntu16-k6-node3.kubernetes
+++ export CLUSTER_SERVICE_IP_RANGE=10.5.0.0/24
+++ CLUSTER_SERVICE_IP_RANGE=10.5.0.0/24
+++ export CLUSTER_CIDR=10.244.0.0/16
+++ CLUSTER_CIDR=10.244.0.0/16
+++ export CLUSTER_DNS=10.32.0.1
+++ CLUSTER_DNS=10.32.0.1
+++ export DOWNLOAD_DEPENDENCIES=true
+++ DOWNLOAD_DEPENDENCIES=true
+++ export CERT_DIR_PATH=certs
+++ CERT_DIR_PATH=certs
+++ export TOKEN_DIR_PATH=token
+++ TOKEN_DIR_PATH=token
+++ export CA_DIR_PATH=ca
+++ CA_DIR_PATH=ca
+Connection to 10.0.6.110
+++ export CONFIG_DIR_PATH=configs
+++ CONFIG_DIR_PATH=configs
++ for host in '"$IP_W1"' '"$IP_W2"' '"$IP_W3"'
++ echo 'Connection to 10.0.6.110'
++ ssh root@10.0.6.110 '
+
+        set -x
+
+        echo "Commands executed on bash by $USER@$HOSTNAME"
+
+        cat /etc/systemd/system/kubelet.service
+
+        systemctl status kubelet --no-pager
+        systemctl status kube-proxy --no-pager
+        systemctl status docker --no-pager
+
+    '
+Commands executed on bash by root@
++zsh:5> echo 'Commands executed on bash by root@'
++zsh:7> cat /etc/systemd/system/kubelet.service
+[Unit]
+Description=Kubernetes Kubelet
+Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+After=docker.service
+Requires=docker.service
+
+[Service]
+ExecStart=/usr/bin/kubelet \
+  --api-servers=https://10.0.6.100:6443 \
+  --allow-privileged=true \
+  --cluster-dns=10.32.0.1 \
+  --cluster-domain=cluster.local \
+  --container-runtime=docker \
+  --experimental-bootstrap-kubeconfig=/var/lib/kubelet/bootstrap.kubeconfig \
+  --network-plugin=kubenet \
+  --kubeconfig=/var/lib/kubelet/kubeconfig \
+  --serialize-image-pulls=false \
+  --register-node=true \
+  --tls-cert-file=/var/lib/kubelet/kubelet-client.crt \
+  --tls-private-key-file=/var/lib/kubelet/kubelet-client.key \
+  --cert-dir=/var/lib/kubelet \
+  --v=2
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
++zsh:9> systemctl status kubelet --no-pager
+● kubelet.service - Kubernetes Kubelet
+   Loaded: loaded (/etc/systemd/system/kubelet.service; enabled; vendor preset: enabled)
+   Active: active (running) since mer. 2017-08-23 16:37:53 CEST; 30s ago
+     Docs: https://github.com/GoogleCloudPlatform/kubernetes
+ Main PID: 17352 (kubelet)
+    Tasks: 7
+   Memory: 10.1M
+      CPU: 138ms
+   CGroup: /system.slice/kubelet.service
+           └─17352 /usr/bin/kubelet --api-servers=https://10.0.6.100:6443 --allow-privileged=true --cluster-dns=10.32.0.1 --cluster-domain=cluster.local --container-runtime=docker --experimental-bootstrap-kubeconfig=/var/lib/kubelet/bootstrap.kubeconfig --network-plugin=kubenet --kubeconfig=/var/lib/kubelet/kubeconfig --serialize-image-pulls=false --register-node=true --tls-cert-file=/var/lib/kubelet/kubelet-client.crt --tls-private-key-file=/var/lib/kubelet/kubelet-client.key --cert-dir=/var/lib/kubelet --v=2
+
+août 23 16:37:53 ubuntu16-k6-node1.kubernetes systemd[1]: Started Kubernetes Kubelet.
+août 23 16:37:53 ubuntu16-k6-node1.kubernetes kubelet[17352]: Flag --api-servers has been deprecated, Use --kubeconfig instead. Will be removed in a future version.
+août 23 16:37:53 ubuntu16-k6-node1.kubernetes kubelet[17352]: I0823 16:37:53.744621   17352 feature_gate.go:144] feature gates: map[]
+août 23 16:37:53 ubuntu16-k6-node1.kubernetes kubelet[17352]: I0823 16:37:53.744699   17352 bootstrap.go:58] Using bootstrap kubeconfig to generate TLS client cert, key and kubeconfig file
++zsh:10> systemctl status kube-proxy --no-pager
+● kube-proxy.service - Kubernetes Kube Proxy
+   Loaded: loaded (/etc/systemd/system/kube-proxy.service; enabled; vendor preset: enabled)
+   Active: active (running) since mer. 2017-08-23 16:37:53 CEST; 30s ago
+     Docs: https://github.com/GoogleCloudPlatform/kubernetes
+ Main PID: 17393 (kube-proxy)
+    Tasks: 8
+   Memory: 9.0M
+      CPU: 202ms
+   CGroup: /system.slice/kube-proxy.service
+           └─17393 /usr/bin/kube-proxy --cluster-cidr=10.244.0.0/16 --masquerade-all=true --kubeconfig=/var/lib/kube-proxy/kube-proxy.kubeconfig --proxy-mode=iptables --v=2
+
+août 23 16:37:53 ubuntu16-k6-node1.kubernetes kube-proxy[17393]: W0823 16:37:53.843499   17393 proxier.go:304] invalid nodeIP, initializing kube-proxy with 127.0.0.1 as nodeIP
+août 23 16:37:53 ubuntu16-k6-node1.kubernetes kube-proxy[17393]: I0823 16:37:53.843637   17393 server.go:249] Tearing down userspace rules.
+août 23 16:37:53 ubuntu16-k6-node1.kubernetes kube-proxy[17393]: I0823 16:37:53.843696   17393 healthcheck.go:119] Initializing kube-proxy health checker
+août 23 16:37:53 ubuntu16-k6-node1.kubernetes kube-proxy[17393]: I0823 16:37:53.976093   17393 proxier.go:490] Adding new service "default/kubernetes:https" at 10.5.0.1:443/TCP
+août 23 16:37:53 ubuntu16-k6-node1.kubernetes kube-proxy[17393]: I0823 16:37:53.976298   17393 proxier.go:767] Not syncing iptables until Services and Endpoints have been received from master
+août 23 16:37:53 ubuntu16-k6-node1.kubernetes kube-proxy[17393]: I0823 16:37:53.976326   17393 proxier.go:566] Received first Endpoints update
+août 23 16:37:53 ubuntu16-k6-node1.kubernetes kube-proxy[17393]: I0823 16:37:53.976809   17393 conntrack.go:81] Set sysctl 'net/netfilter/nf_conntrack_max' to 131072
+août 23 16:37:53 ubuntu16-k6-node1.kubernetes kube-proxy[17393]: I0823 16:37:53.980374   17393 conntrack.go:66] Setting conntrack hashsize to 32768
+août 23 16:37:53 ubuntu16-k6-node1.kubernetes kube-proxy[17393]: I0823 16:37:53.980724   17393 conntrack.go:81] Set sysctl 'net/netfilter/nf_conntrack_tcp_timeout_established' to 86400
+août 23 16:37:53 ubuntu16-k6-node1.kubernetes kube-proxy[17393]: I0823 16:37:53.981739   17393 conntrack.go:81] Set sysctl 'net/netfilter/nf_conntrack_tcp_timeout_close_wait' to 3600
++zsh:11> systemctl status docker --no-pager
+● docker.service - Docker Application Container Engine
+   Loaded: loaded (/etc/systemd/system/docker.service; enabled; vendor preset: enabled)
+   Active: active (running) since mer. 2017-08-23 16:37:48 CEST; 35s ago
+     Docs: http://docs.docker.com
+ Main PID: 17228 (dockerd)
+    Tasks: 17
+   Memory: 13.1M
+      CPU: 144ms
+   CGroup: /system.slice/docker.service
+           ├─17228 dockerd --iptables=false --ip-masq=false --host=unix:///var/run/docker.sock --log-level=error --storage-driver=overlay
+           └─17245 docker-containerd -l unix:///var/run/docker/libcontainerd/docker-containerd.sock --shim docker-containerd-shim --metrics-interval=0 --start-timeout 2m --state-dir /var/run/docker/libcontainerd/containerd --runtime docker-runc
+
+août 23 16:37:48 ubuntu16-k6-node1.kubernetes systemd[1]: Started Docker Application Container Engine.
+août 23 16:37:48 ubuntu16-k6-node1.kubernetes docker[17228]: time="2017-08-23T16:37:48.665076711+02:00" level=warning msg="containerd: low RLIMIT_NOFILE changing to max" current=1024 max=4096
++ for host in '"$IP_W1"' '"$IP_W2"' '"$IP_W3"'
++ echo 'Connection to 10.0.6.111'
+Connection to 10.0.6.111
++ ssh root@10.0.6.111 '
+
+        set -x
+
+        echo "Commands executed on bash by $USER@$HOSTNAME"
+
+        cat /etc/systemd/system/kubelet.service
+
+        systemctl status kubelet --no-pager
+        systemctl status kube-proxy --no-pager
+        systemctl status docker --no-pager
+
+    '
+Commands executed on bash by root@
++zsh:5> echo 'Commands executed on bash by root@'
++zsh:7> cat /etc/systemd/system/kubelet.service
+[Unit]
+Description=Kubernetes Kubelet
+Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+After=docker.service
+Requires=docker.service
+
+[Service]
+ExecStart=/usr/bin/kubelet \
+  --api-servers=https://10.0.6.100:6443 \
+  --allow-privileged=true \
+  --cluster-dns=10.32.0.1 \
+  --cluster-domain=cluster.local \
+  --container-runtime=docker \
+  --experimental-bootstrap-kubeconfig=/var/lib/kubelet/bootstrap.kubeconfig \
+  --network-plugin=kubenet \
+  --kubeconfig=/var/lib/kubelet/kubeconfig \
+  --serialize-image-pulls=false \
+  --register-node=true \
+  --tls-cert-file=/var/lib/kubelet/kubelet-client.crt \
+  --tls-private-key-file=/var/lib/kubelet/kubelet-client.key \
+  --cert-dir=/var/lib/kubelet \
+  --v=2
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
++zsh:9> systemctl status kubelet --no-pager
+● kubelet.service - Kubernetes Kubelet
+   Loaded: loaded (/etc/systemd/system/kubelet.service; enabled; vendor preset: enabled)
+   Active: active (running) since mer. 2017-08-23 16:38:05 CEST; 19s ago
+     Docs: https://github.com/GoogleCloudPlatform/kubernetes
+ Main PID: 17625 (kubelet)
+    Tasks: 6
+   Memory: 12.3M
+      CPU: 134ms
+   CGroup: /system.slice/kubelet.service
+           └─17625 /usr/bin/kubelet --api-servers=https://10.0.6.100:6443 --allow-privileged=true --cluster-dns=10.32.0.1 --cluster-domain=cluster.local --container-runtime=docker --experimental-bootstrap-kubeconfig=/var/lib/kubelet/bootstrap.kubeconfig --network-plugin=kubenet --kubeconfig=/var/lib/kubelet/kubeconfig --serialize-image-pulls=false --register-node=true --tls-cert-file=/var/lib/kubelet/kubelet-client.crt --tls-private-key-file=/var/lib/kubelet/kubelet-client.key --cert-dir=/var/lib/kubelet --v=2
+
+août 23 16:38:05 ubuntu16-k6-node2.kubernetes systemd[1]: Started Kubernetes Kubelet.
+août 23 16:38:05 ubuntu16-k6-node2.kubernetes kubelet[17625]: Flag --api-servers has been deprecated, Use --kubeconfig instead. Will be removed in a future version.
+août 23 16:38:05 ubuntu16-k6-node2.kubernetes kubelet[17625]: I0823 16:38:05.408089   17625 feature_gate.go:144] feature gates: map[]
+août 23 16:38:05 ubuntu16-k6-node2.kubernetes kubelet[17625]: I0823 16:38:05.408169   17625 bootstrap.go:58] Using bootstrap kubeconfig to generate TLS client cert, key and kubeconfig file
++zsh:10> systemctl status kube-proxy --no-pager
+● kube-proxy.service - Kubernetes Kube Proxy
+   Loaded: loaded (/etc/systemd/system/kube-proxy.service; enabled; vendor preset: enabled)
+   Active: active (running) since mer. 2017-08-23 16:38:05 CEST; 19s ago
+     Docs: https://github.com/GoogleCloudPlatform/kubernetes
+ Main PID: 17665 (kube-proxy)
+    Tasks: 7
+   Memory: 8.7M
+      CPU: 167ms
+   CGroup: /system.slice/kube-proxy.service
+           └─17665 /usr/bin/kube-proxy --cluster-cidr=10.244.0.0/16 --masquerade-all=true --kubeconfig=/var/lib/kube-proxy/kube-proxy.kubeconfig --proxy-mode=iptables --v=2
+
+août 23 16:38:05 ubuntu16-k6-node2.kubernetes kube-proxy[17665]: W0823 16:38:05.526731   17665 proxier.go:304] invalid nodeIP, initializing kube-proxy with 127.0.0.1 as nodeIP
+août 23 16:38:05 ubuntu16-k6-node2.kubernetes kube-proxy[17665]: I0823 16:38:05.526854   17665 server.go:249] Tearing down userspace rules.
+août 23 16:38:05 ubuntu16-k6-node2.kubernetes kube-proxy[17665]: I0823 16:38:05.527243   17665 healthcheck.go:119] Initializing kube-proxy health checker
+août 23 16:38:05 ubuntu16-k6-node2.kubernetes kube-proxy[17665]: I0823 16:38:05.658090   17665 proxier.go:490] Adding new service "default/kubernetes:https" at 10.5.0.1:443/TCP
+août 23 16:38:05 ubuntu16-k6-node2.kubernetes kube-proxy[17665]: I0823 16:38:05.660035   17665 conntrack.go:81] Set sysctl 'net/netfilter/nf_conntrack_max' to 131072
+août 23 16:38:05 ubuntu16-k6-node2.kubernetes kube-proxy[17665]: I0823 16:38:05.660608   17665 proxier.go:767] Not syncing iptables until Services and Endpoints have been received from master
+août 23 16:38:05 ubuntu16-k6-node2.kubernetes kube-proxy[17665]: I0823 16:38:05.660636   17665 proxier.go:566] Received first Endpoints update
+août 23 16:38:05 ubuntu16-k6-node2.kubernetes kube-proxy[17665]: I0823 16:38:05.661315   17665 conntrack.go:66] Setting conntrack hashsize to 32768
+août 23 16:38:05 ubuntu16-k6-node2.kubernetes kube-proxy[17665]: I0823 16:38:05.661443   17665 conntrack.go:81] Set sysctl 'net/netfilter/nf_conntrack_tcp_timeout_established' to 86400
+août 23 16:38:05 ubuntu16-k6-node2.kubernetes kube-proxy[17665]: I0823 16:38:05.661463   17665 conntrack.go:81] Set sysctl 'net/netfilter/nf_conntrack_tcp_timeout_close_wait' to 3600
++zsh:11> systemctl status docker --no-pager
+● docker.service - Docker Application Container Engine
+   Loaded: loaded (/etc/systemd/system/docker.service; enabled; vendor preset: enabled)
+   Active: active (running) since mer. 2017-08-23 16:38:00 CEST; 23s ago
+     Docs: http://docs.docker.com
+ Main PID: 17503 (dockerd)
+    Tasks: 17
+   Memory: 11.3M
+      CPU: 130ms
+   CGroup: /system.slice/docker.service
+           ├─17503 dockerd --iptables=false --ip-masq=false --host=unix:///var/run/docker.sock --log-level=error --storage-driver=overlay
+           └─17520 docker-containerd -l unix:///var/run/docker/libcontainerd/docker-containerd.sock --shim docker-containerd-shim --metrics-interval=0 --start-timeout 2m --state-dir /var/run/docker/libcontainerd/containerd --runtime docker-runc
+
+août 23 16:38:00 ubuntu16-k6-node2.kubernetes systemd[1]: Started Docker Application Container Engine.
+août 23 16:38:00 ubuntu16-k6-node2.kubernetes docker[17503]: time="2017-08-23T16:38:00.760299829+02:00" level=warning msg="containerd: low RLIMIT_NOFILE changing to max" current=1024 max=4096
++ for host in '"$IP_W1"' '"$IP_W2"' '"$IP_W3"'
++ echo 'Connection to 10.0.6.112'
+Connection to 10.0.6.112
++ ssh root@10.0.6.112 '
+
+        set -x
+
+        echo "Commands executed on bash by $USER@$HOSTNAME"
+
+        cat /etc/systemd/system/kubelet.service
+
+        systemctl status kubelet --no-pager
+        systemctl status kube-proxy --no-pager
+        systemctl status docker --no-pager
+
+    '
++zsh:5> echo 'Commands executed on bash by root@'
++zsh:7> cat /etc/systemd/system/kubelet.service
++zsh:9> systemctl status kubelet --no-pager
+Commands executed on bash by root@
+[Unit]
+Description=Kubernetes Kubelet
+Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+After=docker.service
+Requires=docker.service
+
+[Service]
+ExecStart=/usr/bin/kubelet \
+  --api-servers=https://10.0.6.100:6443 \
+  --allow-privileged=true \
+  --cluster-dns=10.32.0.1 \
+  --cluster-domain=cluster.local \
+  --container-runtime=docker \
+  --experimental-bootstrap-kubeconfig=/var/lib/kubelet/bootstrap.kubeconfig \
+  --network-plugin=kubenet \
+  --kubeconfig=/var/lib/kubelet/kubeconfig \
+  --serialize-image-pulls=false \
+  --register-node=true \
+  --tls-cert-file=/var/lib/kubelet/kubelet-client.crt \
+  --tls-private-key-file=/var/lib/kubelet/kubelet-client.key \
+  --cert-dir=/var/lib/kubelet \
+  --v=2
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+● kubelet.service - Kubernetes Kubelet
+   Loaded: loaded (/etc/systemd/system/kubelet.service; enabled; vendor preset: enabled)
+   Active: active (running) since mer. 2017-08-23 16:38:23 CEST; 1s ago
+     Docs: https://github.com/GoogleCloudPlatform/kubernetes
+ Main PID: 17664 (kubelet)
+    Tasks: 6
+   Memory: 11.8M
+      CPU: 145ms
+   CGroup: /system.slice/kubelet.service
+           └─17664 /usr/bin/kubelet --api-servers=https://10.0.6.100:6443 --allow-privileged=true --cluster-dns=10.32.0.1 --cluster-domain=cluster.local --container-runtime=docker --experimental-bootstrap-kubeconfig=/var/lib/kubelet/bootstrap.kubeconfig --network-plugin=kubenet --kubeconfig=/var/lib/kubelet/kubeconfig --serialize-image-pulls=false --register-node=true --tls-cert-file=/var/lib/kubelet/kubelet-client.crt --tls-private-key-file=/var/lib/kubelet/kubelet-client.key --cert-dir=/var/lib/kubelet --v=2
+
+août 23 16:38:23 ubuntu16-k6-node3.kubernetes systemd[1]: Started Kubernetes Kubelet.
+août 23 16:38:23 ubuntu16-k6-node3.kubernetes kubelet[17664]: Flag --api-servers has been deprecated, Use --kubeconfig instead. Will be removed in a future version.
+août 23 16:38:23 ubuntu16-k6-node3.kubernetes kubelet[17664]: I0823 16:38:23.777894   17664 feature_gate.go:144] feature gates: map[]
+août 23 16:38:23 ubuntu16-k6-node3.kubernetes kubelet[17664]: I0823 16:38:23.778168   17664 bootstrap.go:58] Using bootstrap kubeconfig to generate TLS client cert, key and kubeconfig file
+● kube-proxy.service - Kubernetes Kube Proxy
+   Loaded: loaded (/etc/systemd/system/kube-proxy.service; enabled; vendor preset: enabled)
+   Active: active (running) since mer. 2017-08-23 16:38:23 CEST; 979ms ago
+     Docs: https://github.com/GoogleCloudPlatform/kubernetes
+ Main PID: 17704 (kube-proxy)
+    Tasks: 7
+   Memory: 8.6M
+      CPU: 140ms
+   CGroup: /system.slice/kube-proxy.service
+           └─17704 /usr/bin/kube-proxy --cluster-cidr=10.244.0.0/16 --masquerade-all=true --kubeconfig=/var/lib/kube-proxy/kube-proxy.kubeconfig --proxy-mode=iptables --v=2
+
+août 23 16:38:23 ubuntu16-k6-node3.kubernetes kube-proxy[17704]: W0823 16:38:23.941433   17704 proxier.go:304] invalid nodeIP, initializing kube-proxy with 127.0.0.1 as nodeIP
+août 23 16:38:23 ubuntu16-k6-node3.kubernetes kube-proxy[17704]: I0823 16:38:23.941586   17704 server.go:249] Tearing down userspace rules.
++zsh:10> systemctl status kube-proxy --no-pager
+août 23 16:38:23 ubuntu16-k6-node3.kubernetes kube-proxy[17704]: I0823 16:38:23.942159   17704 healthcheck.go:119] Initializing kube-proxy health checker
+août 23 16:38:24 ubuntu16-k6-node3.kubernetes kube-proxy[17704]: I0823 16:38:24.071191   17704 proxier.go:490] Adding new service "default/kubernetes:https" at 10.5.0.1:443/TCP
+août 23 16:38:24 ubuntu16-k6-node3.kubernetes kube-proxy[17704]: I0823 16:38:24.071767   17704 proxier.go:767] Not syncing iptables until Services and Endpoints have been received from master
+août 23 16:38:24 ubuntu16-k6-node3.kubernetes kube-proxy[17704]: I0823 16:38:24.072046   17704 proxier.go:566] Received first Endpoints update
+août 23 16:38:24 ubuntu16-k6-node3.kubernetes kube-proxy[17704]: I0823 16:38:24.073369   17704 conntrack.go:81] Set sysctl 'net/netfilter/nf_conntrack_max' to 131072
+août 23 16:38:24 ubuntu16-k6-node3.kubernetes kube-proxy[17704]: I0823 16:38:24.075022   17704 conntrack.go:66] Setting conntrack hashsize to 32768
+août 23 16:38:24 ubuntu16-k6-node3.kubernetes kube-proxy[17704]: I0823 16:38:24.075630   17704 conntrack.go:81] Set sysctl 'net/netfilter/nf_conntrack_tcp_timeout_established' to 86400
+août 23 16:38:24 ubuntu16-k6-node3.kubernetes kube-proxy[17704]: I0823 16:38:24.076119   17704 conntrack.go:81] Set sysctl 'net/netfilter/nf_conntrack_tcp_timeout_close_wait' to 3600
++zsh:11> systemctl status docker --no-pager
+● docker.service - Docker Application Container Engine
+   Loaded: loaded (/etc/systemd/system/docker.service; enabled; vendor preset: enabled)
+   Active: active (running) since mer. 2017-08-23 16:38:12 CEST; 12s ago
+     Docs: http://docs.docker.com
+ Main PID: 17512 (dockerd)
+    Tasks: 17
+   Memory: 15.1M
+      CPU: 135ms
+   CGroup: /system.slice/docker.service
+           ├─17512 dockerd --iptables=false --ip-masq=false --host=unix:///var/run/docker.sock --log-level=error --storage-driver=overlay
+           └─17528 docker-containerd -l unix:///var/run/docker/libcontainerd/docker-containerd.sock --shim docker-containerd-shim --metrics-interval=0 --start-timeout 2m --state-dir /var/run/docker/libcontainerd/containerd --runtime docker-runc
+
+août 23 16:38:12 ubuntu16-k6-node3.kubernetes systemd[1]: Started Docker Application Container Engine.
+août 23 16:38:12 ubuntu16-k6-node3.kubernetes docker[17512]: time="2017-08-23T16:38:12.379372484+02:00" level=warning msg="containerd: low RLIMIT_NOFILE changing to max" current=1024 max=4096

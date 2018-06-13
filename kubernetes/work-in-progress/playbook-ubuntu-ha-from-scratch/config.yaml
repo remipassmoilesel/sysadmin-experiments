@@ -1,0 +1,13 @@
+---
+
+  # Install command line tools on all nodes
+install_helpers: False
+
+cluster_name: "kubernetes.default"
+
+token: "8d8daaf1be2bab53e6605df6a53c42ad"
+
+public_address: "192.168.0.100"
+
+configure_local_kubectl: True
+

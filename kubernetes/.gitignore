@@ -1,0 +1,9 @@
+*.swp
+.idea
+.vagrant
+*.retry
+playbooks/certificates/*
+!playbooks/certificates/README.md
+
+.credentials.sh
+

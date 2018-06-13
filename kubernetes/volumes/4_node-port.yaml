@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: volume-example-deployment
+  namespace: volumes-examples
+  labels:
+    app: volume-example-deployment
+spec:
+  selector:
+    app: volume-example-deployment
+  ports:
+  - port: 80
+    protocol: TCP
+    nodePort: 30082
+  type: LoadBalancer

@@ -1,0 +1,11 @@
+---
+
+- name: Distribute ca to masters
+  copy:
+    src: "{{ item }}"
+    dest: "/root"
+  with_items:
+    - "{{ playbook_dir }}/certificates/ca/ca.pem"
+    - "{{ playbook_dir }}/certificates/ca/ca-key.pem"
+    - "{{ playbook_dir }}/certificates/certs/kubernetes.pem"
+    - "{{ playbook_dir }}/certificates/certs/kubernetes-key.pem"

@@ -1,0 +1,78 @@
+- hosts: cluster
+  vars_files:
+  - vars.yaml
+  roles:
+  - init-cluster-nodes
+  - setup-k8s-components
+
+- hosts: keepalived
+  vars_files:
+  - vars.yaml
+  roles:
+  - setup-keepalived
+
+- hosts: etcd_cluster
+  vars_files:
+  - vars.yaml
+  roles:
+  - setup-etcd
+
+- hosts: primary_controller
+  vars_files:
+  - vars.yaml
+  roles:
+  - init-primary-controller
+  - setup-flannel
+  - update-kubeproxy-config
+  - get-primary-controller-config
+
+- hosts: controllers
+  vars_files:
+  - vars.yaml
+  roles:
+  - update-controllers-config
+
+- hosts: controllers
+  tasks:
+  - name: Ensure keepalived service is up
+    systemd:
+      name: keepalived
+      state: started
+
+- hosts: controllers
+  tasks:
+  - name: Ensure kubelet service is up
+    systemd:
+      name: keepalived
+      state: started
+
+#- hosts: primary_controller
+#  vars_files:
+#  - vars.yaml
+#  roles:
+#  - setup-k8s-addons
+
+- hosts: workers
+  vars_files:
+  - vars.yaml
+  roles:
+  - join-workers
+
+#- hosts: controllers
+#  tasks:
+#  - systemd:
+#      name: "{{ item }}"
+#      state: restarted
+#    with_items:
+#      - docker
+#      - kubelet
+#      - keepalived
+#
+#- hosts: workers
+#  tasks:
+#  - systemd:
+#      name: "{{ item }}"
+#      state: restarted
+#    with_items:
+#      - docker
+#      - kubelet

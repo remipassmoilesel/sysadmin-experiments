@@ -1,0 +1,15 @@
+---
+
+- name: "Create token"
+  shell: "echo \"{{ vars.token }},kubelet-bootstrap,10001,'system:kubelet-bootstrap'\" \
+          > {{ playbook_dir }}/certificates/token.csv"
+  args:
+    executable: /bin/bash
+    creates: "{{ playbook_dir }}/certificates/token.csv"
+  delegate_to: localhost
+  run_once: true
+
+- name: "Distribute token to workers"
+  copy:
+    src: "{{ playbook_dir }}/certificates/token.csv"
+    dest: "/root"

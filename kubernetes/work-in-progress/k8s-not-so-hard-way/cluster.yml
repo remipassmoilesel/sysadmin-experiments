@@ -1,0 +1,21 @@
+---
+- hosts: k8s
+
+  tasks:
+  - name: "Install peerVPN"
+    include_role:
+      name: ansible-role-peervpn
+      args:
+        peervpn_conf_networkname: "peervpn"
+        peervpn_conf_psk: "preshared_key_change_it"
+        peervpn_conf_initpeers: "10.0.6.100 7000"
+        peervpn_conf_enabletunneling: "yes"
+        peervpn_conf_interface: "peervpn0"
+        peervpn_conf_port: 7000
+        peervpn_conf_enableipv6: "no"
+
+  - name: "Restart networking"
+    systemd:
+      name: networking
+      state: restarted
+

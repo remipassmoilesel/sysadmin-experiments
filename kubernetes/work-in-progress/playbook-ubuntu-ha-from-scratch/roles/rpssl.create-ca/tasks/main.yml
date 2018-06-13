@@ -1,0 +1,47 @@
+---
+# tasks file for rpssl.create-ca
+- name: Ensure openssl is installed
+  apt:
+    name: openssl
+  delegate_to: localhost
+  run_once: true
+  become: true
+  become_method: sudo
+
+- name: Ensure cfssl is installed
+  apt:
+    name: golang-cfssl
+  delegate_to: localhost
+  run_once: true
+  become: true
+  become_method: sudo
+
+- name: Create directory for certificates
+  file:
+    path: "{{ playbook_dir }}/certificates/ca"
+    state: directory
+    recurse: true
+  delegate_to: localhost
+  run_once: true
+
+- name: Copy certificate configuration
+  copy:
+    src: ca-config.json
+    dest: "{{ playbook_dir }}/certificates/ca"
+  delegate_to: localhost
+  run_once: true
+
+- copy:
+    src: ca-csr.json
+    dest: "{{ playbook_dir }}/certificates/ca"
+  delegate_to: localhost
+  run_once: true
+
+- name: Generate certificate authority
+  shell: "cfssl gencert -initca {{ playbook_dir }}/certificates/ca/ca-csr.json \
+                        -config {{ playbook_dir }}/certificates/ca/ca-config.json \
+                        | cfssljson -bare {{ playbook_dir }}/certificates/ca/ca"
+  args:
+    creates: "{{ playbook_dir }}/certificates/ca/ca.pem"
+  delegate_to: localhost
+  run_once: true

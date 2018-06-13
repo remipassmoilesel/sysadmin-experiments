@@ -1,0 +1,6 @@
+serviceaccount "flannel" created
+configmap "kube-flannel-cfg" created
+daemonset "kube-flannel-ds" created
+clusterrole "flannel" created
+clusterrolebinding "flannel" created
+Waiting 10 seconds ...

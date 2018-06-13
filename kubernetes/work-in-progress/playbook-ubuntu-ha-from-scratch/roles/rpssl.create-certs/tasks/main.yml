@@ -1,0 +1,70 @@
+---
+# tasks file for rpssl.create-certs
+
+- name: Create directory for certificates
+  file:
+    path: "{{ playbook_dir }}/certificates/certs"
+    state: directory
+    recurse: true
+  delegate_to: localhost
+  run_once: true
+
+- name: Template admin certificate configuration
+  template:
+    src: admin-csr.json.j2
+    dest: "{{ playbook_dir }}/certificates/certs/admin-csr.json"
+  delegate_to: localhost
+  run_once: true
+
+- name: Template kube-proxy certificate configuration
+  template:
+    src: kube-proxy-csr.json.j2
+    dest: "{{ playbook_dir }}/certificates/certs/kube-proxy-csr.json"
+  delegate_to: localhost
+  run_once: true
+
+- name: Template kubernetes certificate configuration
+  template:
+    src: kubernetes-csr.json.j2
+    dest: "{{ playbook_dir }}/certificates/certs/kubernetes-csr.json"
+  delegate_to: localhost
+  run_once: true
+
+- name: Generate admin certificate
+  shell: "cfssl gencert \
+            -ca={{ playbook_dir }}/certificates/ca/ca.pem \
+            -ca-key={{ playbook_dir }}/certificates/ca/ca-key.pem \
+            -config={{ playbook_dir }}/certificates/ca/ca-config.json \
+            -profile=kubernetes \
+            {{ playbook_dir }}/certificates/certs/admin-csr.json | cfssljson -bare \
+            {{ playbook_dir }}/certificates/certs/admin"
+  args:
+    creates: "{{ playbook_dir }}/certificates/certs/admin.pem"
+  delegate_to: localhost
+  run_once: true
+
+- name: Generate admin certificate
+  shell: "cfssl gencert \
+            -ca={{ playbook_dir }}/certificates/ca/ca.pem \
+            -ca-key={{ playbook_dir }}/certificates/ca/ca-key.pem \
+            -config={{ playbook_dir }}/certificates/ca/ca-config.json \
+            -profile=kubernetes \
+            {{ playbook_dir }}/certificates/certs/kube-proxy-csr.json | cfssljson -bare \
+            {{ playbook_dir }}/certificates/certs/kube-proxy"
+  args:
+    creates: "{{ playbook_dir }}/certificates/certs/kube-proxy.pem"
+  delegate_to: localhost
+  run_once: true
+
+- name: Generate admin certificate
+  shell: "cfssl gencert \
+            -ca={{ playbook_dir }}/certificates/ca/ca.pem \
+            -ca-key={{ playbook_dir }}/certificates/ca/ca-key.pem \
+            -config={{ playbook_dir }}/certificates/ca/ca-config.json \
+            -profile=kubernetes \
+            {{ playbook_dir }}/certificates/certs/kubernetes-csr.json | cfssljson -bare \
+            {{ playbook_dir }}/certificates/certs/kubernetes"
+  args:
+    creates: "{{ playbook_dir }}/certificates/certs/kubernetes.pem"
+  delegate_to: localhost
+  run_once: true

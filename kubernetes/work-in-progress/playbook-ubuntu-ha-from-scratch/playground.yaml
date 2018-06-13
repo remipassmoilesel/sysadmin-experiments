@@ -1,0 +1,5 @@
+- hosts: all
+  tasks:
+  - raw: "echo 'aaa' >> /tmp/test"
+    delegate_to: "localhost"
+    run_once: true

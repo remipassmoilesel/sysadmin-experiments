@@ -1,0 +1,719 @@
++ source config.sh
+++ export KUBERNETES_PUBLIC_ADDRESS=10.0.6.100
+++ KUBERNETES_PUBLIC_ADDRESS=10.0.6.100
+++ export IP_M1=10.0.6.100
+++ IP_M1=10.0.6.100
+++ export IP_M2=10.0.6.101
+++ IP_M2=10.0.6.101
+++ export IP_M3=10.0.6.102
+++ IP_M3=10.0.6.102
+++ export HOST_M1=ubuntu16-k6-master1.kubernetes
+++ HOST_M1=ubuntu16-k6-master1.kubernetes
+++ export HOST_M2=ubuntu16-k6-master2.kubernetes
+++ HOST_M2=ubuntu16-k6-master2.kubernetes
+++ export HOST_M3=ubuntu16-k6-master3.kubernetes
+++ HOST_M3=ubuntu16-k6-master3.kubernetes
+++ export IP_W1=10.0.6.110
+++ IP_W1=10.0.6.110
+++ export IP_W2=10.0.6.111
+++ IP_W2=10.0.6.111
+++ export IP_W3=10.0.6.112
+++ IP_W3=10.0.6.112
+++ export HOST_W1=ubuntu16-k6-node1.kubernetes
+++ HOST_W1=ubuntu16-k6-node1.kubernetes
+++ export HOST_W2=ubuntu16-k6-node2.kubernetes
+++ HOST_W2=ubuntu16-k6-node2.kubernetes
+++ export HOST_W3=ubuntu16-k6-node3.kubernetes
+++ HOST_W3=ubuntu16-k6-node3.kubernetes
+++ export CLUSTER_SERVICE_IP_RANGE=10.5.0.0/24
+++ CLUSTER_SERVICE_IP_RANGE=10.5.0.0/24
+++ export CLUSTER_CIDR=10.244.0.0/16
+++ CLUSTER_CIDR=10.244.0.0/16
+++ export CLUSTER_DNS=10.32.0.1
+++ CLUSTER_DNS=10.32.0.1
+++ export DOWNLOAD_DEPENDENCIES=true
+++ DOWNLOAD_DEPENDENCIES=true
+++ export CERT_DIR_PATH=certs
+++ CERT_DIR_PATH=certs
+++ export TOKEN_DIR_PATH=token
+++ TOKEN_DIR_PATH=token
+++ export CA_DIR_PATH=ca
+++ CA_DIR_PATH=ca
+++ export CONFIG_DIR_PATH=configs
+++ CONFIG_DIR_PATH=configs
++ ssh root@10.0.6.100 '
+
+    set -x
+
+    echo "Commands executed on bash by $USER@"
+
+    kubectl create clusterrolebinding kubelet-bootstrap       --clusterrole=system:node-bootstrapper       --user=kubelet-bootstrap
+'
++zsh:5> echo 'Commands executed on bash by root@'
+Commands executed on bash by root@
++zsh:7> kubectl create clusterrolebinding kubelet-bootstrap '--clusterrole=system:node-bootstrapper' '--user=kubelet-bootstrap'
+clusterrolebinding "kubelet-bootstrap" created
++ for host in '"$IP_W1"' '"$IP_W2"' '"$IP_W3"'
++ echo 'Connection to 10.0.6.110'
+Connection to 10.0.6.110
++ ssh root@10.0.6.110 '
+
+        set -x
+
+        echo "Commands executed on bash by $USER@10.0.6.110"
+
+        cd ~
+
+        # create directories for k8s and move config
+        mkdir -p /var/lib/{kubelet,kube-proxy,kubernetes}
+        mkdir -p /var/run/kubernetes
+        mv bootstrap.kubeconfig /var/lib/kubelet
+        mv kube-proxy.kubeconfig /var/lib/kube-proxy
+
+        # move certificates
+         mv ca.pem /var/lib/kubernetes/
+
+        # install docker
+        if [ true = true ]; then
+          wget https://get.docker.com/builds/Linux/x86_64/docker-1.12.6.tgz -q
+        fi
+
+        tar -xf docker-1.12.6.tgz
+        cp docker/docker* /usr/bin/
+
+        # create service file for docker
+        cat > docker.service <<EOF
+[Unit]
+Description=Docker Application Container Engine
+Documentation=http://docs.docker.com
+
+[Service]
+ExecStart=/usr/bin/docker daemon \\
+  --iptables=false \\
+  --ip-masq=false \\
+  --host=unix:///var/run/docker.sock \\
+  --log-level=error \\
+  --storage-driver=overlay
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+        # move and enable service
+        mv docker.service /etc/systemd/system/docker.service
+        systemctl daemon-reload
+        systemctl enable docker
+        systemctl start docker
+        docker version
+
+        # install cni
+        mkdir -p /opt/cni
+        if [ true = true ]; then
+          wget https://storage.googleapis.com/kubernetes-release/network-plugins/cni-amd64-0799f5732f2a11b329d9e3d51b9c8f2e3759f2ff.tar.gz -q
+        fi
+        tar -xf cni-amd64-0799f5732f2a11b329d9e3d51b9c8f2e3759f2ff.tar.gz -C /opt/cni
+
+        # download and install k8s worker binaries
+        if [ true = true ]; then
+          wget https://storage.googleapis.com/kubernetes-release/release/v1.6.1/bin/linux/amd64/kubectl -q
+          wget https://storage.googleapis.com/kubernetes-release/release/v1.6.1/bin/linux/amd64/kube-proxy -q
+          wget https://storage.googleapis.com/kubernetes-release/release/v1.6.1/bin/linux/amd64/kubelet -q
+        fi
+        chmod +x kubectl kube-proxy kubelet
+        mv kubectl kube-proxy kubelet /usr/bin/
+
+        # create k8s workers service
+        API_SERVERS=$( cat /var/lib/kubelet/bootstrap.kubeconfig |             grep server | cut -d '\'':'\'' -f2,3,4 | tr -d '\''[:space:]'\'')
+
+        cat > kubelet.service <<EOF
+[Unit]
+Description=Kubernetes Kubelet
+Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+After=docker.service
+Requires=docker.service
+
+[Service]
+ExecStart=/usr/bin/kubelet \\
+  --api-servers=${API_SERVERS} \\
+  --allow-privileged=true \\
+  --cluster-dns=10.32.0.1 \\
+  --cluster-domain=cluster.local \\
+  --container-runtime=docker \\
+  --experimental-bootstrap-kubeconfig=/var/lib/kubelet/bootstrap.kubeconfig \\
+  --network-plugin=kubenet \\
+  --kubeconfig=/var/lib/kubelet/kubeconfig \\
+  --serialize-image-pulls=false \\
+  --register-node=true \\
+  --tls-cert-file=/var/lib/kubelet/kubelet-client.crt \\
+  --tls-private-key-file=/var/lib/kubelet/kubelet-client.key \\
+  --cert-dir=/var/lib/kubelet \\
+  --v=2
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+        # move and enable service
+        mv kubelet.service /etc/systemd/system/kubelet.service
+        systemctl daemon-reload
+        systemctl enable kubelet
+        systemctl start kubelet
+        systemctl status kubelet --no-pager
+
+        # create kube-proxy service
+        cat > kube-proxy.service <<EOF
+[Unit]
+Description=Kubernetes Kube Proxy
+Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+
+[Service]
+ExecStart=/usr/bin/kube-proxy \\
+  --cluster-cidr=10.244.0.0/16 \\
+  --masquerade-all=true \\
+  --kubeconfig=/var/lib/kube-proxy/kube-proxy.kubeconfig \\
+  --proxy-mode=iptables \\
+  --v=2
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+        # move and enable service
+        mv kube-proxy.service /etc/systemd/system/kube-proxy.service
+        systemctl daemon-reload
+        systemctl enable kube-proxy
+        systemctl start kube-proxy
+        systemctl status kube-proxy --no-pager
+
+    '
++zsh:5> echo 'Commands executed on bash by root@10.0.6.110'
+Commands executed on bash by root@10.0.6.110
++zsh:7> cd /root
++zsh:10> mkdir -p /var/lib/kubelet /var/lib/kube-proxy /var/lib/kubernetes
++zsh:11> mkdir -p /var/run/kubernetes
++zsh:12> mv bootstrap.kubeconfig /var/lib/kubelet
++zsh:13> mv kube-proxy.kubeconfig /var/lib/kube-proxy
++zsh:16> mv ca.pem /var/lib/kubernetes/
++zsh:19> [ true '=' true ']'
++zsh:20> wget https://get.docker.com/builds/Linux/x86_64/docker-1.12.6.tgz -q
++zsh:23> tar -xf docker-1.12.6.tgz
++zsh:24> cp docker/docker docker/docker-containerd docker/docker-containerd-ctr docker/docker-containerd-shim docker/dockerd docker/docker-proxy docker/docker-runc /usr/bin/
++zsh:27> cat
++zsh:47> mv docker.service /etc/systemd/system/docker.service
++zsh:48> systemctl daemon-reload
++zsh:49> systemctl enable docker
+Created symlink from /etc/systemd/system/multi-user.target.wants/docker.service to /etc/systemd/system/docker.service.
++zsh:50> systemctl start docker
++zsh:51> docker version
+Client:
+ Version:      1.12.6
+ API version:  1.24
+ Go version:   go1.6.4
+ Git commit:   78d1802
+ Built:        Wed Jan 11 00:23:16 2017
+ OS/Arch:      linux/amd64
+Cannot connect to the Docker daemon. Is the docker daemon running on this host?
++zsh:54> mkdir -p /opt/cni
++zsh:55> [ true '=' true ']'
++zsh:56> wget https://storage.googleapis.com/kubernetes-release/network-plugins/cni-amd64-0799f5732f2a11b329d9e3d51b9c8f2e3759f2ff.tar.gz -q
++zsh:58> tar -xf cni-amd64-0799f5732f2a11b329d9e3d51b9c8f2e3759f2ff.tar.gz -C /opt/cni
++zsh:61> [ true '=' true ']'
++zsh:62> wget https://storage.googleapis.com/kubernetes-release/release/v1.6.1/bin/linux/amd64/kubectl -q
++zsh:63> wget https://storage.googleapis.com/kubernetes-release/release/v1.6.1/bin/linux/amd64/kube-proxy -q
++zsh:64> wget https://storage.googleapis.com/kubernetes-release/release/v1.6.1/bin/linux/amd64/kubelet -q
++zsh:66> chmod +x kubectl kube-proxy kubelet
++zsh:67> mv kubectl kube-proxy kubelet /usr/bin/
++zsh:70> API_SERVERS=+zsh:70> cat /var/lib/kubelet/bootstrap.kubeconfig
++zsh:70> API_SERVERS=+zsh:70> API_SERVERS=+zsh:70> cut -d : -f2,3,4
++zsh:70> grep server
++zsh:70> API_SERVERS=+zsh:70> tr -d '[:space:]'
++zsh:70> API_SERVERS=https://10.0.6.100:6443 
++zsh:72> cat
++zsh:103> mv kubelet.service /etc/systemd/system/kubelet.service
++zsh:104> systemctl daemon-reload
++zsh:105> systemctl enable kubelet
+Created symlink from /etc/systemd/system/multi-user.target.wants/kubelet.service to /etc/systemd/system/kubelet.service.
++zsh:106> systemctl start kubelet
++zsh:107> systemctl status kubelet --no-pager
+● kubelet.service - Kubernetes Kubelet
+   Loaded: loaded (/etc/systemd/system/kubelet.service; enabled; vendor preset: enabled)
+   Active: active (running) since mer. 2017-08-23 16:37:53 CEST; 21ms ago
+     Docs: https://github.com/GoogleCloudPlatform/kubernetes
+ Main PID: 17352 (kubelet)
+    Tasks: 4
+   Memory: 2.6M
+      CPU: 9ms
+   CGroup: /system.slice/kubelet.service
+           └─17352 /usr/bin/kubelet --api-servers=https://10.0.6.100:6443 --allow-privileged=true --cluster-dns=10.32.0.1 --cluster-domain=cluster.local --container-runtime=docker --experimental-bootstrap-kubeconfig=/var/lib/kubelet/bootstrap.kubeconfig --network-plugin=kubenet --kubeconfig=/var/lib/kubelet/kubeconfig --serialize-image-pulls=false --register-node=true --tls-cert-file=/var/lib/kubelet/kubelet-client.crt --tls-private-key-file=/var/lib/kubelet/kubelet-client.key --cert-dir=/var/lib/kubelet --v=2
+
+août 23 16:37:53 ubuntu16-k6-node1.kubernetes systemd[1]: Started Kubernetes Kubelet.
++zsh:110> cat
++zsh:130> mv kube-proxy.service /etc/systemd/system/kube-proxy.service
++zsh:131> systemctl daemon-reload
++zsh:132> systemctl enable kube-proxy
+Created symlink from /etc/systemd/system/multi-user.target.wants/kube-proxy.service to /etc/systemd/system/kube-proxy.service.
++zsh:133> systemctl start kube-proxy
++zsh:134> systemctl status kube-proxy --no-pager
+● kube-proxy.service - Kubernetes Kube Proxy
+   Loaded: loaded (/etc/systemd/system/kube-proxy.service; enabled; vendor preset: enabled)
+   Active: active (running) since mer. 2017-08-23 16:37:53 CEST; 19ms ago
+     Docs: https://github.com/GoogleCloudPlatform/kubernetes
+ Main PID: 17393 (kube-proxy)
+    Tasks: 6
+   Memory: 3.6M
+      CPU: 14ms
+   CGroup: /system.slice/kube-proxy.service
+           └─17393 /usr/bin/kube-proxy --cluster-cidr=10.244.0.0/16 --masquerade-all=true --kubeconfig=/var/lib/kube-proxy/kube-proxy.kubeconfig --proxy-mode=iptables --v=2
+
+août 23 16:37:53 ubuntu16-k6-node1.kubernetes systemd[1]: Started Kubernetes Kube Proxy.
++ for host in '"$IP_W1"' '"$IP_W2"' '"$IP_W3"'
++ echo 'Connection to 10.0.6.111'
+Connection to 10.0.6.111
++ ssh root@10.0.6.111 '
+
+        set -x
+
+        echo "Commands executed on bash by $USER@10.0.6.111"
+
+        cd ~
+
+        # create directories for k8s and move config
+        mkdir -p /var/lib/{kubelet,kube-proxy,kubernetes}
+        mkdir -p /var/run/kubernetes
+        mv bootstrap.kubeconfig /var/lib/kubelet
+        mv kube-proxy.kubeconfig /var/lib/kube-proxy
+
+        # move certificates
+         mv ca.pem /var/lib/kubernetes/
+
+        # install docker
+        if [ true = true ]; then
+          wget https://get.docker.com/builds/Linux/x86_64/docker-1.12.6.tgz -q
+        fi
+
+        tar -xf docker-1.12.6.tgz
+        cp docker/docker* /usr/bin/
+
+        # create service file for docker
+        cat > docker.service <<EOF
+[Unit]
+Description=Docker Application Container Engine
+Documentation=http://docs.docker.com
+
+[Service]
+ExecStart=/usr/bin/docker daemon \\
+  --iptables=false \\
+  --ip-masq=false \\
+  --host=unix:///var/run/docker.sock \\
+  --log-level=error \\
+  --storage-driver=overlay
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+        # move and enable service
+        mv docker.service /etc/systemd/system/docker.service
+        systemctl daemon-reload
+        systemctl enable docker
+        systemctl start docker
+        docker version
+
+        # install cni
+        mkdir -p /opt/cni
+        if [ true = true ]; then
+          wget https://storage.googleapis.com/kubernetes-release/network-plugins/cni-amd64-0799f5732f2a11b329d9e3d51b9c8f2e3759f2ff.tar.gz -q
+        fi
+        tar -xf cni-amd64-0799f5732f2a11b329d9e3d51b9c8f2e3759f2ff.tar.gz -C /opt/cni
+
+        # download and install k8s worker binaries
+        if [ true = true ]; then
+          wget https://storage.googleapis.com/kubernetes-release/release/v1.6.1/bin/linux/amd64/kubectl -q
+          wget https://storage.googleapis.com/kubernetes-release/release/v1.6.1/bin/linux/amd64/kube-proxy -q
+          wget https://storage.googleapis.com/kubernetes-release/release/v1.6.1/bin/linux/amd64/kubelet -q
+        fi
+        chmod +x kubectl kube-proxy kubelet
+        mv kubectl kube-proxy kubelet /usr/bin/
+
+        # create k8s workers service
+        API_SERVERS=$( cat /var/lib/kubelet/bootstrap.kubeconfig |             grep server | cut -d '\'':'\'' -f2,3,4 | tr -d '\''[:space:]'\'')
+
+        cat > kubelet.service <<EOF
+[Unit]
+Description=Kubernetes Kubelet
+Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+After=docker.service
+Requires=docker.service
+
+[Service]
+ExecStart=/usr/bin/kubelet \\
+  --api-servers=${API_SERVERS} \\
+  --allow-privileged=true \\
+  --cluster-dns=10.32.0.1 \\
+  --cluster-domain=cluster.local \\
+  --container-runtime=docker \\
+  --experimental-bootstrap-kubeconfig=/var/lib/kubelet/bootstrap.kubeconfig \\
+  --network-plugin=kubenet \\
+  --kubeconfig=/var/lib/kubelet/kubeconfig \\
+  --serialize-image-pulls=false \\
+  --register-node=true \\
+  --tls-cert-file=/var/lib/kubelet/kubelet-client.crt \\
+  --tls-private-key-file=/var/lib/kubelet/kubelet-client.key \\
+  --cert-dir=/var/lib/kubelet \\
+  --v=2
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+        # move and enable service
+        mv kubelet.service /etc/systemd/system/kubelet.service
+        systemctl daemon-reload
+        systemctl enable kubelet
+        systemctl start kubelet
+        systemctl status kubelet --no-pager
+
+        # create kube-proxy service
+        cat > kube-proxy.service <<EOF
+[Unit]
+Description=Kubernetes Kube Proxy
+Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+
+[Service]
+ExecStart=/usr/bin/kube-proxy \\
+  --cluster-cidr=10.244.0.0/16 \\
+  --masquerade-all=true \\
+  --kubeconfig=/var/lib/kube-proxy/kube-proxy.kubeconfig \\
+  --proxy-mode=iptables \\
+  --v=2
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+        # move and enable service
+        mv kube-proxy.service /etc/systemd/system/kube-proxy.service
+        systemctl daemon-reload
+        systemctl enable kube-proxy
+        systemctl start kube-proxy
+        systemctl status kube-proxy --no-pager
+
+    '
+Commands executed on bash by root@10.0.6.111
++zsh:5> echo 'Commands executed on bash by root@10.0.6.111'
++zsh:7> cd /root
++zsh:10> mkdir -p /var/lib/kubelet /var/lib/kube-proxy /var/lib/kubernetes
++zsh:11> mkdir -p /var/run/kubernetes
++zsh:12> mv bootstrap.kubeconfig /var/lib/kubelet
++zsh:13> mv kube-proxy.kubeconfig /var/lib/kube-proxy
++zsh:16> mv ca.pem /var/lib/kubernetes/
++zsh:19> [ true '=' true ']'
++zsh:20> wget https://get.docker.com/builds/Linux/x86_64/docker-1.12.6.tgz -q
++zsh:23> tar -xf docker-1.12.6.tgz
++zsh:24> cp docker/docker docker/docker-containerd docker/docker-containerd-ctr docker/docker-containerd-shim docker/dockerd docker/docker-proxy docker/docker-runc /usr/bin/
++zsh:27> cat
++zsh:47> mv docker.service /etc/systemd/system/docker.service
++zsh:48> systemctl daemon-reload
++zsh:49> systemctl enable docker
+Created symlink from /etc/systemd/system/multi-user.target.wants/docker.service to /etc/systemd/system/docker.service.
++zsh:50> systemctl start docker
++zsh:51> docker version
+Cannot connect to the Docker daemon. Is the docker daemon running on this host?
+Client:
+ Version:      1.12.6
+ API version:  1.24
+ Go version:   go1.6.4
+ Git commit:   78d1802
+ Built:        Wed Jan 11 00:23:16 2017
+ OS/Arch:      linux/amd64
++zsh:54> mkdir -p /opt/cni
++zsh:55> [ true '=' true ']'
++zsh:56> wget https://storage.googleapis.com/kubernetes-release/network-plugins/cni-amd64-0799f5732f2a11b329d9e3d51b9c8f2e3759f2ff.tar.gz -q
++zsh:58> tar -xf cni-amd64-0799f5732f2a11b329d9e3d51b9c8f2e3759f2ff.tar.gz -C /opt/cni
++zsh:61> [ true '=' true ']'
++zsh:62> wget https://storage.googleapis.com/kubernetes-release/release/v1.6.1/bin/linux/amd64/kubectl -q
++zsh:63> wget https://storage.googleapis.com/kubernetes-release/release/v1.6.1/bin/linux/amd64/kube-proxy -q
++zsh:64> wget https://storage.googleapis.com/kubernetes-release/release/v1.6.1/bin/linux/amd64/kubelet -q
++zsh:66> chmod +x kubectl kube-proxy kubelet
++zsh:67> mv kubectl kube-proxy kubelet /usr/bin/
++zsh:70> API_SERVERS=+zsh:70> cat /var/lib/kubelet/bootstrap.kubeconfig
++zsh:70> API_SERVERS=+zsh:70> API_SERVERS=+zsh:70> cut -d : -f2,3,4
++zsh:70> grep server
++zsh:70> API_SERVERS=+zsh:70> tr -d '[:space:]'
++zsh:70> API_SERVERS=https://10.0.6.100:6443 
++zsh:72> cat
++zsh:103> mv kubelet.service /etc/systemd/system/kubelet.service
++zsh:104> systemctl daemon-reload
++zsh:105> systemctl enable kubelet
+Created symlink from /etc/systemd/system/multi-user.target.wants/kubelet.service to /etc/systemd/system/kubelet.service.
++zsh:106> systemctl start kubelet
++zsh:107> systemctl status kubelet --no-pager
+● kubelet.service - Kubernetes Kubelet
+   Loaded: loaded (/etc/systemd/system/kubelet.service; enabled; vendor preset: enabled)
+   Active: active (running) since mer. 2017-08-23 16:38:05 CEST; 15ms ago
+     Docs: https://github.com/GoogleCloudPlatform/kubernetes
+ Main PID: 17625 (kubelet)
+    Tasks: 4
+   Memory: 3.3M
+      CPU: 13ms
+   CGroup: /system.slice/kubelet.service
+           └─17625 /usr/bin/kubelet --api-servers=https://10.0.6.100:6443 --allow-privileged=true --cluster-dns=10.32.0.1 --cluster-domain=cluster.local --container-runtime=docker --experimental-bootstrap-kubeconfig=/var/lib/kubelet/bootstrap.kubeconfig --network-plugin=kubenet --kubeconfig=/var/lib/kubelet/kubeconfig --serialize-image-pulls=false --register-node=true --tls-cert-file=/var/lib/kubelet/kubelet-client.crt --tls-private-key-file=/var/lib/kubelet/kubelet-client.key --cert-dir=/var/lib/kubelet --v=2
+
+août 23 16:38:05 ubuntu16-k6-node2.kubernetes systemd[1]: Started Kubernetes Kubelet.
++zsh:110> cat
++zsh:130> mv kube-proxy.service /etc/systemd/system/kube-proxy.service
++zsh:131> systemctl daemon-reload
++zsh:132> systemctl enable kube-proxy
+Created symlink from /etc/systemd/system/multi-user.target.wants/kube-proxy.service to /etc/systemd/system/kube-proxy.service.
++zsh:133> systemctl start kube-proxy
++zsh:134> systemctl status kube-proxy --no-pager
+● kube-proxy.service - Kubernetes Kube Proxy
+   Loaded: loaded (/etc/systemd/system/kube-proxy.service; enabled; vendor preset: enabled)
+   Active: active (running) since mer. 2017-08-23 16:38:05 CEST; 20ms ago
+     Docs: https://github.com/GoogleCloudPlatform/kubernetes
+ Main PID: 17665 (kube-proxy)
+    Tasks: 5
+   Memory: 2.6M
+      CPU: 10ms
+   CGroup: /system.slice/kube-proxy.service
+           └─17665 /usr/bin/kube-proxy --cluster-cidr=10.244.0.0/16 --masquerade-all=true --kubeconfig=/var/lib/kube-proxy/kube-proxy.kubeconfig --proxy-mode=iptables --v=2
+
+août 23 16:38:05 ubuntu16-k6-node2.kubernetes systemd[1]: Started Kubernetes Kube Proxy.
++ for host in '"$IP_W1"' '"$IP_W2"' '"$IP_W3"'
++ echo 'Connection to 10.0.6.112'
+Connection to 10.0.6.112
++ ssh root@10.0.6.112 '
+
+        set -x
+
+        echo "Commands executed on bash by $USER@10.0.6.112"
+
+        cd ~
+
+        # create directories for k8s and move config
+        mkdir -p /var/lib/{kubelet,kube-proxy,kubernetes}
+        mkdir -p /var/run/kubernetes
+        mv bootstrap.kubeconfig /var/lib/kubelet
+        mv kube-proxy.kubeconfig /var/lib/kube-proxy
+
+        # move certificates
+         mv ca.pem /var/lib/kubernetes/
+
+        # install docker
+        if [ true = true ]; then
+          wget https://get.docker.com/builds/Linux/x86_64/docker-1.12.6.tgz -q
+        fi
+
+        tar -xf docker-1.12.6.tgz
+        cp docker/docker* /usr/bin/
+
+        # create service file for docker
+        cat > docker.service <<EOF
+[Unit]
+Description=Docker Application Container Engine
+Documentation=http://docs.docker.com
+
+[Service]
+ExecStart=/usr/bin/docker daemon \\
+  --iptables=false \\
+  --ip-masq=false \\
+  --host=unix:///var/run/docker.sock \\
+  --log-level=error \\
+  --storage-driver=overlay
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+        # move and enable service
+        mv docker.service /etc/systemd/system/docker.service
+        systemctl daemon-reload
+        systemctl enable docker
+        systemctl start docker
+        docker version
+
+        # install cni
+        mkdir -p /opt/cni
+        if [ true = true ]; then
+          wget https://storage.googleapis.com/kubernetes-release/network-plugins/cni-amd64-0799f5732f2a11b329d9e3d51b9c8f2e3759f2ff.tar.gz -q
+        fi
+        tar -xf cni-amd64-0799f5732f2a11b329d9e3d51b9c8f2e3759f2ff.tar.gz -C /opt/cni
+
+        # download and install k8s worker binaries
+        if [ true = true ]; then
+          wget https://storage.googleapis.com/kubernetes-release/release/v1.6.1/bin/linux/amd64/kubectl -q
+          wget https://storage.googleapis.com/kubernetes-release/release/v1.6.1/bin/linux/amd64/kube-proxy -q
+          wget https://storage.googleapis.com/kubernetes-release/release/v1.6.1/bin/linux/amd64/kubelet -q
+        fi
+        chmod +x kubectl kube-proxy kubelet
+        mv kubectl kube-proxy kubelet /usr/bin/
+
+        # create k8s workers service
+        API_SERVERS=$( cat /var/lib/kubelet/bootstrap.kubeconfig |             grep server | cut -d '\'':'\'' -f2,3,4 | tr -d '\''[:space:]'\'')
+
+        cat > kubelet.service <<EOF
+[Unit]
+Description=Kubernetes Kubelet
+Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+After=docker.service
+Requires=docker.service
+
+[Service]
+ExecStart=/usr/bin/kubelet \\
+  --api-servers=${API_SERVERS} \\
+  --allow-privileged=true \\
+  --cluster-dns=10.32.0.1 \\
+  --cluster-domain=cluster.local \\
+  --container-runtime=docker \\
+  --experimental-bootstrap-kubeconfig=/var/lib/kubelet/bootstrap.kubeconfig \\
+  --network-plugin=kubenet \\
+  --kubeconfig=/var/lib/kubelet/kubeconfig \\
+  --serialize-image-pulls=false \\
+  --register-node=true \\
+  --tls-cert-file=/var/lib/kubelet/kubelet-client.crt \\
+  --tls-private-key-file=/var/lib/kubelet/kubelet-client.key \\
+  --cert-dir=/var/lib/kubelet \\
+  --v=2
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+        # move and enable service
+        mv kubelet.service /etc/systemd/system/kubelet.service
+        systemctl daemon-reload
+        systemctl enable kubelet
+        systemctl start kubelet
+        systemctl status kubelet --no-pager
+
+        # create kube-proxy service
+        cat > kube-proxy.service <<EOF
+[Unit]
+Description=Kubernetes Kube Proxy
+Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+
+[Service]
+ExecStart=/usr/bin/kube-proxy \\
+  --cluster-cidr=10.244.0.0/16 \\
+  --masquerade-all=true \\
+  --kubeconfig=/var/lib/kube-proxy/kube-proxy.kubeconfig \\
+  --proxy-mode=iptables \\
+  --v=2
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+        # move and enable service
+        mv kube-proxy.service /etc/systemd/system/kube-proxy.service
+        systemctl daemon-reload
+        systemctl enable kube-proxy
+        systemctl start kube-proxy
+        systemctl status kube-proxy --no-pager
+
+    '
+Commands executed on bash by root@10.0.6.112
++zsh:5> echo 'Commands executed on bash by root@10.0.6.112'
++zsh:7> cd /root
++zsh:10> mkdir -p /var/lib/kubelet /var/lib/kube-proxy /var/lib/kubernetes
++zsh:11> mkdir -p /var/run/kubernetes
++zsh:12> mv bootstrap.kubeconfig /var/lib/kubelet
++zsh:13> mv kube-proxy.kubeconfig /var/lib/kube-proxy
++zsh:16> mv ca.pem /var/lib/kubernetes/
++zsh:19> [ true '=' true ']'
++zsh:20> wget https://get.docker.com/builds/Linux/x86_64/docker-1.12.6.tgz -q
++zsh:23> tar -xf docker-1.12.6.tgz
++zsh:24> cp docker/docker docker/docker-containerd docker/docker-containerd-ctr docker/docker-containerd-shim docker/dockerd docker/docker-proxy docker/docker-runc /usr/bin/
++zsh:27> cat
++zsh:47> mv docker.service /etc/systemd/system/docker.service
++zsh:48> systemctl daemon-reload
++zsh:49> systemctl enable docker
+Created symlink from /etc/systemd/system/multi-user.target.wants/docker.service to /etc/systemd/system/docker.service.
++zsh:50> systemctl start docker
++zsh:51> docker version
+Client:
+ Version:      1.12.6
+ API version:  1.24
+ Go version:   go1.6.4
+ Git commit:   78d1802
+ Built:        Wed Jan 11 00:23:16 2017
+ OS/Arch:      linux/amd64
+
+Server:
+ Version:      1.12.6
+ API version:  1.24
+ Go version:   go1.6.4
+ Git commit:   78d1802
+ Built:        Wed Jan 11 00:23:16 2017
+ OS/Arch:      linux/amd64
++zsh:54> mkdir -p /opt/cni
++zsh:55> [ true '=' true ']'
++zsh:56> wget https://storage.googleapis.com/kubernetes-release/network-plugins/cni-amd64-0799f5732f2a11b329d9e3d51b9c8f2e3759f2ff.tar.gz -q
++zsh:58> tar -xf cni-amd64-0799f5732f2a11b329d9e3d51b9c8f2e3759f2ff.tar.gz -C /opt/cni
++zsh:61> [ true '=' true ']'
++zsh:62> wget https://storage.googleapis.com/kubernetes-release/release/v1.6.1/bin/linux/amd64/kubectl -q
++zsh:63> wget https://storage.googleapis.com/kubernetes-release/release/v1.6.1/bin/linux/amd64/kube-proxy -q
++zsh:64> wget https://storage.googleapis.com/kubernetes-release/release/v1.6.1/bin/linux/amd64/kubelet -q
++zsh:66> chmod +x kubectl kube-proxy kubelet
++zsh:67> mv kubectl kube-proxy kubelet /usr/bin/
++zsh:70> API_SERVERS=+zsh:70> cat /var/lib/kubelet/bootstrap.kubeconfig
++zsh:70> API_SERVERS=+zsh:70> API_SERVERS=+zsh:70> cut -d : -f2,3,4
++zsh:70> grep server
++zsh:70> API_SERVERS=+zsh:70> tr -d '[:space:]'
++zsh:70> API_SERVERS=https://10.0.6.100:6443 
++zsh:72> cat
++zsh:103> mv kubelet.service /etc/systemd/system/kubelet.service
++zsh:104> systemctl daemon-reload
++zsh:105> systemctl enable kubelet
+Created symlink from /etc/systemd/system/multi-user.target.wants/kubelet.service to /etc/systemd/system/kubelet.service.
++zsh:106> systemctl start kubelet
++zsh:107> systemctl status kubelet --no-pager
+● kubelet.service - Kubernetes Kubelet
+   Loaded: loaded (/etc/systemd/system/kubelet.service; enabled; vendor preset: enabled)
+   Active: active (running) since mer. 2017-08-23 16:38:23 CEST; 16ms ago
+     Docs: https://github.com/GoogleCloudPlatform/kubernetes
+ Main PID: 17664 (kubelet)
+    Tasks: 4
+   Memory: 3.3M
+      CPU: 13ms
+   CGroup: /system.slice/kubelet.service
+           └─17664 /usr/bin/kubelet --api-servers=https://10.0.6.100:6443 --allow-privileged=true --cluster-dns=10.32.0.1 --cluster-domain=cluster.local --container-runtime=docker --experimental-bootstrap-kubeconfig=/var/lib/kubelet/bootstrap.kubeconfig --network-plugin=kubenet --kubeconfig=/var/lib/kubelet/kubeconfig --serialize-image-pulls=false --register-node=true --tls-cert-file=/var/lib/kubelet/kubelet-client.crt --tls-private-key-file=/var/lib/kubelet/kubelet-client.key --cert-dir=/var/lib/kubelet --v=2
+
+août 23 16:38:23 ubuntu16-k6-node3.kubernetes systemd[1]: Started Kubernetes Kubelet.
++zsh:110> cat
++zsh:130> mv kube-proxy.service /etc/systemd/system/kube-proxy.service
++zsh:131> systemctl daemon-reload
++zsh:132> systemctl enable kube-proxy
+Created symlink from /etc/systemd/system/multi-user.target.wants/kube-proxy.service to /etc/systemd/system/kube-proxy.service.
++zsh:133> systemctl start kube-proxy
++zsh:134> systemctl status kube-proxy --no-pager
+● kube-proxy.service - Kubernetes Kube Proxy
+   Loaded: loaded (/etc/systemd/system/kube-proxy.service; enabled; vendor preset: enabled)
+   Active: active (running) since mer. 2017-08-23 16:38:23 CEST; 21ms ago
+     Docs: https://github.com/GoogleCloudPlatform/kubernetes
+ Main PID: 17704 (kube-proxy)
+    Tasks: 5
+   Memory: 1.8M
+      CPU: 6ms
+   CGroup: /system.slice/kube-proxy.service
+           └─17704 /usr/bin/kube-proxy --cluster-cidr=10.244.0.0/16 --masquerade-all=true --kubeconfig=/var/lib/kube-proxy/kube-proxy.kubeconfig --proxy-mode=iptables --v=2
+
+août 23 16:38:23 ubuntu16-k6-node3.kubernetes systemd[1]: Started Kubernetes Kube Proxy.
