@@ -1,0 +1,35 @@
+---
+- hosts: nodes
+  tasks:
+  - name: Install nfs server
+    apt: name={{item}} state=present
+    with_items:
+      - nfs-kernel-server
+
+  - name: Create a specific user for shared files
+    user:
+      name: nfs-anon-user
+      uid: 1999
+
+  - name: Create shared directory
+    file:
+      path: /srv/shared
+      state: directory
+      owner: nfs-anon-user
+
+  - name: Create example file
+    copy:
+      dest: /srv/shared/hello.world
+      owner: nfs-anon-user
+      content: |
+        Hello world !
+
+  - name: Configure NFS server
+    template:
+      src: exports.cfg
+      dest: /etc/exports
+
+  - name: Restart NFS server
+    systemd:
+      name: nfs-server
+      state: restarted
