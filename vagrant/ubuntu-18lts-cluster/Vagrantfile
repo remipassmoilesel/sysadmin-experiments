@@ -1,7 +1,7 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-$bridge = "wlp4s0"
+$bridge = "enp2s0"
 
 $cluster = {
   "master" => [
@@ -15,13 +15,15 @@ $cluster = {
 
 $provisionner=<<-SHELL
 
+    set -x
+
     echo "Current user for provisionning: $USER"
 
     # update system
     apt-get update && sudo apt-get upgrade -y
 
     # install helpers
-    apt-get install -y python vim net-tools sed curl wget byobu
+    apt-get install -y python vim net-tools sed curl wget byobu ranger
 
     echo 'root:azerty' | chpasswd
     echo 'ubuntu:azerty' | chpasswd
@@ -29,11 +31,12 @@ $provisionner=<<-SHELL
     cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
 
     # allow root login
-    sed -i -E 's/PermitRootLogin.+/PermitRootLogin yes/g' /etc/ssh/sshd_config
+    sed -i -E 's/#?PermitRootLogin.+/PermitRootLogin yes/g' /etc/ssh/sshd_config
+    sed -i -E 's/#?PasswordAuthentication.+/PasswordAuthentication yes/g' /etc/ssh/sshd_config
 
-    service ssh restart
+    systemctl restart ssh
 
-    # show adresses
+    # show interfaces
     ip a
 
 SHELL

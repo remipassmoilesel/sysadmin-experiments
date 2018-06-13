@@ -1,0 +1,9 @@
+---
+- hosts: nodes
+  tasks:
+  - name: Install gluster fs
+    apt: name={{item}} state=installed
+    with_items:
+      - glusterfs-server
+      - glusterfs-client
+      - attr

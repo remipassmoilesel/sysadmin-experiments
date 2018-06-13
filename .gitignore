@@ -12,3 +12,4 @@ credentials.tf
 *.box
 node_modules
 npm-debug.log
+*.log
