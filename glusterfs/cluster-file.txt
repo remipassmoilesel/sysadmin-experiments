@@ -1,0 +1,3 @@
+10.0.1.40  ##no-hostname##                   root    azerty    ~/.ssh/id_rsa.pub
+10.0.1.41  ##no-hostname##                   root    azerty    ~/.ssh/id_rsa.pub
+10.0.1.42  ##no-hostname##                   root    azerty    ~/.ssh/id_rsa.pub
