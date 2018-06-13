@@ -29,7 +29,7 @@
       default_release: jessie-backports
 
   - name: "Install various command line tools"
-    apt: name={{item}} state=installed
+    apt: name={{item}} state=present
     with_items:
       - vim
       - byobu
@@ -54,7 +54,7 @@
     raw: echo root:azerty | chpasswd
 
   - name: "Install mesos"
-    apt: name={{item}} state=installed
+    apt: name={{item}} state=present
     with_items:
       - mesos
       - marathon

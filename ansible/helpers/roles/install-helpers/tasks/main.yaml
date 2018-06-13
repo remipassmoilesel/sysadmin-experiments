@@ -1,5 +1,5 @@
 - name: "Install various command line tools"
-  apt: name={{item}} state=installed
+  apt: name={{item}} state=present
   with_items:
     - vim
     - byobu
