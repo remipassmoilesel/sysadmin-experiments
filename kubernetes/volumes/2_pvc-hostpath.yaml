@@ -2,6 +2,7 @@ kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
   name: host-path-example-claim
+  namespace: volumes-examples
 spec:
   storageClassName: manual
   accessModes:
@@ -9,3 +10,6 @@ spec:
   resources:
     requests:
       storage: 1Gi
+  selector:
+    matchLabels:
+      volume-type: hostpath

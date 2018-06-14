@@ -3,8 +3,7 @@ apiVersion: v1
 metadata:
   name: host-path-example-volume
   labels:
-    type: local
-  namespace: volumes-examples
+    volume-type: hostpath
 spec:
   storageClassName: manual
   capacity:
@@ -12,4 +11,4 @@ spec:
   accessModes:
     - ReadWriteMany
   hostPath:
-    path: "/mnt/sda1/host-path-example"
+    path: /mnt/sda1/host-path-example-volume

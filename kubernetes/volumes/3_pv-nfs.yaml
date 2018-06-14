@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs-example-volume
+  namespace: volumes-examples
+  labels:
+    volume-type: nfs
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: manual
+  nfs:
+    path: /srv/shared   # the shared folder on distant server
+    server: 10.0.1.139
