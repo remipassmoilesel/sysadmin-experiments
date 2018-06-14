@@ -20,7 +20,7 @@ spec:
               name: empty-dir-example-volume
             - mountPath: /host-path
               name: host-path-example-volume
-            - mountPath: /nfs-volume
+            - mountPath: /nfs-example
               name: nfs-example-volume-name
       volumes:
       - name: empty-dir-example-volume

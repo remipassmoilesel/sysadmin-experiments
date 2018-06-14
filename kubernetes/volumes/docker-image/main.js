@@ -39,6 +39,8 @@ const getIndex = (req, res) => {
         But if you delete the pod, files will be lost.</p>
         <p><a href='/host-path'>/host-path:</a> Read and write in a volume created on host. If you kill the container, files will be kept. 
         If you destroy deployment, files will be kept.</p>
+        <p><a href='/nfs-example'>/nfs-example:</a> Read and write in a volume created with NFS server. If you kill the container, 
+        files will be kept. If you destroy deployment, files will be kept.</p>
         `,
         res);
 };
@@ -97,6 +99,7 @@ process.on('SIGTERM', handleSignal);
 console.log('Starting server with options: ' + JSON.stringify(options));
 
 const handleRequest = (req, res) => {
+
     switch (req.url) {
         case '/':
             getIndex(req, res);
@@ -112,6 +115,9 @@ const handleRequest = (req, res) => {
             break;
         case '/host-path':
             logThenGetLogs('/host-path', 'Logs in host path volume', req, res);
+            break;
+        case '/nfs-example':
+            logThenGetLogs('/nfs-example', 'Logs in host path volume', req, res);
             break;
         default:
             console.log('Unhandled route: ' + req.url);
