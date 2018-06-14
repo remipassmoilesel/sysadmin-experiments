@@ -1,8 +1,17 @@
 ---
 - hosts: nodes
   tasks:
-  - name: Install gluster fs
+  - name: Update machines # Mandatory on 14/06/2018
+    apt:
+      upgrade: yes
+
+  - name: Install GlusterFS components
     apt: name={{item}} state=present
     with_items:
       - glusterfs-server
       - attr
+
+  - name: Ensure volume0 directory exists
+    file:
+      state: directory
+      path: /data/volume0
