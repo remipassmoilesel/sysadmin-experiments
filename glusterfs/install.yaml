@@ -26,3 +26,19 @@
       cmd: "gluster peer probe {{ item }}"
       executable: /bin/bash
     with_items: "{{ groups['all'] | first }}"
+
+  - name: Create gluster volume
+    gluster_volume:
+      state: present
+      name: volume0
+      bricks: /data/volume0/brick0,/data/volume0/brick0,/data/volume0/brick0
+      rebalance: yes
+      replicas: 3
+      cluster: "{{ groups['all'] }}"
+      force: yes  # Force because in vagrant volumes are on the root partition, which is not recommended
+    run_once: true
+
+  - name: start gluster volume
+    gluster_volume:
+      state: started
+      name: volume0

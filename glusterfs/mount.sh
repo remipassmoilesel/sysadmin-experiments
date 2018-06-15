@@ -8,4 +8,4 @@ set -x
 
 mkdir example-mount-point
 
-sudo mount -t glusterfs 10.0.1.30:/repl-vol $(pwd)/example-mount-point
+sudo mount -t glusterfs 10.0.1.30:/volume1 $(pwd)/example-mount-point
