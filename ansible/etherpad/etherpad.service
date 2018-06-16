@@ -1,0 +1,12 @@
+[Unit]
+Description=Etherpad
+
+[Service]
+User=etherpad
+Environment=NODE_ENV=production
+ExecStart=/opt/etherpad-lite/bin/run.sh
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,31 @@
+- hosts: etherpad
+  tasks:
+    - name: Ensure etherpad user exists
+      user:
+        name: etherpad
+        create_home: yes
+
+    - name: Synchronize etherpad folder
+      shell:
+        cmd: "rsync --exclude=\"{'node_modules', '.git'}\" -avz .. {{ ansible_user }}@{{ ansible_hostname }}:/opt/etherpad-lite"
+        executable: /bin/bash
+      delegate_to: localhost
+      run_once: yes
+
+    - name: Ensure etherpad is owner of bin directory
+      file:
+        path: /opt/etherpad-lite
+        owner: etherpad
+        recurse: yes
+
+    - name: Copy service
+      copy:
+        src: etherpad.service
+        dest: /lib/systemd/system/etherpad.service
+
+    - name: Enable service
+      systemd:
+        name: etherpad
+        state: started
+        enabled: yes
+        daemon_reload: yes
