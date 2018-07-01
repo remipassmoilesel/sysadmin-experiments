@@ -1,6 +1,11 @@
 # Kubespray
 
+Kubespray est une bonne solution pour monter un cluster HA. Cependant, kubeadm semble plus stable et 
+référencé dans la documentation officielle.
+
 ## Kubespray-cli
+
+/!\ Kubespray cli a été déprécié
 
 Installation:
 
@@ -30,6 +35,11 @@ cAdvisor:
 API rest:
 
     https://10.0.2.201:6443     root   changeme
+
+## Problèmes courants
+
+**Réinstallation (01/07/2018)**: après une première installation, les suivantes peuvent échouer (api server non stable, etc ...)
+Supprimer le dossier /etc/kubernetes de tous les noeuds peut arranger ce problème.
 
 ## A explorer
 
