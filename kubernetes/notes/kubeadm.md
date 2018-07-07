@@ -10,7 +10,7 @@ Liste des tokens valides:
 
     $ kubeadm token list
     
-Joindre des esclaves:    
+Joindre des noeuds:    
     
     $ kubeadm join --token ${TOKEN} ${VIRTUAL_IP}:8443
 
@@ -28,19 +28,7 @@ Installer docker:
 
     $ sudo apt install docker.io
     $ sudo usermod -aG docker remipassmoilesel    
-    
-Installer kubectl:
 
-    $ cd /usr/bin/ \
-      && sudo curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl \
-      && sudo chmod +x /usr/bin/kubectl
-  
-Ajouter le dépôt k8s et installer sur chaque machine:
-
-- docker (paquet docker.io, les dernières versions de Docker ne sont pas supportées)
-- kubeadm
-- kubectl
-- kubelet  
     
 ## Ajout du dépôt APT kubernetes sur toutes les nodes (master, workers)
     
@@ -113,6 +101,12 @@ Garder le token.
 Entrer la commande:
   
     $ kubeadm join --token 8d0f33.442ba0dd12ebd94f 10.0.2.201:6443
+    
+## Si on veut déployer des pods sur le master
+
+Enlever la teinte "master" de chaque noeud:
+
+    $ kubectl taint nodes --all node-role.kubernetes.io/master-
     
 ## Finalisation
 
