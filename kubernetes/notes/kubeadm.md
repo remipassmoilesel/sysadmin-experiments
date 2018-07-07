@@ -1,5 +1,6 @@
 # Installation de Kubernetes avec kubeadm et création d'un cluster
 
+
 ## Principales commandes
 
 Annuler les modifications faites:
@@ -14,9 +15,11 @@ Joindre des noeuds:
     
     $ kubeadm join --token ${TOKEN} ${VIRTUAL_IP}:8443
 
+
 ## Limitations de kubeadm
 
 Pas de High Availability, un seul master.
+
 
 ## Installation 
 
@@ -45,6 +48,7 @@ Installer sur chaque machine:
 - kubeadm
 - kubectl
 - kubelet
+
 
 ## Initialisation du master
 
@@ -96,20 +100,20 @@ Ensuite entrer la commande:
 
 Garder le token.
 
+
 ## Initialisation des workers
 
 Entrer la commande:
   
     $ kubeadm join --token 8d0f33.442ba0dd12ebd94f 10.0.2.201:6443
     
-## Si on veut déployer des pods sur le master
-
-Enlever la teinte "master" de chaque noeud:
-
-    $ kubectl taint nodes --all node-role.kubernetes.io/master-
     
 ## Finalisation
 
+Si on veut déployer des pods sur le master, enlever la teinte "master" de chaque noeud:
+
+    $ kubectl taint nodes --all node-role.kubernetes.io/master-
+    
 Créer un réseau de pod avant l'installation de toute autre application.
 Exemple avec flannel:
 
