@@ -1,11 +1,15 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+$box="debian/jessie64"
+$ip="192.168.8.235"
+$bridge="enp3s0"
+
 Vagrant.configure("2") do |config|
 
-  config.vm.box = "debian/jessie64"
+  config.vm.box = $box
 
-  config.vm.network "public_network"
+  config.vm.network :public_network, ip: $ip, bridge: $bridge
 
   config.vbguest.auto_update = false
 
