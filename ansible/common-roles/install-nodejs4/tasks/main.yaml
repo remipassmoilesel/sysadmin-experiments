@@ -1,0 +1,23 @@
+
+- name: "Add Node repository key"
+  apt_key:
+    url: "https://deb.nodesource.com/gpgkey/nodesource.gpg.key"
+
+- name: "Add Node repository"
+  apt_repository:
+     repo: "{{ item }}"
+     state: present
+  with_items:
+    - deb https://deb.nodesource.com/node_4.x jessie main
+
+- name: "Install Node"
+  apt:
+    name: "{{ item }}"
+    update_cache: "yes"
+  with_items:
+    - nodejs
+
+- name: Install Bower
+  npm:
+    name: bower
+    global: yes
