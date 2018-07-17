@@ -1,0 +1,15 @@
+- name: "Ensure prerequisites are installed"
+  apt:
+    name: software-properties-common
+    state: present
+
+- name: "Add certbot repository"
+  apt_repository:
+    repo: 'ppa:certbot/certbot'
+
+- name: "Add certbot apache"
+  apt:
+    name: python-certbot-apache
+    state: present
+    update_cache: yes
+

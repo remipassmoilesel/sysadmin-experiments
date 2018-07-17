@@ -1,0 +1,29 @@
+- set_fact:
+    sslh_address: '{{ ansible_default_ipv4.address }}'
+
+- name: "Ensure sslh is installed"
+  apt:
+    name: sslh
+    state: latest
+    update_cache: yes
+
+- name: Change sslh configuration to enable it
+  lineinfile:
+    path: /etc/default/sslh
+    regexp: "^RUN=(no|yes)"
+    line: "RUN=yes"
+    state: present
+
+- name: Change sslh listen address
+  lineinfile:
+    path: /etc/default/sslh
+    regexp: "DAEMON_OPTS=\"--user sslh --listen ({{ sslh_address }}|<change-me>):443 --ssh 127.0.0.1:(22|10235) --ssl 127.0.0.1:44(3|5) --pidfile /var/run/sslh/sslh.pid\""
+    line: "DAEMON_OPTS=\"--user sslh --listen {{ sslh_address }}:443 --ssh 127.0.0.1:10235 --ssl 127.0.0.1:445 --pidfile /var/run/sslh/sslh.pid\""
+    state: present
+
+- name: Restart sslh
+  systemd:
+    name: ssh
+    enabled: yes
+    daemon_reload: yes
+    state: restarted

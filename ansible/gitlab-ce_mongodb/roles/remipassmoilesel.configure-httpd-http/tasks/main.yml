@@ -1,0 +1,31 @@
+
+- name: "Disable default config"
+  shell: a2dissite 000-default.conf default-ssl.conf
+
+- name: "Copy Apache2 ports configuration"
+  template:
+    src: '{{ playbook_dir }}/config/etc/apache2/ports.conf'
+    dest: /etc/apache2/ports.conf
+    owner: www-data
+
+- name: "Copy Apache2 http configuration"
+  template:
+    src: '{{ playbook_dir }}/config/etc/apache2/sites-available/gitlab-http.conf'
+    dest: /etc/apache2/sites-available/gitlab-http.conf
+    owner: www-data
+
+- name: "Create empty root"
+  file:
+    path: /var/www/empty
+    state: directory
+    recurse: yes
+    owner: www-data
+
+- name: "Enable site"
+  shell: a2ensite gitlab-http.conf
+
+- name: "Restart Apache2"
+  systemd:
+    name: apache2
+    enabled: yes
+    state: reloaded

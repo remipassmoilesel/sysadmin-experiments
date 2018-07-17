@@ -1,0 +1,14 @@
+- hosts: all
+  roles:
+    - { role: remipassmoilesel.ansible-prerequisites,   tags: ['base'] }
+    - { role: remipassmoilesel.install-docker,          tags: ['base'] }
+    - { role: remipassmoilesel.install-docker-compose,  tags: ['base'] }
+    - { role: remipassmoilesel.configure-users,         tags: ['base'] }
+    - { role: remipassmoilesel.install-apache-httpd,    tags: ['http'] }
+    - { role: remipassmoilesel.install-certbot,         tags: ['http'] }
+    - { role: remipassmoilesel.configure-httpd-http,    tags: ['http'] }
+    - { role: remipassmoilesel.configure-letsencrypt,   tags: ['https'] }
+    - { role: remipassmoilesel.configure-httpd-https,   tags: ['https'] }
+    - { role: remipassmoilesel.install-sslh,            tags: ['https'] }
+    - { role: remipassmoilesel.deploy-gitlab,           tags: ['gitlab'] }
+    - { role: remipassmoilesel.deploy-mongodb,          tags: ['mongodb'] }

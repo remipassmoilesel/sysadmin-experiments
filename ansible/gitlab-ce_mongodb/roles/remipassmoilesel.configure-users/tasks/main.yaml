@@ -1,0 +1,4 @@
+- user:
+    name: remipassmoilesel
+    groups: sudo,docker
+    append: yes

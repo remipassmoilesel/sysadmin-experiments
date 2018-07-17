@@ -1,0 +1,21 @@
+- name: "Ensure apt-transport-https is installed."
+  apt: name=apt-transport-https state=present
+
+
+- name: "Ensure pip is installed"
+  apt:
+    name: python-pip
+    state: present
+    update_cache: yes
+
+
+- name: "Ensure pip is up to date"
+  pip:
+    name: pip
+    state: latest
+
+
+- name: "Ensure docker-py is installed"
+  pip:
+    name: docker
+

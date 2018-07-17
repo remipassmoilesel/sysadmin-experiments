@@ -1,0 +1,22 @@
+
+- name: "Copy Apache2 configuration"
+  template:
+    src: '{{ playbook_dir }}/config/etc/apache2/sites-available/gitlab-https.conf'
+    dest: /etc/apache2/sites-available/gitlab-https.conf
+    owner: www-data
+
+- name: "Create empty root"
+  file:
+    path: /var/www/empty
+    state: directory
+    recurse: yes
+    owner: www-data
+
+- name: "Enable site"
+  shell: a2ensite gitlab-https.conf
+
+- name: "Restart Apache2"
+  systemd:
+    name: apache2
+    enabled: yes
+    state: reloaded

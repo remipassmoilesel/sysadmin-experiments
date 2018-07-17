@@ -1,0 +1,72 @@
+- set_fact: compose_local_src="{{ playbook_dir }}/dockerc-gitlab"
+- set_fact: compose_remote_root="/opt"
+- set_fact: compose_remote_src="{{ compose_remote_root }}/dockerc-gitlab"
+
+- name: "Copy docker compose directory"
+  synchronize:
+    src: "{{ compose_local_src }}"
+    dest: "{{ compose_remote_root }}"
+
+- name: "Ensure gitlab config dir exists"
+  file:
+    path: /srv/gitlab/config/
+    state: directory
+    recurse: yes
+
+- name: Template gitlab configuration
+  template:
+    src: '{{ playbook_dir }}/config/srv/gitlab/config/gitlab.rb'
+    dest: /srv/gitlab/config/gitlab.rb
+
+- debug:
+    var: compose_remote_src
+
+- docker_service:
+    project_src: "{{ compose_remote_src }}"
+    state: absent
+
+- docker_service:
+    project_src: "{{ compose_remote_src }}"
+  register: output
+
+- debug:
+    var: output
+
+- docker_service:
+    project_src: "{{ compose_remote_src }}"
+    build: no
+  register: output
+
+- debug:
+    var: output
+
+- assert:
+    that: "not output.changed"
+
+- docker_service:
+    project_src: "{{ compose_remote_src }}"
+    build: no
+    stopped: true
+  register: output
+
+- debug:
+    var: output
+
+- assert:
+    that:
+      - "not gitlab.dockercgitlab_gitlab_1.state.running"
+      - "not gitlab_runner.dockercgitlab_gitlab_runner_1.state.running"
+
+- docker_service:
+    project_src: "{{ compose_remote_src }}"
+    build: no
+    restarted: true
+  register: output
+
+- debug:
+    var: output
+
+- assert:
+    that:
+      - "gitlab.dockercgitlab_gitlab_1.state.running"
+      - "gitlab_runner.dockercgitlab_gitlab_runner_1.state.running"
