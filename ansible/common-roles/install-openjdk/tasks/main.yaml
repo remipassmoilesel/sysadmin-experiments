@@ -1,0 +1,9 @@
+
+- name: "Install Openjdk"
+  apt:
+    name: "{{ item }}"
+    state: present
+    default_release: jessie-backports
+  with_items:
+    - openjdk-8-jdk
+    - maven
