@@ -1,5 +1,9 @@
 # Utiliser terraform avec vsphere
 
+/!\ Fichier obsolète après mise à jour du provider
+
+Voir: https://www.hashicorp.com/blog/a-re-introduction-to-the-terraform-vsphere-provider
+
 Créer un fichier credentials.tf:
 
 
