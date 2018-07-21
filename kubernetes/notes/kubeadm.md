@@ -30,7 +30,7 @@ Mettre à jour le système:
 Installer docker:
 
     $ sudo apt install docker.io
-    $ sudo usermod -aG docker remipassmoilesel    
+    $ sudo usermod -aG docker remipassmoilesel
 
     
 ## Ajout du dépôt APT kubernetes sur toutes les nodes (master, workers)
@@ -97,6 +97,7 @@ Ensuite entrer la commande:
     
       kubeadm join --token 8d0f33.442ba0dd12ebd94f 10.0.2.201:6443
 
+Attention aux avertissements sur la version de docker ! Si la version est trop récente, des problèmes arrivent.
 
 Garder le token.
 
