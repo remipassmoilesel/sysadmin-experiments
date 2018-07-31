@@ -1,0 +1,9 @@
+- name: "Check that all variables are defined"
+  assert:
+    that:
+      - "{{ item }} is defined"
+      - "{{ item }} != 'DEFAULT_VALUE'"
+    msg: "{{ item }} variable must be defined and different of DEFAULT_VALUE"
+  with_items:
+  - var1
+  - var2
