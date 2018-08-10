@@ -1,0 +1,7 @@
+- hosts: localhost
+  environment:
+    PLAYBOOK_ENV_VAR: "PLAYBOOK_ENV_VAR -> value"
+
+  tasks:
+  - name: "Echo $PLAYBOOK_ENV_VAR"
+    shell: echo $PLAYBOOK_ENV_VAR
