@@ -1,10 +1,4 @@
-# Gitlab-ce
-
-## Installation 
-
-Voir les playbooks ansible.
-
-## Gitlab runner
+# Gitlab runner
 
 Pour déployer le gitlab runner, copier le token d'enregistrement:
 
@@ -24,8 +18,7 @@ Utiliser des urls de sous modules relatifs:
     	url = ../module1.git
     [submodule "sub/module2"]
     	path = sub/module2
-    	url = ../../group2/module1.git    
-    
+    	url = ../../group2/module1.git        
 
 ## Erreurs courantes
 
@@ -59,4 +52,25 @@ Il est possible d'utiliser une image custom avec l'option:
       [runners.docker]
         helper_image = ".....:5000/.../../gitlab-ci-helper:0.1"
     
-      
+
+Il est possible également d'appeler une commande pre-clone pour installer un client SSH:
+
+
+## Cloner en SSH
+
+Gitlab utilise une image helper pour cloner les modules, basée sur Alpine Linux. Si des dépôts doivent être clonés en SSH,
+
+    
+    concurrent = 5
+    check_interval = 0
+    
+    [[runners]]
+      name = "gitlab-runner-01"
+      url = "https://192.168.XX.XX/"
+      token = "XXXXXXXX"
+      executor = "docker"
+    
+      # The command below is used to allow ssh clone
+      pre_clone_script = "apk update && apk add openssh-client && mkdir -p /root/.ssh/ && ssh-keyscan -H 192.168.XX.XX >> /root/.ssh/known_hosts"    
+    
+      ...
