@@ -13,3 +13,4 @@ credentials.tf
 node_modules
 npm-debug.log
 *.log
+gitlab-ce/private-access-token/config.js
