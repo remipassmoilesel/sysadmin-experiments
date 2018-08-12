@@ -56,7 +56,7 @@ const createMergeRequest = async () => {
   // POST /projects/:id/merge_requests
   const sourceBranch = 'master';
   const targetBranch = 'env/preprod';
-  const title = "Update of " + targetBranch
+  const title = "Update of " + targetBranch + " " + new Date()
   const description = "MR description"
 
   const url = config.baseUrl + '/projects/' + config.projectId + '/merge_requests'
@@ -66,7 +66,7 @@ const createMergeRequest = async () => {
       'Private-Token': config.accessToken
     },
     body: {
-      id: config.projectId,
+//      id: config.projectId,
       source_branch: sourceBranch,
       target_branch: targetBranch,
       title,
