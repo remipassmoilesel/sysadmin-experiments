@@ -1,0 +1,7 @@
+
+- name: "Wait for postgresql to be ready"
+  command: "pg_isready -h localhost -p postgresql_port"
+  register: cmd_res
+  retries: 20
+  delay: 1
+  until: cmd_res.rc == 0
