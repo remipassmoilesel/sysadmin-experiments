@@ -1,0 +1,33 @@
+version: '3.4'
+services:
+
+  auto-heal:
+    container_name: autoheal
+    image: willfarrell/autoheal:latest
+    environment:
+    - AUTOHEAL_CONTAINER_LABEL=all
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    restart: always
+
+  healthy-container:
+    container_name: healthy-container
+    image: nginx:1.15.2-alpine
+    healthcheck:
+      test: "exit 0"
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    restart: always
+
+  unhealthy-container:
+    container_name: unhealthy-container
+    image: nginx:1.15.2-alpine
+    healthcheck:
+      test: "exit 1"
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    restart: always
