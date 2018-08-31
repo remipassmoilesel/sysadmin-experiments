@@ -28,6 +28,7 @@ Vagrant.configure("2") do |config|
 
     # install helpers
     apt-get install -y python vim net-tools sed curl wget byobu ranger
+    apt-get install -y language-pack-fr
 
     echo 'root:azerty' | chpasswd
     echo 'ubuntu:azerty' | chpasswd
@@ -37,6 +38,7 @@ Vagrant.configure("2") do |config|
     # allow root login
     sed -i -E 's/#?PermitRootLogin.+/PermitRootLogin yes/g' /etc/ssh/sshd_config
     sed -i -E 's/#?PasswordAuthentication.+/PasswordAuthentication yes/g' /etc/ssh/sshd_config
+    sed -i -E 's/#?UsePAM.+/UsePAM no/g' /etc/ssh/sshd_config
 
     systemctl restart ssh
 

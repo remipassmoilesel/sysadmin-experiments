@@ -38,8 +38,8 @@ Vagrant.configure("2") do |config|
     cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
 
     # allow root login
-    sed -i -E 's/.+PermitRootLogin.+/PermitRootLogin yes/g' /etc/ssh/sshd_config
-    sed -i -E 's/.+PasswordAuthentication.+/PasswordAuthentication yes/g' /etc/ssh/sshd_config
+    sed -i -E 's/.*PermitRootLogin.+/PermitRootLogin yes/g' /etc/ssh/sshd_config
+    sed -i -E 's/.*PasswordAuthentication.+/PasswordAuthentication yes/g' /etc/ssh/sshd_config
 
     service ssh restart
 
