@@ -1,5 +1,10 @@
 # Cloud init
 
+## Installation sur Ubuntu Server
+
+    $ sudo apt install cloud-init
+
+
 ## Configuration
 
 - Fichier principal: /etc/cloud/cloud.cfg
@@ -34,7 +39,13 @@ Sur Bionic:
 
 Lancer cloud init avec log de debug:
 
-    $ ( cd /var/lib/cloud/ && sudo rm -rf * )
-    $ cloud-init -d init
+    $ ( cd /var/lib/cloud/ && sudo rm -rf * ) && cloud-init -d init
     
+
+## Erreurs
+
+Il peut être nécéssaire de désactiver les sources de donnée si on en a pas besoin:
+
+    $ vim /etc/cloud/cloud.cfg.d/90-dpkg.cfg
     
+    datasource_list: [ None ]
