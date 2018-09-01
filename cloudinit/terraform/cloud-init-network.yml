@@ -12,3 +12,9 @@ network:
         - 8.8.8.8
         search: []
   version: 2
+
+power_state:
+  delay: "+30"
+  mode: reboot
+  timeout: 30
+
