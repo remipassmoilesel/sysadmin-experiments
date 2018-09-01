@@ -1,0 +1,23 @@
+#cloud-config
+users:
+- name: ubuntu
+  primary_group: ubuntu
+  groups: sudo
+  lock_passwd: false
+  # sudo apt install whois; mkpasswd --method=SHA-512 --rounds=4096
+  # azerty
+  passwd: $6$rounds=4096$ozyTFWjZEWZX8F$ghbpNvQ.r24DhP/oVwKmtuYwJrfY1bAm/FO2PyckW5.7NzEPaWv5QXmsrcuA.Fwu6pqwZ3WxavoNRh5JRTwXv/
+
+network:
+  version: 2
+  ethernets:
+    id0:
+      match:
+        name: enp0s8
+      dhcp4: false
+      addresses:
+      - 10.0.0.20/24
+      gateway4: 10.0.2.2
+      nameservers:
+        search: []
+        addresses: [8.8.8.8]

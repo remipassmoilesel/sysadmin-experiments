@@ -20,14 +20,17 @@ Pour être prises en compte, toutes les configurations doivent commencer par la 
 Voir https://cloudinit.readthedocs.io/en/latest/topics/network-config-format-v2.html#examples
 
 
-## Statut de cloud init
+## Boot Stages
 
-Voir https://cloudinit.readthedocs.io/en/latest/topics/boot.html
+Voir: https://cloudinit.readthedocs.io/en/latest/topics/boot.html
 
-Sur Bionic:
+Un générateur systemd active ou non les services systemd nécéssaire.
+
+    $ cloud-init-local.service −> Executes cloud-init init --local
+    $ cloud-init.service ->  cloud-init init
+    $ cloud-config.service -> Executes cloud-init modules --mode=config
+    $ cloud-final.service -> Executes cloud-init modules --mode=final
     
-    $ sudo systemctl status cloud-init-local
-
 
 ## Journaux
 
