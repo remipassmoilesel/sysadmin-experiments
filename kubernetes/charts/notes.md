@@ -1,5 +1,22 @@
 # Charts kubernetes
 
+## Installation
+
+Installer Helm:
+
+    $ curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get | bash
+    
+Initialiser Tiller:
+
+    $ helm init
+    
+
+## Création
+
+Le meilleur moyen de créer un chart est de commencer par:
+
+    $ helm create chartname
+
 
 ## Debug
 

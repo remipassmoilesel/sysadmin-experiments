@@ -20,6 +20,27 @@ Utiliser des urls de sous modules relatifs:
     	path = sub/module2
     	url = ../../group2/module1.git        
 
+
+## Cloner en SSH
+
+Gitlab utilise une image helper pour cloner les modules, basée sur Alpine Linux. Si des dépôts doivent être clonés en SSH,
+
+    
+    concurrent = 5
+    check_interval = 0
+    
+    [[runners]]
+      name = "gitlab-runner-01"
+      url = "https://192.168.XX.XX/"
+      token = "XXXXXXXX"
+      executor = "docker"
+    
+      # The command below is used to allow ssh clone
+      pre_clone_script = "apk update && apk add openssh-client && mkdir -p /root/.ssh/ && ssh-keyscan -H 192.168.XX.XX >> /root/.ssh/known_hosts"    
+    
+      ...
+
+
 ## Erreurs courantes
 
 ## Mode debug pour le pipeline
@@ -56,21 +77,19 @@ Il est possible d'utiliser une image custom avec l'option:
 Il est possible également d'appeler une commande pre-clone pour installer un client SSH:
 
 
-## Cloner en SSH
+### Checking for job: forbidden
 
-Gitlab utilise une image helper pour cloner les modules, basée sur Alpine Linux. Si des dépôts doivent être clonés en SSH,
+    ERROR: Checking for jobs... forbidden               runner=a6f756be
+    ERROR: Checking for jobs... forbidden               runner=a6f756be
+    ERROR: Runner https://gitlab.locala6f756be006d1a3bb27eb1313f3cc4 is not healthy and will be disabled!
+    All workers stopped. Can exit now                   builds=0
 
-    
-    concurrent = 5
-    check_interval = 0
-    
-    [[runners]]
-      name = "gitlab-runner-01"
-      url = "https://192.168.XX.XX/"
-      token = "XXXXXXXX"
-      executor = "docker"
-    
-      # The command below is used to allow ssh clone
-      pre_clone_script = "apk update && apk add openssh-client && mkdir -p /root/.ssh/ && ssh-keyscan -H 192.168.XX.XX >> /root/.ssh/known_hosts"    
-    
-      ...
+Ajouter les adresses IP des runners en whiteliste de rackattack (meilleure solution ?)
+
+    gitlab_rails['rack_attack_git_basic_auth'] = {
+      'enabled' => true,
+      'ip_whitelist' => ["172.16.0.1", "172.16.0.2", "172.16.0.3", "172.16.0.4", "172.16.0.5", "172.16.0.6", "172.16.0.7", "172.16.0.8", "172.16.0.9"],
+      'maxretry' => 10,
+      'findtime' => 60,
+      'bantime' => 3600
+    }
