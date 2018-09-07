@@ -1,0 +1,10 @@
+- hosts: localhost
+
+  tasks:
+
+  - name: "Create snapshot repository"
+    uri:
+      url: "http://localhost:9200/_snapshot/dev_data"
+      method: PUT
+      body_format: json
+      body: "{{ lookup('file','create_snapshot_repo.json') }}"
