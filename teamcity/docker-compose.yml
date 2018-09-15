@@ -1,0 +1,11 @@
+version: '3'
+services:
+  teamcisty:
+    image: "jetbrains/teamcity-server"
+    container_name: teamcity-server-instance
+    network_mode: bridge
+    ports:
+    - 8111:8111
+    volumes:
+    - ./data:/data/teamcity_server/datadir
+
