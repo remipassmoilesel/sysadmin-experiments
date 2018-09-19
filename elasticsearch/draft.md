@@ -32,6 +32,12 @@ Lancer un conteneur Docker en local:
     GET http://host:9200/_cluster/health/?level=shards
 
 
+## Exporter tous les index / mappings
+
+    $ curl -XGET 'http://localhost:9200/_all'
+    
+    $ curl -XGET 'http://localhost:9200/_all/_mapping'
+
 
 ## Cas d'erreurs
 
