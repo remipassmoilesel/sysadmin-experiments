@@ -1,8 +1,4 @@
-# Elasticsearch
-
-Obtenir des stats sur l'espace disque:
-
-## Curator
+# Elasticsearch Curator
 
 Pour un nettoyage régulier des données, voir Curator:
 

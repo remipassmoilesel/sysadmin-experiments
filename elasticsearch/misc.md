@@ -1,6 +1,8 @@
 # Elasticsearch
 
-Lister tous les index:
+## Requêtes utiles
+
+Lister tous les index avec nom de colonne:
 
     $ http://host:9200/_cat/indices?v
     
@@ -37,6 +39,11 @@ Lancer un conteneur Docker en local:
     $ curl -XGET 'http://localhost:9200/_all'
     
     $ curl -XGET 'http://localhost:9200/_all/_mapping'
+
+
+## Supprimer toutes les données d'un cluster
+
+    $ curl -XDELETE "localhost:9200/.*"
 
 
 ## Cas d'erreurs
