@@ -3,6 +3,8 @@ version: '3'
 
 services:
 
+  # File /etc/gitlab/gitlab-secrets.json should be backed up too !
+
   gitlab:
     image: gitlab/gitlab-ce:11.0.4-ce.0
     container_name: gitlab
@@ -10,18 +12,18 @@ services:
     - "80:80"
     - "443:443"
     - "1022:22"
-    # volumes:
-    # - /etc/gitlab/gitlab.rb:/etc/gitlab/gitlab.rb
-    # - /etc/gitlab/trusted-certs:/etc/trusted-certs
-    # - /etc/gitlab/ssl:/etc/gitlab/ssl
-    # - /var/log/gitlab:/var/log/gitlab
-    # - /var/opt/gitlab:/var/opt/gitlab
+     volumes:
+     - /etc/gitlab/gitlab.rb:/etc/gitlab/gitlab.rb
+     - /etc/gitlab/trusted-certs:/etc/trusted-certs
+     - /etc/gitlab/ssl:/etc/gitlab/ssl
+     - /var/log/gitlab:/var/log/gitlab
+     - /var/opt/gitlab:/var/opt/gitlab
     restart: always
 
   gitlab_runner:
     image: gitlab/gitlab-runner:alpine-v11.1.0
     container_name: gitlab_runner
-    # volumes:
-    # - /etc/gitlab-runner:/etc/gitlab-runner
-    # - /var/run/docker.sock:/var/run/docker.sock
+     volumes:
+     - /etc/gitlab-runner:/etc/gitlab-runner
+     - /var/run/docker.sock:/var/run/docker.sock
     restart: always

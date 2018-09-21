@@ -93,3 +93,41 @@ Ajouter les adresses IP des runners en whiteliste de rackattack (meilleure solut
       'findtime' => 60,
       'bantime' => 3600
     }
+    
+
+### Erreur 500 sur la manipulation des pipelines
+
+    
+    ActionView::Template::Error (bad decrypt):
+        4: 
+        5: - id = variable&.id
+        6: - key = variable&.key
+        7: - value = variable&.value
+        8: - is_protected = variable && !only_key_value ? variable.protected : false
+        9: 
+       10: - id_input_name = "#{form_field}[variables_attributes][][id]"
+      app/views/ci/variables/_variable_row.html.haml:7:in `_app_views_ci_variables__variable_row_html_haml___2623095548269879429_69848920190020'
+      app/views/ci/variables/_index.html.haml:9:in `block in _app_views_ci_variables__index_html_haml__3729429806748550900_69848806226200'
+      app/views/ci/variables/_index.html.haml:8:in `each'
+      app/views/ci/variables/_index.html.haml:8:in `each'
+        
+        
+    
+    ==> /var/log/gitlab/gitlab-rails/production.log <==
+    
+    OpenSSL::Cipher::CipherError (bad decrypt):
+      /opt/gitlab/embedded/lib/ruby/gems/2.4.0/gems/encryptor-3.0.0/lib/encryptor.rb:98:in `final'
+      /opt/gitlab/embedded/lib/ruby/gems/2.4.0/gems/encryptor-3.0.0/lib/encryptor.rb:98:in `crypt'
+      /opt/gitlab/embedded/lib/ruby/gems/2.4.0/gems/encryptor-3.0.0/lib/encryptor.rb:49:in `decrypt'
+      /opt/gitlab/embedded/lib/ruby/gems/2.4.0/gems/attr_encrypted-3.1.0/lib/attr_encrypted.rb:240:in `decrypt'
+      /opt/gitlab/embedded/lib/ruby/gems/2.4.0/gems/attr_encrypted-3.1.0/lib/attr_encrypted.rb:329:in `decrypt'
+
+Il y a un problème sur la gestion du chiffrage des variables gitlab ci.
+Solutions possible:
+
+    $ gitlab-rails dbconsole
+    $ DELETE FROM ci_variables
+    
+Ensuite redéfinir les variables de pipeline de projets.
+
+Voir: https://gitlab.com/gitlab-org/gitlab-ce/issues/13590
