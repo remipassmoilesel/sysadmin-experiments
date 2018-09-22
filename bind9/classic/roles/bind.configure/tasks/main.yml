@@ -1,5 +1,12 @@
 
-- name: "Ensure configuration fodlers exists"
+- name: "Clean old zones configurations"
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+  - /etc/named/zones
+
+- name: "Ensure configuration folders exists"
   file:
     path: "{{ item }}"
     state: directory
@@ -18,7 +25,7 @@
 
 - name: "Template Bind zones"
   template:
-    src: "zone.conf"
+    src: "forward-zone.conf"
     dest: "/etc/named/zones/db.{{ item.name }}"
   vars:
   with_items: "{{ bind.zones }}"
