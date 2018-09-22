@@ -5,3 +5,9 @@
     dest: "{{ item.dest }}"
   with_items:
   - {name: "named.conf", dest: "/etc/named.conf"}
+  - {name: "named.conf.local", dest: "/etc/named/named.conf.local"}
+
+- name: "Start and enable bind"
+  systemd:
+    name: named
+    state: reloaded
