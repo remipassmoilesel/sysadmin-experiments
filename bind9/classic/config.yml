@@ -2,12 +2,13 @@ bind:
   trusted_cidr: 10.0.0.0/24
   global_forwarders:
   - 8.8.8.8
-  ns_address: 10.0.0.5
-  reverse_ns_address: 5.0
+  listen_addresses:
+  - 10.0.0.5 # should normally be 10.20.0.5, 10.30.0.5
 
   zones:
   - name: mydomain.net
     reverse_name: 20.10.in-addr.arpa
+    reverse_ns_address: 5.0
     serial: 201809222
     admin_mail: admin.mydomain.net
     records:
@@ -18,6 +19,7 @@ bind:
 
   - name: mydomain.com
     reverse_name: 30.10.in-addr.arpa
+    reverse_ns_address: 5.0
     serial: 201809222
     admin_mail: admin.mydomain.com
     records:
