@@ -1,11 +1,27 @@
 
-- name: "Template bind configuration"
+- name: "Ensure configuration fodlers exists"
+  file:
+    path: "{{ item }}"
+    state: directory
+    recurse: yes
+  with_items:
+  - /etc/named
+  - /etc/named/zones
+
+- name: "Template Bind global configuration"
   template:
     src: "{{ item.name }}"
     dest: "{{ item.dest }}"
   with_items:
   - {name: "named.conf", dest: "/etc/named.conf"}
   - {name: "named.conf.local", dest: "/etc/named/named.conf.local"}
+
+- name: "Template Bind zones"
+  template:
+    src: "zone.conf"
+    dest: "/etc/named/zones/db.{{ item.name }}"
+  vars:
+  with_items: "{{ bind.zones }}"
 
 - name: "Start and enable bind"
   systemd:

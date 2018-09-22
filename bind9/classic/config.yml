@@ -4,8 +4,20 @@ bind:
   - 8.8.8.8
 
   zones:
-  - zone_name: mydomain.net
-    reverse_zone_name: 10.10.in-addr.arpa
+  - name: mydomain.net
+    admin_mail: admin.mydomain.net
+    serial: 201809221
+    reverse_name: 10.10.in-addr.arpa
+    records:
+    - { type: 'A', domain: 'vm1.mydomain.net', address: '10.0.10.10'}
+    - { type: 'A', domain: 'vm2.mydomain.net', address: '10.0.10.11'}
+    - { type: 'A', domain: 'vm3.mydomain.net', address: '10.0.10.13'}
 
-  - zone_name: mydomain.com
-    reverse_zone_name: 20.10.in-addr.arpa
+  - name: mydomain.com
+    admin_mail: admin.mydomain.com
+    serial: 201809221
+    reverse_name: 10.20.in-addr.arpa
+    records:
+    - { type: 'A', domain: 'vm1.mydomain.com', address: '10.0.20.10'}
+    - { type: 'A', domain: 'vm2.mydomain.com', address: '10.0.20.11'}
+    - { type: 'A', domain: 'vm3.mydomain.com', address: '10.0.20.13'}

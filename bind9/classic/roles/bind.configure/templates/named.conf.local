@@ -4,9 +4,9 @@
 ////////////////////////////////////
 
 {% for zone in bind.zones %}
-zone "{{ zone.zone_name }}" {
+zone "{{ zone.name }}" {
     type master;
-    file "/etc/named/zones/db.{{ zone.zone_name }}";
+    file "/etc/named/zones/db.{{ zone.name }}";
     forwarders {};
 };
 {% endfor %}
@@ -16,9 +16,9 @@ zone "{{ zone.zone_name }}" {
 ////////////////////////////////////
 
 {% for zone in bind.zones %}
-zone "{{ zone.reverse_zone_name }}" {
+zone "{{ zone.reverse_name }}" {
     type master;
-    file "/etc/named/zones/db.{{ zone.reverse_zone_name }}";
+    file "/etc/named/zones/db.{{ zone.reverse_name }}";
     forwarders {};
 };
 {% endfor %}
