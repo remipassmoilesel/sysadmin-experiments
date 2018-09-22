@@ -1,6 +1,8 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+# Need vbguest plugins: $ vagrant plugin install vagrant-vbguest
+
 # Master address and host name
 masterAddress       = "192.168.0.40"
 masterHostName      = "master-jessie.mesos"
