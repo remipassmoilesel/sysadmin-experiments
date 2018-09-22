@@ -1,0 +1,7 @@
+
+- name: "Template bind configuration"
+  template:
+    src: "{{ item.name }}"
+    dest: "{{ item.dest }}"
+  with_items:
+  - {name: "named.conf", dest: "/etc/named.conf"}

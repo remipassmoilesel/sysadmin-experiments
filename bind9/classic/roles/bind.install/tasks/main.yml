@@ -7,3 +7,8 @@
   - bind
   - bind-utils
 
+- name: "Start and enable bind"
+  systemd:
+    name: named
+    state: started
+    enabled: yes
