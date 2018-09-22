@@ -23,7 +23,14 @@
   vars:
   with_items: "{{ bind.zones }}"
 
-- name: "Start and enable bind"
+- name: "Template Bind reverse zones"
+  template:
+    src: "reverse-zone.conf"
+    dest: "/etc/named/zones/db.{{ item.reverse_name }}"
+  vars:
+  with_items: "{{ bind.zones }}"
+
+- name: "Restart Bind"
   systemd:
     name: named
-    state: reloaded
+    state: restarted

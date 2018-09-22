@@ -2,6 +2,8 @@ bind:
   trusted_cidr: 10.0.0.0/24
   global_forwarders:
   - 8.8.8.8
+  ns_address: 10.0.0.5
+  reverse_ns_address: 0.5
 
   zones:
   - name: mydomain.net
@@ -9,15 +11,17 @@ bind:
     serial: 201809221
     reverse_name: 10.10.in-addr.arpa
     records:
-    - { type: 'A', domain: 'vm1.mydomain.net', address: '10.0.10.10'}
-    - { type: 'A', domain: 'vm2.mydomain.net', address: '10.0.10.11'}
-    - { type: 'A', domain: 'vm3.mydomain.net', address: '10.0.10.13'}
+      a:
+      - { domain: 'vm1.mydomain.net', address: '10.0.10.11', reverse_addr: '10.11'}
+      - { domain: 'vm2.mydomain.net', address: '10.0.10.12', reverse_addr: '10.12'}
+      - { domain: 'vm3.mydomain.net', address: '10.0.10.13', reverse_addr: '10.13'}
 
   - name: mydomain.com
     admin_mail: admin.mydomain.com
     serial: 201809221
     reverse_name: 10.20.in-addr.arpa
     records:
-    - { type: 'A', domain: 'vm1.mydomain.com', address: '10.0.20.10'}
-    - { type: 'A', domain: 'vm2.mydomain.com', address: '10.0.20.11'}
-    - { type: 'A', domain: 'vm3.mydomain.com', address: '10.0.20.13'}
+      a:
+      - { domain: 'vm1.mydomain.com', address: '10.0.20.11', reverse_addr: '20.11'}
+      - { domain: 'vm2.mydomain.com', address: '10.0.20.12', reverse_addr: '20.12'}
+      - { domain: 'vm3.mydomain.com', address: '10.0.20.13', reverse_addr: '20.13'}
