@@ -1,14 +1,24 @@
 
+////////////////////////////////////
+//  ZONES
+////////////////////////////////////
+
 {% for zone in bind.zones %}
 zone "{{ zone.zone_name }}" {
     type master;
     file "/etc/named/zones/db.{{ zone.zone_name }}";
+    forwarders {};
 };
 {% endfor %}
+
+////////////////////////////////////
+//  REVERSE ZONES
+////////////////////////////////////
 
 {% for zone in bind.zones %}
 zone "{{ zone.reverse_zone_name }}" {
     type master;
-    file "/etc/named/zones/db{{ zone.reverse_zone_name }}";
+    file "/etc/named/zones/db.{{ zone.reverse_zone_name }}";
+    forwarders {};
 };
 {% endfor %}

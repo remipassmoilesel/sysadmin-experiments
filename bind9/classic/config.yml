@@ -1,9 +1,11 @@
-
 bind:
   trusted_cidr: 10.0.0.0/24
-  zones:
-    - zone_name: mydomain.net
-      reverse_zone_name: .10.10.in-addr.arpa
+  global_forwarders:
+  - 8.8.8.8
 
-    - zone_name: mydomain.com
-      reverse_zone_name: .20.10.in-addr.arpa
+  zones:
+  - zone_name: mydomain.net
+    reverse_zone_name: 10.10.in-addr.arpa
+
+  - zone_name: mydomain.com
+    reverse_zone_name: 20.10.in-addr.arpa
