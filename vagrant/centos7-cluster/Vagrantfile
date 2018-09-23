@@ -1,0 +1,74 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# Need vbguest plugins: $ vagrant plugin install vagrant-vbguest
+
+$box="centos/7"
+$ip="10.0.0.5"
+
+# Connected network interface where bridge VM
+$bridge="wlp3s0"
+
+$cluster = {
+  "dns" => [
+      { :ip => "10.0.0.5", :cpus => 2, :mem => 2048 },
+      { :ip => "10.0.0.6", :cpus => 2, :mem => 2048 },
+  ],
+}
+
+$provisionner=<<-SHELL
+
+    echo "Current user for provisionning: $USER"
+
+    # Update system
+    yum update && yum upgrade -y
+
+    # Install helpers
+    yum install -y python vim net-tools sed curl wget byobu
+
+  	echo 'root:azerty' | chpasswd
+  	echo 'vagrant:azerty' | chpasswd
+
+    # Configure SSH
+    cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+    sed -i -E 's/#?PermitRootLogin.+/PermitRootLogin yes/g' /etc/ssh/sshd_config
+    sed -i -E 's/#?PasswordAuthentication.+/PasswordAuthentication yes/g' /etc/ssh/sshd_config
+
+    systemctl restart sshd
+
+    # Configure Selinux
+    cp /etc/selinux/config /etc/selinux/config.bak
+    sed -i -E 's/SELINUX=.+/SELINUX=permissive/g' /etc/selinux/config
+
+    setenforce 0
+
+    # show adresses
+    ip a
+
+SHELL
+
+Vagrant.configure("2") do |config|
+
+  $cluster.each_with_index do |(vmIndex, vmConfigs), index|
+
+    vmConfigs.each_with_index do |info , index|
+      hostname = vmIndex + index.to_s
+
+      config.vm.define hostname do |cfg|
+
+        cfg.vm.provider :virtualbox do |vb, override|
+          config.vm.box = $box
+          override.vm.network :public_network, ip: "#{info[:ip]}", bridge: $bridge
+          override.vm.hostname = hostname
+          vb.name = hostname
+          vb.customize ["modifyvm", :id, "--memory", info[:mem], "--cpus", info[:cpus], "--hwvirtex", "on"]
+        end # end provider
+
+        cfg.vm.provision "shell", inline: $provisionner
+
+      end # end config
+
+     end # end vmConfigs
+   end # end cluster
+
+end
