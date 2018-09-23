@@ -1,7 +1,7 @@
 
 - hosts: bind
   vars_files:
-    - config.yml
+    - dns-config.yml
   roles:
     - bind.install
     - bind.configure
