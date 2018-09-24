@@ -7,7 +7,6 @@
 zone "{{ zone.name }}" {
     type master;
     file "/etc/named/zones/db.{{ zone.name }}";
-    forwarders {};
 };
 {% endfor %}
 
@@ -19,6 +18,5 @@ zone "{{ zone.name }}" {
 zone "{{ zone.reverse_name }}" {
     type master;
     file "/etc/named/zones/db.{{ zone.reverse_name }}";
-    forwarders {};
 };
 {% endfor %}

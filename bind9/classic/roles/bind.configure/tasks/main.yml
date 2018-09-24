@@ -12,7 +12,6 @@
     state: directory
     recurse: yes
   with_items:
-  - /etc/named
   - /etc/named/zones
 
 - name: "Template Bind global configuration"
