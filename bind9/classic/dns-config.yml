@@ -18,6 +18,8 @@ bind:
       - { domain: 'vm1.mydomain.net', address: '10.20.0.11' }
       - { domain: 'vm2.mydomain.net', address: '10.20.0.12' }
       - { domain: 'vm3.mydomain.net', address: '10.20.0.13' }
+      type_cname:
+      - { name: 'www.vm1.mydomain.net', target: 'vm1.mydomain.net' }
 
   - name: mydomain.com
     reverse_name: 30.10.in-addr.arpa
