@@ -6,3 +6,8 @@
   with_items:
   - {name: "main.cf", dest: "/etc/postfix/main.cf"}
 
+- name: "Restart Postfix"
+  systemd:
+    name: postix
+    state: restarted
+
