@@ -1,0 +1,7 @@
+
+- hosts: postfix
+  vars_files:
+  - postfix-config.yml
+  roles:
+    - postfix.install
+    - postfix.configure

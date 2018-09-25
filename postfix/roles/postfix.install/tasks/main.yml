@@ -1,0 +1,14 @@
+
+- name: "Install Postfix"
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+  - postfix
+  - mailx
+
+- name: "Start and enable bind"
+  systemd:
+    name: postfix
+    state: started
+    enabled: yes

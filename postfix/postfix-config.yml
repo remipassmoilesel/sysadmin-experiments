@@ -1,0 +1,5 @@
+
+postfix:
+  hostname_fqdn: domain.net
+  trusted_networks: 192.168.0.0/16, 127.0.0.0/8
+  relay: 192.168.0.1 # can be gateway, ip address, etc ...

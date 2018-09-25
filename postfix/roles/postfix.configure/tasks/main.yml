@@ -1,0 +1,8 @@
+
+- name: "Template Postfix configuration"
+  template:
+    src: "{{ item.name }}"
+    dest: "{{ item.dest }}"
+  with_items:
+  - {name: "main.cf", dest: "/etc/postfix/main.cf"}
+
