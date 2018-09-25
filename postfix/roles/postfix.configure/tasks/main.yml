@@ -8,6 +8,6 @@
 
 - name: "Restart Postfix"
   systemd:
-    name: postix
+    name: postfix
     state: restarted
 
