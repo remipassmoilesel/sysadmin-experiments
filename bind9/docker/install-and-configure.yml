@@ -1,0 +1,15 @@
+
+- hosts: bind
+  vars:
+    docker_compose_root:
+      local: "{{ playbook_dir }}/docker/compose"
+      remote: "/opt"
+  vars_files:
+    - dns-config.yml
+  roles:
+    - prerequisites.install
+    - docker.install
+    - autoheal.install
+    - bind.configure
+    - bind.install
+    - bind.check-config

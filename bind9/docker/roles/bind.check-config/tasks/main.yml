@@ -1,0 +1,11 @@
+
+- name: "Check global configuration"
+  shell: "docker exec bind9 ash -c 'named-checkconf'"
+
+- name: "Check zone configurations"
+  shell: "docker exec bind9 ash -c 'named-checkzone {{ item.name }} /etc/named/zones/db.{{ item.name }}'"
+  with_items: "{{ bind.zones }}"
+
+- name: "Check reverse zone configurations"
+  shell: "docker exec bind9 ash -c 'named-checkzone {{ item.reverse_name }} /etc/named/zones/db.{{ item.reverse_name }}'"
+  with_items: "{{ bind.zones }}"

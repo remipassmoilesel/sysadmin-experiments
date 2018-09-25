@@ -1,0 +1,11 @@
+
+- name: "Copy application directory"
+  copy:
+    src: "{{ docker_compose_root.local }}/autoheal/"
+    dest: "{{ docker_compose_root.remote }}/autoheal"
+
+- name: "Start Autoheal service"
+  shell: "docker-compose up -d --remove-orphans --force-recreate"
+  args:
+    executable: /bin/bash
+    chdir: "{{ docker_compose_root.remote }}/autoheal"

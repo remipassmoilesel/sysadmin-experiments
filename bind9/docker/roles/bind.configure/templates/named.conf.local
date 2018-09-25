@@ -1,0 +1,22 @@
+
+////////////////////////////////////
+//  ZONES
+////////////////////////////////////
+
+{% for zone in bind.zones %}
+zone "{{ zone.name }}" {
+    type master;
+    file "/etc/named/zones/db.{{ zone.name }}";
+};
+{% endfor %}
+
+////////////////////////////////////
+//  REVERSE ZONES
+////////////////////////////////////
+
+{% for zone in bind.zones %}
+zone "{{ zone.reverse_name }}" {
+    type master;
+    file "/etc/named/zones/db.{{ zone.reverse_name }}";
+};
+{% endfor %}

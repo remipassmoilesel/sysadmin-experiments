@@ -1,0 +1,17 @@
+
+- name: "Copy application directory"
+  copy:
+    src: "{{ docker_compose_root.local }}/bind/"
+    dest: "{{ docker_compose_root.remote }}/bind"
+
+- name: "Pull Bind image"
+  shell: "docker-compose pull"
+  args:
+    executable: /bin/bash
+    chdir: "{{ docker_compose_root.remote }}/bind"
+
+- name: "Start Bind service"
+  shell: "docker-compose up -d --remove-orphans --force-recreate"
+  args:
+    executable: /bin/bash
+    chdir: "{{ docker_compose_root.remote }}/bind"

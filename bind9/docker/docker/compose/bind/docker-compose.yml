@@ -1,0 +1,24 @@
+version: '3.4'
+services:
+
+  bind9:
+    container_name: bind9
+    image: remipassmoilesel/alpine-bind9:9.12
+    network_mode: bridge
+    ports:
+    - "53:53/udp"
+    volumes:
+    - /etc/named:/etc/named
+    - /etc/localtime:/etc/localtime
+    restart: always
+    healthcheck:
+      test: "dig @localhost wikipedia.fr"
+      interval: 3m
+      timeout: 5s
+      retries: 3
+      start_period: 2m
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "10"
