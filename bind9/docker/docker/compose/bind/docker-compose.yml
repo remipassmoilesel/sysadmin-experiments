@@ -7,6 +7,7 @@ services:
     network_mode: bridge
     ports:
     - "53:53/udp"
+    - "53:53/tcp"
     volumes:
     - /etc/named:/etc/named
     - /etc/localtime:/etc/localtime
