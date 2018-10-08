@@ -37,3 +37,23 @@ Puis ajouter dans le playbook:
         template:
           src: "config/kube-config"
           dest: "/var/lib/kubelet/kubeconfig"       
+          
+## Tout un répertoire:
+    
+Voir: https://docs.ansible.com/ansible/2.6/plugins/lookup/filetree.html    
+    
+    - name: Create directories
+      file:
+        path: /web/{{ item.path }}
+        state: directory
+        mode: '{{ item.mode }}'
+      with_filetree: web/
+      when: item.state == 'directory'
+    
+    - name: Template files
+      template:
+        src: '{{ item.src }}'
+        dest: /web/{{ item.path }}
+        mode: '{{ item.mode }}'
+      with_filetree: web/
+      when: item.state == 'file'
