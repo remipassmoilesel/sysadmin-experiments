@@ -1,0 +1,51 @@
+bind:
+  trusted_cidr: 10.0.0.0/24
+  global_forwarders:
+  - 8.8.8.8
+  listen_addresses:
+  - 10.0.0.5 # should normally be [10.20.0.5, 10.30.0.5]
+
+  zones:
+  - name: mydomain.net
+    reverse_name: 20.10.in-addr.arpa
+    reverse_address_groups: 2 # 10.20.0.5 -> 5.0
+    serial: 201809223
+    admin_mail: admin.mydomain.net
+    records:
+      type_ns:
+      - { domain: 'ns1.mydomain.net',   address: '10.20.0.5' }
+      type_a:
+      - { domain: 'vm1.mydomain.net',   address: '10.20.0.11' }
+      - { domain: 'vm2.mydomain.net',   address: '10.20.0.12' }
+      - { domain: 'vm3.mydomain.net',   address: '10.20.0.13' }
+      - { domain: 'smtp.mydomain.net',  address: '10.20.0.14' }
+      type_cname:
+      - { domain: 'www.vm1.mydomain.net', target: 'vm1.mydomain.net' }
+      type_mx:
+      - { domain: 'mydomain.net',         target: 'smtp.mydomain.net', priority: '10' }
+
+  - name: mydomain.com
+    reverse_name: 30.10.in-addr.arpa
+    reverse_address_groups: 2
+    serial: 201809223
+    admin_mail: admin.mydomain.com
+    records:
+      type_ns:
+      - { domain: 'ns1.mydomain.com', address: '10.30.0.5' }
+      type_a:
+      - { domain: 'vm1.mydomain.com', address: '10.30.0.11' }
+      - { domain: 'vm2.mydomain.com', address: '10.30.0.12' }
+      - { domain: 'vm3.mydomain.com', address: '10.30.0.13' }
+
+  - name: subdomain.mydomain.com
+    reverse_name: 40.10.in-addr.arpa
+    reverse_address_groups: 2
+    serial: 201809223
+    admin_mail: admin.subdomain.mydomain.com
+    records:
+      type_ns:
+      - { domain: 'ns1.subdomain.mydomain.com', address: '10.40.0.5' }
+      type_a:
+      - { domain: 'vm1.subdomain.mydomain.com', address: '10.40.0.11' }
+      - { domain: 'vm2.subdomain.mydomain.com', address: '10.40.0.12' }
+      - { domain: 'vm3.subdomain.mydomain.com', address: '10.40.0.13' }

@@ -1,0 +1,26 @@
+
+- name: "Install bind"
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+  - bind
+  - bind-utils
+
+- name: "Ensure Bind folders exists"
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: named
+    recurse: yes
+  with_items:
+  - /etc/named
+  - /etc/named/zones
+  - /var/named/data
+  - /var/log/named
+
+- name: "Start and enable bind"
+  systemd:
+    name: named
+    state: started
+    enabled: yes

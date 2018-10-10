@@ -1,0 +1,51 @@
+
+- name: "Clean old zones configurations"
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+  - /etc/named/zones
+
+- name: "Ensure configuration folders exists"
+  file:
+    path: "{{ item }}"
+    state: directory
+    recurse: yes
+  with_items:
+  - /etc/named/zones
+
+- name: "Template Bind global configuration"
+  template:
+    src: "{{ item.name }}"
+    dest: "{{ item.dest }}"
+  with_items:
+  - {name: "named.conf", dest: "/etc/named.conf"}
+  - {name: "named.conf.local", dest: "/etc/named/named.conf.local"}
+
+- name: "Template Bind zones"
+  template:
+    src: "forward-zone.conf"
+    dest: "/etc/named/zones/db.{{ item.name }}"
+  with_items: "{{ bind.zones }}"
+
+- name: "Template Bind reverse zones"
+  template:
+    src: "reverse-zone.conf"
+    dest: "/etc/named/zones/db.{{ item.reverse_name }}"
+  with_items: "{{ bind.zones }}"
+
+- name: "Check global configuration"
+  shell: "named-checkconf"
+
+- name: "Check zone configurations"
+  shell: "named-checkzone {{ item.name }} /etc/named/zones/db.{{ item.name }}"
+  with_items: "{{ bind.zones }}"
+
+- name: "Check reverse zone configurations"
+  shell: "named-checkzone {{ item.reverse_name }} /etc/named/zones/db.{{ item.reverse_name }}"
+  with_items: "{{ bind.zones }}"
+
+- name: "Restart Bind"
+  systemd:
+    name: named
+    state: restarted
