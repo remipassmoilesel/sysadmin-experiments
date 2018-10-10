@@ -11,12 +11,13 @@ zone "{{ zone.name }}" {
 {% endfor %}
 
 ////////////////////////////////////
-//  REVERSE ZONES
+//  REVERSE ZONE
 ////////////////////////////////////
 
-{% for zone in bind.zones %}
-zone "{{ zone.reverse_name }}" {
+{% for rzone in bind.reverse_zones %}
+zone "{{ rzone.name }}" {
     type master;
-    file "/etc/named/zones/db.{{ zone.reverse_name }}";
+    file "/etc/named/zones/db.{{ rzone.name }}";
 };
 {% endfor %}
+

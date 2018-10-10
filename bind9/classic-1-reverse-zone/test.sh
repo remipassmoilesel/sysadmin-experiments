@@ -42,3 +42,4 @@ dig @10.0.0.5 +noall +answer www.vm1.mydomain.net | grep -v -e '^$'
 dig @10.0.0.5 +noall +answer mydomain.net MX | grep -v -e '^$'
 dig @10.0.0.5 +noall +answer smtp.mydomain.net | grep -v -e '^$'
 
+echo "Success !!!!"

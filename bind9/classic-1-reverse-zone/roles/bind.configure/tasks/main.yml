@@ -28,11 +28,20 @@
     dest: "/etc/named/zones/db.{{ item.name }}"
   with_items: "{{ bind.zones }}"
 
-- name: "Template Bind reverse zones"
+- name: "Template Bind reverse zone"
   template:
     src: "reverse-zone.conf"
-    dest: "/etc/named/zones/db.{{ item.reverse_name }}"
-  with_items: "{{ bind.zones }}"
+    dest: "/etc/named/zones/db.{{ item.name }}"
+  with_items: "{{ bind.reverse_zones }}"
+
+- name: "Insert reverse zones blocks"
+  blockinfile:
+    dest: "/etc/named/zones/db.{{ item[0].name }}"
+    content: "{{ lookup('template', 'templates/reverse-zone-partial.conf') }}"
+    marker: "; {mark} ANSIBLE MANAGED BLOCK FOR ZONE {{ item[0].name }} - {{ item[1].name }}"
+  with_nested:
+  - "{{ bind.reverse_zones }}"
+  - "{{ bind.zones }}"
 
 - name: "Check global configuration"
   shell: "named-checkconf"
@@ -42,8 +51,8 @@
   with_items: "{{ bind.zones }}"
 
 - name: "Check reverse zone configurations"
-  shell: "named-checkzone {{ item.reverse_name }} /etc/named/zones/db.{{ item.reverse_name }}"
-  with_items: "{{ bind.zones }}"
+  shell: "named-checkzone {{ item.name }} /etc/named/zones/db.{{ item.name }}"
+  with_items: "{{ bind.reverse_zones }}"
 
 - name: "Restart Bind"
   systemd:
