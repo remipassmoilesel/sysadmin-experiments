@@ -1,0 +1,6 @@
+
+- name: "Template Docker configuration"
+  template:
+    src: daemon.json
+    dest: /etc/docker/daemon.json
+  notify: restart_docker

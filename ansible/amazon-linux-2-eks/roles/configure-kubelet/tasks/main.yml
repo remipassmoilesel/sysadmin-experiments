@@ -1,0 +1,11 @@
+
+- name: "Template Kubelet configuration"
+  file:
+    path: /etc/systemd/system/kubelet.service.d/30-kubelet-extra-args.conf
+    state: absent
+
+- name: "Template Kubelet configuration"
+  template:
+    src: 30-kubelet-extra-args.conf
+    dest: /etc/systemd/system/kubelet.service.d/30-kubelet-extra-args.conf
+  notify: restart_kubelet
